@@ -1,0 +1,15 @@
+{
+    "name": "proyecto-node-postgres",
+    "version": "1.0.0",
+    "description": "Ejemplo de backend Node + Express + Postgres con Docker Compose",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "node --watch index.js"
+    },
+    "dependencies": {
+        "express": "^4.19.2",
+        "pg": "^8.12.0",
+        "dotenv": "^16.4.5"
+    }
+}
