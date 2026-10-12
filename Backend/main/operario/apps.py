@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class OperarioConfig(AppConfig):
-    name = 'operario'
+    name = 'main.operario'
