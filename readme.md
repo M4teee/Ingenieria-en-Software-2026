@@ -47,6 +47,15 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
+Si usás Fish, activá el entorno con su archivo específico:
+
+```fish
+python3.14 -m venv .venv
+source .venv/bin/activate.fish
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
 Confirmá `python --version` después de activar el entorno. Debe mostrar Python 3.14.8. Instalá Python desde la distribución oficial o el gestor de paquetes aprobado por el equipo.
 
 ## Ejecutar el backend
