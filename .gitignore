@@ -1,2 +1,18 @@
 .env
 proyecto-node-postgres/node_modules
+
+# Python / Django
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+.pytest_cache/
+.coverage
+htmlcov/
+.setup-venv/
+
+# Editor and operating system files
+.DS_Store
+.vscode/
