@@ -1,22 +1,28 @@
 # Estado actual
 
-Actualizado: 2026-10-11.
+Actualizado: 2026-10-11. Se actualizó el entorno base a Django 6.1.2 y Python 3.14.8. Python 3.15.0 ya está publicado, pero Django 6.1 todavía declara soporte hasta Python 3.14; se priorizó una combinación oficialmente compatible. La instalación local se recreó con Python 3.14.8.
 
-## Hecho
+## Situación observada
 
-- Se creó una base mínima de backend Django en `Backend/`.
-- Se agregó una guía de preparación local para macOS y archivos iniciales de contexto.
-- El repositorio ya tenía placeholders en `Backend/back` y `Frontend/front`; se conservaron.
+- Existe una base mínima de backend Django en `Backend/`, con configuración en `Backend/config/` y `manage.py`.
+- `AGENTS.md` y `docs/INDEX.md` orientan la lectura y el mantenimiento del contexto del proyecto.
+- `requirements.txt` fija Django 6.1.2 y sus dependencias; `.python-version` indica la serie Python 3.14.
+- `Backend/back` y `Frontend/front` son espacios reservados. No se encontró una aplicación de dominio ni una implementación de frontend en el contenido versionado.
+- La configuración inicial usa SQLite; la base local existente se mantiene como archivo ignorado y no forma parte de estos cambios documentales.
+- El brief, las fuentes de requisitos y varias decisiones siguen incompletos o pendientes de confirmación, según `SOURCE_INDEX.md`, `PROJECT_BRIEF.md` y `DECISIONS.md`.
 
-## Pendiente
+## Pendientes conocidos
 
-1. Confirmar con el grupo Python 3.13 y Django 5.2 LTS.
-2. Cada integrante debe instalar Python 3.13 y seguir `README.md` en su computadora.
-3. Incorporar o enlazar las fuentes de requerimientos, PGP, iniciativas/épicas y consigna en `docs/SOURCE_INDEX.md`.
-4. Completar el brief y revisar la base de conocimiento contra esas fuentes.
-5. Decidir PostgreSQL, frontend y estrategia de despliegue antes de iniciar las funcionalidades que dependan de esas decisiones.
-6. Planificar en Taiga el planning poker y los dos sprints con sus demos.
+1. Incorporar o enlazar la consigna, presentaciones, entrevistas, requerimientos, PGP e iniciativas/épicas en `SOURCE_INDEX.md`.
+2. Completar y validar el brief y la base de conocimiento usando las fuentes originales.
+3. Confirmar con el equipo las versiones de Python y Django, el motor de base de datos, el frontend y la estrategia de despliegue.
+4. Registrar el tablero Taiga y actualizar planificación, historias y sprints a partir de su estado vigente.
+5. Crear las aplicaciones y funcionalidades del dominio cuando el alcance esté aprobado.
 
-## Verificación
+## Verificaciones
 
-El proyecto Django se generó con Django 5.2.18. La verificación de ejecución en las computadoras del grupo queda pendiente hasta que cada integrante instale Python 3.13 y siga el README.
+Se instaló el entorno desde `requirements.txt` usando Python 3.14.8. La versión de Django y las versiones instaladas se comprobaron después de la instalación. No se ejecutaron pruebas de la aplicación.
+
+## Archivos locales fuera del control de versiones
+
+Los artefactos locales ignorados —como el entorno virtual, la base SQLite, cachés de Python y `.DS_Store`— no forman parte de los cambios documentales ni deben subirse al repositorio. Las decisiones técnicas y fuentes que figuran como pendientes continúan requiriendo confirmación del equipo.

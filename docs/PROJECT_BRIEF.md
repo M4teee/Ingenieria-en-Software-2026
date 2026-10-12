@@ -2,26 +2,24 @@
 
 ## Estado
 
-Proyecto grupal de Ingeniería en Software 2026. Completar y validar con el equipo usando los documentos originales.
+Proyecto grupal de Ingeniería en Software 2026. Este brief conserva el contexto inicial disponible y requiere validación con el equipo y las fuentes originales.
 
 ## Propósito y usuarios
 
-Pendiente de consolidar desde el documento de requerimientos aprobado.
+Pendiente de consolidar a partir del documento de requerimientos aprobado.
 
 ## Alcance
 
-Pendiente de confirmar desde las historias de usuario vigentes en Taiga y los acuerdos del equipo.
+Pendiente de confirmar con las historias vigentes en Taiga y los acuerdos del equipo.
 
 ## Entregables y organización
 
-- Entrega 1: dos entrevistas y documento de requerimientos, según el contexto compartido por el equipo.
-- Entrega 2: PGP, iniciativas y épicas; el equipo indicó que Taiga contiene 29 historias de usuario.
-- Siguiente actividad informada: planning poker y división del trabajo en dos sprints con una demo por sprint.
+- Se informó que la primera entrega incluye dos entrevistas y un documento de requerimientos.
+- Se informó que la segunda entrega incluye el PGP, iniciativas y épicas, y que Taiga contiene 29 historias de usuario.
+- Se prevé realizar planning poker y distribuir el trabajo en dos sprints con una demo por sprint.
 
-Los documentos originales todavía deben incorporarse o referenciarse en `SOURCE_INDEX.md`.
+Los detalles deben contrastarse con los originales; ver `SOURCE_INDEX.md`.
 
 ## Restricciones técnicas conocidas
 
-- El equipo quiere trabajar con Python y Django.
-- La cátedra sugirió Vercel o Netlify para frontends; Render para el backend; Neon o Supabase con PostgreSQL, o MongoDB Atlas M0. También propuso Docker Compose como alternativa de desarrollo local.
-- El equipo debe confirmar qué opción de base de datos y despliegue usará. Esta información resume la conversación, no reemplaza la consigna ni la documentación de la cátedra.
+El repositorio contiene una base de backend Python 3.14.8/Django 6.1.2 y configuración SQLite. El equipo todavía debe confirmar la base de datos, el frontend y la estrategia de despliegue. Las alternativas mencionadas por la cátedra se resumen en `KNOWLEDGE_BASE.md` y no constituyen decisiones aprobadas.

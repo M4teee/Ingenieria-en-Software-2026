@@ -1,14 +1,14 @@
 # Registro de decisiones
 
-Registrar decisiones aprobadas por el equipo. Distinguir las propuestas pendientes de los acuerdos vigentes.
+Registrar acuerdos aprobados por el equipo y distinguirlos de propuestas aún abiertas. Al documentar una decisión, incluir fecha, contexto, alternativas consideradas, motivo y consecuencias.
 
-## Propuestas para confirmar
+## Propuestas pendientes
 
 | Fecha | Tema | Propuesta | Estado |
 |---|---|---|---|
-| 2026-10-11 | Entorno Python | Usar Python 3.13 para todo el grupo | Pendiente de confirmación del equipo |
-| 2026-10-11 | Framework backend | Usar Django 5.2 LTS; el backend inicial se generó con Django 5.2.18 | Pendiente de confirmación del equipo |
-| 2026-10-11 | Base de datos | Desarrollar con PostgreSQL y elegir Neon o Supabase antes de las funcionalidades que persistan datos | Pendiente de decisión |
-| 2026-10-11 | Frontend | Elegir arquitectura y herramientas a partir de las historias de usuario | Pendiente de decisión |
+| 2026-10-11 | Entorno Python | Usar Python 3.14.8; Django 6.1 declara soporte hasta Python 3.14. Python 3.15.0 está disponible, pero no se adopta hasta que Django lo soporte oficialmente | Acordado por el usuario |
+| 2026-10-11 | Backend | Usar Django 6.1.2, último parche publicado de la serie 6.1 al actualizar el proyecto | Acordado por el usuario |
+| 2026-10-11 | Base de datos | Elegir PostgreSQL y proveedor antes de desarrollar funcionalidades dependientes de persistencia | Pendiente |
+| 2026-10-11 | Frontend | Elegir arquitectura y herramientas a partir de las historias aprobadas | Pendiente |
 
-Al aprobar una decisión, registrar contexto, alternativas consideradas, motivo y consecuencias. Actualizar o marcar como reemplazada cualquier decisión anterior que deje de regir.
+No hay decisiones aprobadas registradas en los archivos disponibles al preparar esta copia.

@@ -6,7 +6,7 @@
 
 ## Fuentes y contexto
 
-Enlaces a historia de Taiga, requisito, decisión vigente y archivos relevantes.
+Enlaces a la historia, requisito, decisión vigente y archivos relevantes.
 
 ## Alcance
 
@@ -22,8 +22,8 @@ Condiciones observables para considerar terminado el trabajo.
 
 ## Verificación realizada
 
-Comandos o comprobaciones ejecutados y sus resultados reales. Si no se verificó, indicarlo.
+Comprobaciones ejecutadas y resultados reales. Si no se verificó, indicarlo.
 
 ## Cierre
 
-Cambios realizados, decisión aprobada (si hubo), pendientes, riesgos y documentos a actualizar.
+Cambios realizados, decisiones aprobadas, pendientes y documentos de contexto actualizados.
