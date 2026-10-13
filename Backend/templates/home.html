@@ -1,23 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
-</head>
-<body>
-  <h3>Elija una página:</h3>
-  <ul>
-    <li>
-      <a href="/operario">Operario</a>
-    </li>
-    <li>
-      <a href="/clienteFinal">Cliente Final</a>
-    </li>
-    <li>
-      <a href="/repartidor">Repartidor</a>
-    </li>
-  </ul>
-  
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <ul>
+        <h3>Elija una página:</h3>
+        <li>
+            <a href="/operario">Operario</a>
+        </li>
+        <li>
+            <a href="/clienteFinal">Cliente Final</a>
+        </li>
+        <li>
+            <a href="/repartidor">Repartidor</a>
+        </li>
+    </ul>
+{% endblock content %}
