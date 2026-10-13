@@ -22,5 +22,6 @@ urlpatterns = [
     path('operario/', include('main.operario.urls')),
     path('repartidor/', include('main.repartidor.urls')),
     path('clienteFinal/', include('main.clienteFinal.urls')),
-    path('', include('main.homePage.urls'))
+    path('', include('main.homePage.urls')),
+    path('', include('django.contrib.auth.urls'))
 ]
