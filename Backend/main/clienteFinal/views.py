@@ -26,9 +26,9 @@ PEDIDOS_SIMULADOS = {
 }
 
 # Create your views here.
-def hola(req):
-  return render(req, 'hola.html', {})
 
+def form(req):
+  return render(req, 'clienteFinal/index.html', {})
 
 def obtener_pedido(codigo):
     """TEMPORAL: devuelve datos simulados.
@@ -70,3 +70,4 @@ def seguimiento(req, codigo):
         'mostrar_tiempo': debe_mostrar_tiempo(pedido['estado'], llegada),
     }
     return render(req, 'clienteFinal/seguimiento.html', contexto)
+

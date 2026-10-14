@@ -1,0 +1,15 @@
+/* ---------- Login ---------- */
+.auth-card {
+    max-width: 26rem;
+    margin-inline: auto;
+    padding: 2rem;
+    background: #ffffff;
+    border: 1px solid var(--app-line);
+    border-radius: 20px;
+    box-shadow: 0 12px 32px rgba(35, 70, 50, 0.08);
+}
+
+.auth-card .form-control:focus {
+    border-color: var(--app-green);
+    box-shadow: 0 0 0 0.2rem rgba(47, 93, 63, 0.2);
+}

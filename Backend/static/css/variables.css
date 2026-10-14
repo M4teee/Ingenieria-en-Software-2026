@@ -1,0 +1,37 @@
+:root {
+    --app-green: #2F5D3F;
+    --app-green-dark: #234632;
+    --app-mint: #EDFCF1;
+    --app-mint-soft: #F6FDF8;
+    --app-ink: #1B2A21;
+    --app-muted: #5E7266;
+    --app-line: #D5E8DB;
+}
+
+
+/* ---------- Botones ---------- */
+.btn-app {
+    --bs-btn-bg: var(--app-green);
+    --bs-btn-border-color: var(--app-green);
+    --bs-btn-color: var(--app-mint);
+    --bs-btn-hover-bg: var(--app-green-dark);
+    --bs-btn-hover-border-color: var(--app-green-dark);
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-active-bg: var(--app-green-dark);
+    --bs-btn-active-border-color: var(--app-green-dark);
+    --bs-btn-active-color: #ffffff;
+    font-weight: 600;
+}
+
+.btn-app-outline {
+    --bs-btn-color: var(--app-green);
+    --bs-btn-border-color: var(--app-green);
+    --bs-btn-hover-bg: var(--app-green);
+    --bs-btn-hover-border-color: var(--app-green);
+    --bs-btn-hover-color: var(--app-mint);
+    --bs-btn-active-bg: var(--app-green-dark);
+    --bs-btn-active-border-color: var(--app-green-dark);
+    --bs-btn-active-color: #ffffff;
+    font-weight: 600;
+}
+
