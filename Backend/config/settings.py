@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crispy_forms',
+    'crispy_bootstrap5',
     'main.operario',
     'main.clienteFinal',
     'main.repartidor',
@@ -120,7 +122,18 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Carpetas extra donde buscar estáticos (además de las de cada app)
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Carpeta destino de collectstatic (solo producción)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Crispy
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"

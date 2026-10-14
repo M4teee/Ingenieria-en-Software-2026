@@ -1,23 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
-</head>
-<body>
-  <h3>Elija una página:</h3>
-  <ul>
-    <li>
-      <a href="/operario">Operario</a>
-    </li>
-    <li>
-      <a href="/clienteFinal">Cliente Final</a>
-    </li>
-    <li>
-      <a href="/repartidor">Repartidor</a>
-    </li>
-  </ul>
-  
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+    <div class="page-heading">
+        <h1 class="h2">¿Cómo querés ingresar?</h1>
+        <p>Elegí tu perfil para ir a tu página.</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4">
+            <a href="/operario" class="role-link">
+                <span class="role-icon"><i class="bi bi-clipboard-check"></i></span>
+                <span class="role-text">
+                    <strong>Operario</strong>
+                    <span>Gestioná los pedidos</span>
+                </span>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a href="/clienteFinal" class="role-link">
+                <span class="role-icon"><i class="bi bi-bag"></i></span>
+                <span class="role-text">
+                    <strong>Cliente final</strong>
+                    <span>Seguí tus pedidos</span>
+                </span>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a href="/repartidor" class="role-link">
+                <span class="role-icon"><i class="bi bi-truck"></i></span>
+                <span class="role-text">
+                    <strong>Repartidor</strong>
+                    <span>Revisá tus entregas</span>
+                </span>
+            </a>
+        </div>
+    </div>
+
+    <a href="/admin" class="admin-link"><i class="bi bi-gear"></i> Panel de administración</a>
+{% endblock content %}
