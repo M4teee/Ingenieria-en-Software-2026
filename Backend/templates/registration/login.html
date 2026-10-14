@@ -1,16 +1,21 @@
 {% extends "base.html" %}
-
-{% block title %}
-Login
-{% endblock %}
-
 {% load crispy_forms_tags %}
 
+{% block title %}Iniciar sesión{% endblock %}
+
 {% block content %}
-     <form method="post" class="from-group">
-	{% csrf_token %}
-	{{form|crispy}}
-	<p>Don't have an accoount? Create one <a href="/register">here</a></p>
-	<button type="submit" class="btn btn-success">Login</button>	
-    </form>
+    <div class="auth-card">
+        <h1 class="h3 mb-1">Iniciar sesión</h1>
+        <p class="text-secondary mb-4">Ingresá con tu usuario y contraseña.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-app w-100 mt-2">Iniciar sesión</button>
+        </form>
+
+        <p class="text-center mt-4 mb-0">
+            ¿No tenés cuenta? <a href="/register">Registrate acá</a>
+        </p>
+    </div>
 {% endblock %}
