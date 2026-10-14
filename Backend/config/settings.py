@@ -122,6 +122,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Carpetas extra donde buscar estáticos (además de las de cada app)
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Carpeta destino de collectstatic (solo producción)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.1/ref/settings/#default-auto-field
 

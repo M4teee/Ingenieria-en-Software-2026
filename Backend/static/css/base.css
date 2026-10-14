@@ -1,0 +1,22 @@
+:root {
+    --app-green: #2F5D3F;
+    --app-green-dark: #234632;
+    --app-mint: #EDFCF1;
+}
+
+/* Opción A: nav claro (el logo resalta) */
+.navbar-app {
+    --bs-navbar-brand-color: var(--app-green);
+    --bs-navbar-brand-hover-color: var(--app-green-dark);
+    background-color: var(--app-mint);
+    border-bottom: 3px solid var(--app-green);
+}
+
+.navbar-app .navbar-brand > img{
+    margin-right: 13px;
+}
+
+.navbar-app .navbar-brand {
+    font-weight: 700;
+    color: var(--app-green-dark);
+}
