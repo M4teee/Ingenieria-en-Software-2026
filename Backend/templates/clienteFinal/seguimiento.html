@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Seguimiento de pedido{% endblock %}
+
+{% block content %}
+    <div class="card shadow-sm mx-auto" style="max-width: 28rem;">
+        <div class="card-body p-4">
+            <h1 class="h4 mb-4">Seguimiento de tu pedido</h1>
+
+            <p class="text-secondary mb-1">Estado</p>
+            <p>
+                <span class="badge fs-5 text-bg-{{ estado_clase }}">{{ estado }}</span>
+            </p>
+
+            <p class="text-secondary mb-1">Enviado por</p>
+            <p class="fw-semibold">{{ comercio }}</p>
+
+            {% if mostrar_tiempo %}
+                <p class="text-secondary mb-1">Llegada estimada</p>
+                <p class="fw-semibold mb-0">
+                    <i class="bi bi-clock"></i>
+                    Llega aprox. a las {{ llegada_estimada|time:"H:i" }}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}
