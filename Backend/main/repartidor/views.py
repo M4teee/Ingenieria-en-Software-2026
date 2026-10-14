@@ -1,5 +1,12 @@
-from django.shortcuts import render
+# main/repartidor/views.py
 
-# Create your views here.
-def hola(req):
-  return render(req, 'hola.html', {})
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
+@login_required
+def home(req):
+  if (req.user.is_superuser):
+    return redirect('admin:index')
+  else:
+    return render(req, 'repartidor/index.html', {})

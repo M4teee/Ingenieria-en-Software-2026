@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Seguimiento de envío{% endblock %}
+
+{% block extrastyles %}
+    <link rel="stylesheet" href="{% static 'css/tracking_card.css' %}">
+{% endblock extrastyles %}
+
+{% block content %}
+    <div class="page-heading">
+        <h1 class="h2">Seguí tu envío</h1>
+        <p>Ingresá el código de seguimiento que recibiste para ver el estado de tu pedido.</p>
+    </div>
+
+    <form method="get" class="tracking-card">
+        <label for="codigo-seguimiento" class="form-label fw-semibold">Código de seguimiento</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+            <input
+                type="text"
+                id="codigo-seguimiento"
+                name="codigo"
+                class="form-control"
+                placeholder="Ej: ABC123456"
+                autocomplete="off"
+                required
+            >
+        </div>
+        <button type="submit" class="btn btn-app w-100 mt-3" disabled>
+            <i class="bi bi-search"></i> Buscar envío
+        </button>
+    </form>
+{% endblock %}

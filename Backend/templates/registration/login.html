@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Iniciar sesión{% endblock %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock extrastyle %}
 
 {% block content %}
     <div class="auth-card">
@@ -13,9 +18,5 @@
             {{ form|crispy }}
             <button type="submit" class="btn btn-app w-100 mt-2">Iniciar sesión</button>
         </form>
-
-        <p class="text-center mt-4 mb-0">
-            ¿No tenés cuenta? <a href="/register">Registrate acá</a>
-        </p>
     </div>
 {% endblock %}

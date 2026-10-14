@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'main.operario',
     'main.clienteFinal',
     'main.repartidor',
-    'main.homePage'
+    'main.homePage',
+    'main.users'
 ]
 
 MIDDLEWARE = [
@@ -108,9 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-ar'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
 
@@ -137,3 +138,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+###
+
+LOGIN_URL = 'login'
+
+AUTH_USER_MODEL = 'users.User'

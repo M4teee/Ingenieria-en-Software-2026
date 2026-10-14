@@ -1,0 +1,123 @@
+/* ---------- Tema claro ---------- */
+html[data-theme="light"],
+:root {
+    --primary: #6B9A7B;
+    --secondary: var(--app-green);
+    --accent: var(--app-mint);
+    --primary-fg: #fff;
+
+    --body-fg: var(--app-ink);
+    --body-bg: #fff;
+    --body-quiet-color: var(--app-muted);
+    --body-medium-color: #3C4F43;
+    --body-loud-color: #000;
+
+    --header-color: var(--app-mint);
+    --header-branding-color: var(--app-mint);
+    --header-bg: var(--app-green);
+    --header-link-color: var(--primary-fg);
+
+    --breadcrumbs-fg: #BFDCC8;
+    --breadcrumbs-link-fg: var(--body-bg);
+    --breadcrumbs-bg: var(--app-green-dark);
+
+    --link-fg: var(--app-green);
+    --link-hover-color: var(--app-green-dark);
+    --link-selected-fg: var(--app-green);
+
+    --hairline-color: var(--app-line);
+    --border-color: #BCD6C4;
+
+    --message-success-bg: #DDF3E4;
+
+    --darkened-bg: var(--app-mint-soft);
+    --selected-bg: var(--app-line);
+    --selected-row: var(--app-mint);
+
+    --button-fg: #fff;
+    --button-bg: var(--app-green);
+    --button-hover-bg: var(--app-green-dark);
+    --default-button-bg: var(--app-green-dark);
+    --default-button-hover-bg: var(--app-green);
+
+    --font-family-primary:
+        "Plus Jakarta Sans", "Segoe UI", system-ui, Roboto, "Helvetica Neue",
+        Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* ---------- Tema oscuro ---------- */
+html[data-theme="dark"] {
+    --primary: #3F7A55;
+    --secondary: var(--app-green);
+    --accent: #BFDCC8;
+
+    --body-fg: #E3EEE7;
+    --body-bg: #121A15;
+    --body-quiet-color: #9DB3A5;
+    --body-medium-color: #C5D6CB;
+    --body-loud-color: #fff;
+
+    --header-color: var(--app-mint);
+    --header-branding-color: var(--app-mint);
+    --header-bg: var(--app-green-dark);
+
+    --breadcrumbs-fg: #9DB3A5;
+    --breadcrumbs-link-fg: #E3EEE7;
+    --breadcrumbs-bg: var(--app-green);
+
+    --link-fg: #7FC096;
+    --link-hover-color: #A8DCB8;
+    --link-selected-fg: #A8DCB8;
+
+    --hairline-color: #2A3A2F;
+    --border-color: #3A4D40;
+
+    --darkened-bg: #19241D;
+    --selected-bg: #243229;
+    --selected-row: #1F3A2A;
+
+    --button-bg: var(--app-green);
+    --button-hover-bg: #3A7650;
+    --default-button-bg: var(--app-green);
+    --default-button-hover-bg: #3A7650;
+}
+
+/* Cuando el navegador está en modo oscuro y el usuario no eligió tema */
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme]) {
+        --primary: #3F7A55;
+        --secondary: var(--app-green);
+        --accent: #BFDCC8;
+
+        --body-fg: #E3EEE7;
+        --body-bg: #121A15;
+        --body-quiet-color: #9DB3A5;
+        --body-medium-color: #C5D6CB;
+        --body-loud-color: #fff;
+
+        --header-color: var(--app-mint);
+        --header-branding-color: var(--app-mint);
+        --header-bg: var(--app-green-dark);
+
+        --breadcrumbs-fg: #9DB3A5;
+        --breadcrumbs-link-fg: #E3EEE7;
+        --breadcrumbs-bg: var(--app-green);
+
+        --link-fg: #7FC096;
+        --link-hover-color: #A8DCB8;
+        --link-selected-fg: #A8DCB8;
+
+        --hairline-color: #2A3A2F;
+        --border-color: #3A4D40;
+
+        --darkened-bg: #19241D;
+        --selected-bg: #243229;
+        --selected-row: #1F3A2A;
+
+        --button-bg: var(--app-green);
+        --button-hover-bg: #3A7650;
+        --default-button-bg: var(--app-green);
+        --default-button-hover-bg: #3A7650;
+    }
+}
