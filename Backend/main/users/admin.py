@@ -1,13 +1,25 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin
-# from .models import Vehiculo  # Importa tu modelo de Vehiculo
+
+admin.site.unregister(Group)
+admin.site.site_header = 'Panel de operario'
+admin.site.site_title = 'Pedidos Martin'
+admin.site.index_title = 'Inicio'
+
+# Crea un Modelo Proxy temporal solo para cambiar los metadatos visuales
+class MisUsuarios(User):
+    class Meta:
+        proxy = True  # Indica a Django que no cree una tabla nueva en la DB
+        verbose_name = "Usuario"          # Nombre en singular (ej: "Añadir conductor")
+        verbose_name_plural = "Usuarios" # El nombre que saldrá en el menú lateral
 
 # 1. Quita el registro por defecto del modelo User
 admin.site.unregister(User)
 
 # 2. Crea tu clase de administración extendiendo la de Django
-@admin.register(User)
+@admin.register(MisUsuarios)
 class CustomUserAdmin(UserAdmin):
     # Agrega el nombre del método personalizado en la lista de columnas visibles
     list_display = UserAdmin.list_display + ('mostrar_vehiculos',)

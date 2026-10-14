@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %}Inicio{% endblock %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock extrastyle %}
 
 {% block content %}
     <div class="page-heading">
