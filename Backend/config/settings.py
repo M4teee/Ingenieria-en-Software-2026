@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'main.operario',
     'main.clienteFinal',
     'main.repartidor',
-    'main.homePage'
+    'main.homePage',
+    'main.users'
 ]
 
 MIDDLEWARE = [
