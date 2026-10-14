@@ -1,6 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import redirect
 
-# Create your views here.
+def rootHandler(request):
+    if not request.user.is_authenticated:
+        return redirect('clienteFinal')
 
-def rootHandler(req):
-  return render(req, 'home.html', {})
+    if request.user.is_superuser:
+        return redirect('admin:index')
+
+    return redirect('repartidor')
