@@ -1,9 +1,10 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from main.users.models import User
 from .models import Pedido
 
 
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class PedidoTransicionesTests(TestCase):
 
     def setUp(self):
@@ -63,7 +64,31 @@ class PedidoTransicionesTests(TestCase):
             self.pedido.puede_cambiar_a('entregado')
         )
 
+    def test_registrado_puede_asignarse_o_cancelarse(self):
+        self.pedido.estado = 'registrado'
 
+        self.assertTrue(self.pedido.puede_cambiar_a('asignado'))
+        self.assertTrue(self.pedido.puede_cambiar_a('cancelado'))
+        self.assertFalse(self.pedido.puede_cambiar_a('retirado'))
+
+    def test_asignado_puede_cancelarse_antes_del_retiro(self):
+        self.pedido.estado = 'asignado'
+
+        self.assertTrue(self.pedido.puede_cambiar_a('cancelado'))
+
+    def test_pedido_retirado_no_puede_cancelarse(self):
+        self.pedido.estado = 'retirado'
+
+        self.assertFalse(self.pedido.puede_cambiar_a('cancelado'))
+
+    def test_pedido_nuevo_puede_persistirse_sin_repartidor(self):
+        pedido = Pedido.objects.create(codigo='TEST-SIN-REPARTIDOR')
+
+        self.assertIsNone(pedido.repartidor)
+        self.assertEqual(pedido.estado, 'registrado')
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class ActualizarEstadoTests(TestCase):
 
     def setUp(self):

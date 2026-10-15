@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Cargar pedido{% endblock %}
+
+{% block content %}
+    <div class="page-heading">
+        <h1 class="h2">Cargar pedido nuevo</h1>
+        <p>Registrá un pedido solicitado por un comercio.</p>
+    </div>
+
+    {% if not hay_comercios_activos %}
+        <div class="alert alert-warning" role="status">
+            No hay comercios activos disponibles para registrar pedidos.
+        </div>
+    {% endif %}
+
+    <form method="post" class="card shadow-sm p-4" novalidate>
+        {% csrf_token %}
+        {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+            {% for error in hidden.errors %}
+                <div class="alert alert-danger" role="alert">{{ error }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+            </div>
+        {% endif %}
+
+        {% for field in form.visible_fields %}
+            <div class="mb-3">
+                {{ field.label_tag }}
+                {{ field }}
+                {% for error in field.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div>
+            <button type="submit" class="btn btn-primary" {% if not hay_comercios_activos %}disabled{% endif %}>
+                Registrar Pedido
+            </button>
+        </div>
+    </form>
+{% endblock %}

@@ -8,6 +8,10 @@ Este registro conserva el estado que ya estaba anotado y separa los hechos del r
 |---|---|---|
 | 2026-10-11 | Python 3.14.8 para el entorno de trabajo | Registrada como acordada en la documentación previa. `.python-version` especifica la serie `3.14`, no el parche. |
 | 2026-10-11 | Django 6.1.2 | Registrada como versión elegida para el backend. |
+| 2026-10-15 | HU 12 — datos del pedido | Aprobado para la implementación: especificaciones en texto libre; ETA como fecha y hora con la zona horaria Django; sin repartidor al crear; estado inicial `registrado`; evento inicial atribuido al operario. |
+| 2026-10-15 | HU 12, HU 24 y HU 38 — flujo | Aprobado para la implementación: formulario web propio bajo `/operario/` para usuarios autenticados `is_staff`; código seguro, alfanumérico y único; pedidos persistidos consultables por su código y con historial persistido. La creación del pedido y su evento inicial se realiza de forma atómica. |
+
+La interfaz de carga y las consultas públicas se implementan con las plantillas Django existentes; no se aprobó incorporar un framework frontend independiente. Los campos nuevos permanecen opcionales en la base para mantener compatibilidad de filas antiguas, aunque el formulario de alta los requiere.
 
 ## Hechos de configuración, no decisiones de arquitectura
 
@@ -22,6 +26,7 @@ Este registro conserva el estado que ya estaba anotado y separa los hechos del r
 - Plataformas/arquitectura objetivo (la inicialización declara “Pendiente de definir”). La Entrevista 02 describe PC web o escritorio para operario y web móvil para repartidor, pero no consta una elección tecnológica posterior del equipo.
 - Despliegue, seguridad de producción y manejo de archivos/fotografías.
 - Alcance y prioridad de las historias y fechas vigentes de los sprints.
-- Lista autorizada de estados/transiciones del pedido: Entrevista 02 describe siete estados, el PGP enumera cuatro en sus definiciones y el modelo persistente tiene cinco. Confirmar si el PGP acota esa lista a la operación del repartidor antes de completar el ciclo de vida.
+- HU 12 cubre el alta y estado `registrado`; la lista de siete estados del ciclo de vida proviene de Entrevista 02 y se mantiene en el modelo. La asignación del pedido al repartidor no dispone aún de una interfaz; requiere una historia/decisión de flujo posterior.
+- Para una futura migración productiva, ensayar el esquema contra una copia autorizada con pedidos heredados: en este entorno no existía una base poblada para validar sus datos reales.
 
 Al cerrar una decisión, agregá fecha, contexto, opciones consideradas, acuerdo y fuente o acta que lo respalda.
