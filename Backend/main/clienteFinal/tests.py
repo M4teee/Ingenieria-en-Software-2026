@@ -48,3 +48,25 @@ class SeguimientoTests(TestCase):
         self.assertTrue(debe_mostrar_tiempo('en_viaje', AHORA))
         self.assertFalse(debe_mostrar_tiempo('en_viaje', None))
         self.assertFalse(debe_mostrar_tiempo('entregado', AHORA))
+
+    def test_historial_en_orden_cronologico_con_fecha_y_hora(self):
+        # 15:00 UTC = 12:00 BA. Registrado: 120 min antes = 10:00. En viaje: 45 min antes = 11:15.
+        with patch('main.clienteFinal.views.timezone.now', return_value=AHORA):
+            r = self.ver('viaje-demo')
+        html = r.content.decode()
+        self.assertContains(r, '14/10/2026 10:00')
+        self.assertContains(r, '14/10/2026 11:15')
+        pos = [html.index(e) for e in ['Registrado', 'Asignado', 'Retirado']]
+        self.assertEqual(pos, sorted(pos))
+
+    def test_historial_solo_expone_estado_y_fecha(self):
+        r = self.ver('viaje-demo')
+        for paso in r.context['historial']:
+            self.assertEqual(set(paso.keys()), {'etiqueta', 'clase', 'fecha'})
+
+    def test_historial_termina_en_el_estado_actual(self):
+        from .views import ESTADOS, PEDIDOS_SIMULADOS
+        for codigo, datos in PEDIDOS_SIMULADOS.items():
+            with self.subTest(codigo=codigo):
+                r = self.ver(codigo)
+                self.assertEqual(r.context['historial'][-1]['etiqueta'], ESTADOS[datos['estado']][0])    
