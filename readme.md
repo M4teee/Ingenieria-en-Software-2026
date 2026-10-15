@@ -1,84 +1,46 @@
 # Ingeniería en Software 2026
 
-Aplicación grupal de la materia Ingeniería en Software. Este repositorio contiene la base inicial del proyecto y su documentación de contexto.
+Proyecto grupal de la materia Ingeniería en Software: desarrollo del Sistema de Gestión de Repartos (SGR), una aplicación web para organizar pedidos, coordinar repartidores y consultar el estado de las entregas.
 
-## Tecnologías
+## Estado actual
 
-- Python 3.14.8
-- Django 6.1.2
-- SQLite para la configuración inicial
-- Frontend: pendiente de definición
+El repositorio contiene una base de backend Django y documentación académica. Hay modelos iniciales de comercios, usuarios y vehículos, administración de comercios y una pantalla de seguimiento con pedidos simulados. Todavía no existe un modelo persistente de pedido ni un flujo completo de asignación y entrega. `Frontend/front` es solo un marcador de posición; las páginas disponibles están en las plantillas Django.
 
-Python 3.15.0 es la versión estable más reciente, pero Django 6.1 declara soporte oficial hasta Python 3.14. Se fija Python 3.14.8 para mantener una combinación soportada; revisar esta decisión cuando una versión de Django anuncie compatibilidad con Python 3.15. El estado y las decisiones están en [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md) y [`docs/DECISIONS.md`](docs/DECISIONS.md).
+La estructura y las funcionalidades presentes se describen en [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md). Los requisitos y sus fuentes están resumidos en [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) y [`docs/SOURCE_INDEX.md`](docs/SOURCE_INDEX.md).
 
-## Requisitos
+## Tecnologías declaradas
 
-- Git
-- Python 3.14.8
+- Python 3.14, según `.python-version`.
+- Django 6.1.2.
+- SQLite en la configuración local inicial.
+- `django-crispy-forms` y `crispy-bootstrap5`.
+- Interfaz web basada en plantillas Django; no se definió una tecnología separada para `Frontend/`.
 
-## Preparar el entorno
+## Preparar y ejecutar el backend
 
-Desde la carpeta raíz del repositorio, creá y activá un entorno virtual.
+Se necesita Python 3.14 y `pip`. Desde la raíz del proyecto:
 
-### Windows PowerShell
-
-```powershell
-py -3.14 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-Si PowerShell bloquea la activación de scripts, podés usar la terminal `cmd.exe`:
-
-```bat
-py -3.14 -m venv .venv
-.venv\Scripts\activate.bat
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-### macOS y Linux
-
-```bash
+```sh
 python3.14 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-```
-
-Si usás Fish, activá el entorno con su archivo específico:
-
-```fish
-python3.14 -m venv .venv
-source .venv/bin/activate.fish
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-Confirmá `python --version` después de activar el entorno. Debe mostrar Python 3.14.8. Instalá Python desde la distribución oficial o el gestor de paquetes aprobado por el equipo.
-
-## Ejecutar el backend
-
-Con el entorno virtual activo:
-
-```bash
 cd Backend
 python manage.py check
 python manage.py migrate
 python manage.py runserver
 ```
 
-Abrí la dirección que muestra Django, normalmente <http://127.0.0.1:8000/>. `runserver` es para desarrollo local. Para detenerlo, presioná `Ctrl+C`; para salir del entorno virtual, ejecutá `deactivate`.
+Abrí la dirección local que muestra Django, normalmente `http://127.0.0.1:8000/`. `migrate` crea o actualiza la base SQLite local; el archivo está excluido de Git. `runserver` es para desarrollo, no para producción. Para salir, detené el servidor con `Ctrl+C` y ejecutá `deactivate`.
+
+El flujo de `/operario/` todavía renderiza `hola.html`, plantilla que no está en el árbol actual. No se verificó la aplicación en este entorno: el Python 3.14 disponible no tiene Django instalado. Las instrucciones anteriores describen cómo preparar una instalación limpia; no implican que todas las rutas estén completas.
 
 ## Estructura
 
-```text
-AGENTS.md                 Instrucciones para asistentes de código
-Backend/                  Configuración del backend Django
-Frontend/                 Espacio reservado; tecnología pendiente
-docs/                     Contexto, estado, fuentes y decisiones
-requirements.txt          Dependencias Python fijadas
-```
+- `Backend/`: configuración, aplicaciones Django, migraciones, plantillas y recursos estáticos.
+- `Frontend/`: espacio reservado sin implementación propia.
+- `docs/`: brief, estado, decisiones, fuentes académicas versionadas y workflow documental.
+- `requirements.txt`: dependencias Python fijadas.
 
-Consultá [`docs/INDEX.md`](docs/INDEX.md) antes de comenzar una tarea. No subas entornos virtuales, secretos, archivos `.env` ni bases SQLite locales.
+Antes de iniciar una tarea, consultá [`docs/INDEX.md`](docs/INDEX.md). Las fuentes y sus límites están descritos en [`docs/SOURCE_INDEX.md`](docs/SOURCE_INDEX.md); el workflow de actualización está en [`docs/DOCUMENTATION_WORKFLOW.md`](docs/DOCUMENTATION_WORKFLOW.md). La exportación de Taiga se incluye sanitizada y no sustituye el estado actual del tablero.
+
+La configuración actual es de desarrollo (`DEBUG=True`) y no debe publicarse como configuración de producción sin revisar secretos y ajustes de seguridad.
