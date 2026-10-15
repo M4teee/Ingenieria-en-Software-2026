@@ -25,6 +25,16 @@ PEDIDOS_SIMULADOS = {
     'cancelado-demo': {'estado': 'cancelado', 'comercio': 'Panadería Sol', 'minutos': 30},
 }
 
+# TEMPORAL: (estado, minutos atrás en que ocurrió). El último debe coincidir
+# con el estado de PEDIDOS_SIMULADOS. (hasta q exista modelo).
+HISTORIALES_SIMULADOS = {
+    'registrado-demo': [('registrado', 90)],
+    'viaje-demo': [('registrado', 120), ('asignado', 100), ('retirado', 60), ('en_viaje', 45)],
+    'entregado-demo': [('registrado', 120), ('asignado', 100), ('retirado', 60), ('en_viaje', 45), ('entregado', 5)],
+    'fallido-demo': [('registrado', 120), ('asignado', 100), ('retirado', 60), ('en_viaje', 45), ('fallido', 5)],
+    'cancelado-demo': [('registrado', 120), ('cancelado', 90)],
+}
+
 # Create your views here.
 
 def form(req):
@@ -47,6 +57,25 @@ def obtener_pedido(codigo):
         'llegada_estimada': timezone.now() + timedelta(minutes=minutos) if minutos else None,
     }
 
+def obtener_historial(codigo):
+    """TEMPORAL: devuelve datos simulados.
+
+    Con el modelo real, devolver la misma estructura (etiqueta, clase, fecha),
+    por ejemplo a partir de:
+    pedido.historial.order_by('fecha_hora')
+    Solo estado y fecha: nunca datos internos (repartidor, fotos).
+    """
+    pasos = HISTORIALES_SIMULADOS.get(codigo, [])
+    ahora = timezone.now()
+    historial = []
+    for estado, minutos_atras in pasos:
+        etiqueta, clase = ESTADOS[estado]
+        historial.append({
+            'etiqueta': etiqueta,
+            'clase': clase,
+            'fecha': ahora - timedelta(minutes=minutos_atras),
+        })
+    return sorted(historial, key=lambda paso: paso['fecha'])
 
 def debe_mostrar_tiempo(estado, llegada_estimada):
     """La hora estimada solo se muestra si el pedido está en viaje y hay un valor."""
@@ -68,6 +97,7 @@ def seguimiento(req, codigo):
         'comercio': pedido['comercio'],
         'llegada_estimada': llegada,
         'mostrar_tiempo': debe_mostrar_tiempo(pedido['estado'], llegada),
+        'historial': obtener_historial(codigo),
     }
     return render(req, 'clienteFinal/seguimiento.html', contexto)
 
