@@ -1,14 +1,25 @@
-# Registro de decisiones
+# Decisiones y temas abiertos
 
-Registrar acuerdos aprobados por el equipo y distinguirlos de propuestas aún abiertas. Al documentar una decisión, incluir fecha, contexto, alternativas consideradas, motivo y consecuencias.
+Este registro conserva el estado que ya estaba anotado y separa los hechos del repositorio de los acuerdos del equipo. No atribuir una decisión a una persona si la fuente no lo hace.
 
-## Propuestas pendientes
+## Decisiones registradas
 
-| Fecha | Tema | Propuesta | Estado |
-|---|---|---|---|
-| 2026-10-11 | Entorno Python | Usar Python 3.14.8; Django 6.1 declara soporte hasta Python 3.14. Python 3.15.0 está disponible, pero no se adopta hasta que Django lo soporte oficialmente | Acordado por el usuario |
-| 2026-10-11 | Backend | Usar Django 6.1.2, último parche publicado de la serie 6.1 al actualizar el proyecto | Acordado por el usuario |
-| 2026-10-11 | Base de datos | Elegir PostgreSQL y proveedor antes de desarrollar funcionalidades dependientes de persistencia | Pendiente |
-| 2026-10-11 | Frontend | Elegir arquitectura y herramientas a partir de las historias aprobadas | Pendiente |
+| Fecha registrada | Tema | Estado |
+|---|---|---|
+| 2026-10-11 | Python 3.14.8 para el entorno de trabajo | Registrada como acordada en la documentación previa. `.python-version` especifica la serie `3.14`, no el parche. |
+| 2026-10-11 | Django 6.1.2 | Registrada como versión elegida para el backend. |
 
-No hay decisiones aprobadas registradas en los archivos disponibles al preparar esta copia.
+## Hechos de configuración, no decisiones de arquitectura
+
+- `Backend/config/settings.py` configura SQLite para desarrollo local.
+- `requirements.txt` fija las versiones actuales de Django y sus dependencias.
+- `Frontend/` sigue siendo un marcador de posición; no hay framework elegido en sus archivos.
+
+## Pendiente de confirmación del equipo
+
+- Base de datos compartida y proveedor; PostgreSQL figuraba como propuesta previa, no como acuerdo.
+- Arquitectura y tecnologías de la interfaz.
+- Despliegue, seguridad de producción y manejo de archivos/fotografías.
+- Alcance y prioridad de las historias y fechas vigentes de los sprints.
+
+Al cerrar una decisión, agregá fecha, contexto, opciones consideradas, acuerdo y fuente o acta que lo respalda.

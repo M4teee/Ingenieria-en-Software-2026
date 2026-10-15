@@ -16,3 +16,11 @@ htmlcov/
 # Editor and operating system files
 .DS_Store
 .vscode/
+
+# Local environments and generated files (project-init)
+.env.*
+!.env.example
+node_modules/
+dist/
+build/
+.project-init/context/

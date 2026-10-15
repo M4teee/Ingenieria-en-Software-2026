@@ -1,26 +1,18 @@
-# Base de conocimiento del proyecto
+# Base de conocimiento
 
-Resumen de orientación. Para requisitos, reglas y criterios, consultar las fuentes originales registradas en `SOURCE_INDEX.md`.
+Síntesis para orientación. Los documentos originales y la implementación tienen prioridad; ver [`SOURCE_INDEX.md`](SOURCE_INDEX.md) y [`CURRENT_STATE.md`](CURRENT_STATE.md).
 
-## Confirmado en los archivos disponibles
+## Confirmado en las fuentes disponibles
 
-- Es un proyecto grupal de la materia Ingeniería en Software 2026.
-- La base técnica versionada es Python 3.14.8 y Django 6.1.2.
-- Python 3.15.0 fue publicado el 9 de octubre de 2026, pero Django 6.1 declara compatibilidad oficial con Python 3.12–3.14; la actualización mantiene Python 3.14 hasta que Django anuncie soporte para 3.15.
-- El backend está en etapa de esqueleto. El frontend y las funcionalidades del dominio todavía no están definidos en el contenido versionado.
-- El archivo de dependencias contempla Django, `asgiref` y `sqlparse`.
+- El proyecto académico es un Sistema de Gestión de Repartos para coordinar comercios, operario, repartidores y consulta de clientes finales.
+- Las fuentes describen siete épicas y siete estados de pedido. La exportación Taiga sanitizada y versionada contiene 28 historias y dos hitos de sprint; no es el tablero en vivo.
+- El backend actual es Django con configuración SQLite; hay modelos de comercio, usuario y vehículo. El seguimiento público usa pedidos simulados, no persistencia de pedidos.
+- Las historias y el PGP expresan alcance y planificación, no entregables ya implementados.
 
-## Informado por el equipo; pendiente de cotejo con fuentes
+## Discrepancias y límites
 
-- Hay dos entrevistas, un documento de requerimientos, un PGP, iniciativas y épicas, y 29 historias en Taiga.
-- La siguiente actividad prevista es realizar planning poker y organizar dos sprints con una demo por sprint.
-- La cátedra mencionó opciones de despliegue y datos como Vercel/Netlify, Render, Neon/Supabase, MongoDB Atlas y Docker Compose.
-
-Estos datos se habían incorporado como contexto compartido, pero los documentos originales no están presentes en esta copia. No tratarlos como requisitos aprobados hasta verificarlos.
-
-## Por confirmar
-
-- Propósito de la aplicación, usuarios, alcance y criterios de aceptación.
-- Requisitos funcionales y no funcionales aprobados.
-- Stack de frontend, base de datos, despliegue y acuerdos de trabajo.
+- La exportación disponible contiene 28 historias, mientras una nota anterior decía 29. No se puede determinar cuál falta ni consultar el tablero en vivo con las fuentes versionadas; confirmar con el equipo cuando sea posible.
+- El PGP describe el plan de dos sprints y una entrega el 20/11/2026. No se comprobó el avance real ni la vigencia del calendario.
+- No se encontró la consigna general ni presentaciones de la cátedra en la carpeta de contexto.
+- El frontend, la base de datos compartida y el despliegue siguen sin decisión registrada.
 - Estimaciones, responsables y alcance comprometido de cada sprint.
