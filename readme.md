@@ -41,6 +41,4 @@ El flujo de `/operario/` todavía renderiza `hola.html`, plantilla que no está 
 - `docs/`: brief, estado, decisiones, fuentes académicas versionadas y workflow documental.
 - `requirements.txt`: dependencias Python fijadas.
 
-Antes de iniciar una tarea, consultá [`docs/INDEX.md`](docs/INDEX.md). Las fuentes y sus límites están descritos en [`docs/SOURCE_INDEX.md`](docs/SOURCE_INDEX.md); el workflow de actualización está en [`docs/DOCUMENTATION_WORKFLOW.md`](docs/DOCUMENTATION_WORKFLOW.md). La exportación de Taiga se incluye sanitizada y no sustituye el estado actual del tablero.
-
-La configuración actual es de desarrollo (`DEBUG=True`) y no debe publicarse como configuración de producción sin revisar secretos y ajustes de seguridad.
+Antes de iniciar una tarea, consultá [`docs/INDEX.md`](docs/INDEX.md). Las fuentes y sus límites están descritos en [`docs/SOURCE_INDEX.md`](docs/SOURCE_INDEX.md); el workflow de actualización está en [`docs/DOCUMENTATION_WORKFLOW.md`](docs/DOCUMENTATION_WORKFLOW.md).
