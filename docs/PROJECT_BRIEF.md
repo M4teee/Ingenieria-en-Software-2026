@@ -8,7 +8,7 @@ El Sistema de Gestión de Repartos (SGR) busca centralizar la carga y el seguimi
 
 ## Alcance descrito por las fuentes
 
-Las siete épicas cubren: alta y gestión de comercios; ciclo de vida de pedidos; disponibilidad de repartidores; asignación de viajes; operación móvil con evidencia fotográfica; seguimiento público; historial y auditoría. Las entrevistas enumeran los estados `registrado`, `asignado`, `retirado`, `en viaje`, `entregado`, `fallido` y `cancelado`. También indican que se permite cancelar antes del retiro, que un repartidor lleva un pedido por vez y que el código de seguimiento no debe ser predecible.
+Las siete épicas cubren: alta y gestión de comercios; ciclo de vida de pedidos; disponibilidad de repartidores; asignación de viajes; operación móvil con evidencia fotográfica; seguimiento público; historial y auditoría. La Entrevista 02 enumera los estados `registrado`, `asignado`, `retirado`, `en viaje`, `entregado`, `fallido` y `cancelado`. También indica que se permite cancelar antes del retiro, que un repartidor lleva un pedido por vez y que el código de seguimiento no debe ser predecible. El PGP lista cuatro estados en su sección de definiciones; las fuentes no aclaran si se refiere solo a la parte operativa del repartidor.
 
 Los requisitos no funcionales piden interfaces web diferenciadas para escritorio y móvil, pocos pasos para operar, compresión de fotos, tolerancia a cortes de conectividad, historial inmutable, HTTPS, registro de fallas y separación de interfaz y lógica. Son objetivos de requisitos; no están implementados ni verificados íntegramente en el código actual.
 
@@ -18,7 +18,9 @@ El repositorio fija Python 3.14 en `.python-version` y Django 6.1.2 en `requirem
 
 ## Diferencia entre requisitos y producto actual
 
-El backend conserva modelos iniciales de comercio, usuario y vehículo, y una vista de seguimiento que utiliza datos simulados en memoria. No hay todavía un modelo persistente de pedido, la asignación y el ciclo completo de estados no están implementados, y la vista de operario apunta a una plantilla ausente. No presentar las épicas o historias como funcionalidades disponibles.
+El backend contiene modelos de comercio, usuario y vehículo, además de modelos persistentes `Pedido` e `HistorialEstado` ligados al flujo del repartidor. La vista autenticada permite avanzar pedidos asignados entre cinco estados (`asignado`, `retirado`, `en_viaje`, `entregado` y `fallido`) y guardar los cambios en un historial con fotografía opcional para retiro o entrega.
+
+Ese flujo no integra el modelo `Pedido` con `Comercio` ni con la consulta pública: el seguimiento todavía usa códigos e historiales simulados en memoria. No se observó un flujo de alta y asignación de pedidos para el operario; su ruta intenta renderizar una plantilla ausente. Las fuentes describen siete estados, de modo que el conjunto de estados implementado es parcial. No presentar las épicas o historias como funcionalidades disponibles.
 
 ## Plan académico
 
