@@ -6,7 +6,7 @@ Síntesis para orientación. Los documentos originales y la implementación tien
 
 - El proyecto académico es un Sistema de Gestión de Repartos para coordinar comercios, operario, repartidores y consulta de clientes finales.
 - Las fuentes describen siete épicas y siete estados de pedido. La exportación Taiga sanitizada y versionada contiene 28 historias y dos hitos de sprint; no es el tablero en vivo.
-- El backend actual usa Django y SQLite; además de los modelos de comercio, usuario y vehículo, hay modelos persistentes `Pedido` e `HistorialEstado` y un flujo autenticado de actualización de estado del repartidor. El seguimiento público aún usa pedidos simulados, sin conexión con esos modelos.
+- El backend actual usa Django y SQLite. En la rama de HU 12, `Pedido` se asocia con `Comercio`, se registra desde la interfaz protegida del operario y se consulta por su código en el seguimiento público; `HistorialEstado` alimenta la cronología. El repartidor puede avanzar pedidos previamente asignados.
 - Las historias y el PGP expresan alcance y planificación, no entregables ya implementados.
 
 ## Discrepancias y límites
@@ -16,6 +16,6 @@ Síntesis para orientación. Los documentos originales y la implementación tien
 - No se encontró la consigna general ni presentaciones de la cátedra en la carpeta de contexto.
 - El frontend, la base de datos compartida y el despliegue siguen sin decisión registrada.
 - La Entrevista 02 describe PC web o escritorio para el operario y web móvil para el repartidor; la tecnología/plataforma objetivo elegida por el equipo sigue pendiente.
-- El modelo persistente solo contempla cinco estados del pedido, mientras la Entrevista 02 define siete. No se observó generación de códigos de seguimiento, el flujo operativo de alta/asignación, la integración con el comercio y el seguimiento público, ni garantías de inmutabilidad del historial. Estas son discrepancias observadas entre fuentes y código, no decisiones para cambiar el comportamiento.
-- La Entrevista 02 enumera siete estados y el PGP lista cuatro en su sección de definiciones; no queda claro si el PGP describe solo los estados de la etapa del repartidor. Confirmar alcance y transiciones antes de implementar el ciclo completo.
+- La asignación de pedidos no dispone de una pantalla, aunque el modelo ya admite pedidos sin repartidor al registrarse y conserva la relación al asignar. El sistema tampoco garantiza historial inmutable ni operación sin conexión; esos requisitos requieren trabajo posterior.
+- La Entrevista 02 enumera siete estados y el PGP lista cuatro en su sección de definiciones; el modelo actual contempla siete según la entrevista y HU 12, pero el alcance de operaciones todavía incompletas debe confirmarse con el equipo.
 - Estimaciones, responsables y alcance comprometido de cada sprint.

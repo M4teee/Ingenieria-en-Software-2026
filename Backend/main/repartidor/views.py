@@ -6,6 +6,7 @@ from PIL import Image
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
@@ -61,6 +62,7 @@ def comprimir_imagen(imagen):
 
 @login_required
 @require_POST
+@transaction.atomic
 def actualizar_estado(req, pedido_id):
     pedido = get_object_or_404(
         Pedido,

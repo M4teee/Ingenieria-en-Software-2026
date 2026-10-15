@@ -7,4 +7,7 @@ def rootHandler(request):
     if request.user.is_superuser:
         return redirect('admin:index')
 
+    if request.user.is_staff:
+        return redirect('operario:cargar_pedido')
+
     return redirect('repartidor')

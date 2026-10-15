@@ -18,9 +18,9 @@ El repositorio fija Python 3.14 en `.python-version` y Django 6.1.2 en `requirem
 
 ## Diferencia entre requisitos y producto actual
 
-El backend contiene modelos de comercio, usuario y vehículo, además de modelos persistentes `Pedido` e `HistorialEstado` ligados al flujo del repartidor. La vista autenticada permite avanzar pedidos asignados entre cinco estados (`asignado`, `retirado`, `en_viaje`, `entregado` y `fallido`) y guardar los cambios en un historial con fotografía opcional para retiro o entrega.
+El backend mantiene modelos persistentes `Pedido` e `HistorialEstado`. En la rama actual, el operario registra pedidos asociados a comercios activos, con estado inicial `registrado`, código seguro, fecha estimada y evento de historial. La consulta pública busca pedidos por el código persistido; el repartidor puede avanzar un pedido previamente asignado y guardar los cambios en el historial con fotografía opcional al retirar o entregar.
 
-Ese flujo no integra el modelo `Pedido` con `Comercio` ni con la consulta pública: el seguimiento todavía usa códigos e historiales simulados en memoria. No se observó un flujo de alta y asignación de pedidos para el operario; su ruta intenta renderizar una plantilla ausente. Las fuentes describen siete estados, de modo que el conjunto de estados implementado es parcial. No presentar las épicas o historias como funcionalidades disponibles.
+La asignación a repartidores todavía no tiene interfaz. Las entrevistas describen siete estados y reglas de cancelación antes del retiro; el modelo contempla esos estados, pero no todas las operaciones cuentan con una pantalla. Los requisitos no funcionales listados arriba tampoco están implementados ni verificados íntegramente. Las historias fuera del alcance implementado no deben presentarse como funcionalidades disponibles.
 
 ## Plan académico
 
