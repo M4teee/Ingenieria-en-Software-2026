@@ -21,5 +21,8 @@ Este registro conserva el estado que ya estaba anotado y separa los hechos del r
 - Arquitectura y tecnologías de la interfaz.
 - Despliegue, seguridad de producción y manejo de archivos/fotografías.
 - Alcance y prioridad de las historias y fechas vigentes de los sprints.
+- HU #18: la aceptación mueve el pedido directamente a `retirado` ("habilita el retiro"); interpretación pendiente de confirmar con el equipo si debería existir un estado intermedio "confirmado".
+- HU #18: la expiración de los 5 minutos es perezosa (se evalúa al cargar la vista del repartidor o al procesar aceptar/rechazar). Una liberación inmediata sin interacción requeriría una tarea programada; queda a decisión del equipo.
+- HU #18: la notificación al operario para reasignación (Escenario 2 de la historia) se registra en `HistorialPedido` con el evento de rechazo; no se implementó una notificación activa (no hay flujo de operario aún).
 
 Al cerrar una decisión, agregá fecha, contexto, opciones consideradas, acuerdo y fuente o acta que lo respalda.

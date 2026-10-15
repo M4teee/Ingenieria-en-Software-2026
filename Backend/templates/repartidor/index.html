@@ -3,6 +3,123 @@
 {% block title %}Repartidor{% endblock %}
 
 {% block content %}
-    <h1>Sitio del repartidor</h1>
-    <p>En proceso</p>
-{% endblock content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Panel del repartidor</h1>
+    <span class="badge {% if disponible %}bg-success{% else %}bg-secondary{% endif %} fs-6 px-3 py-2">
+        {% if disponible %}Disponible{% else %}No disponible{% endif %}
+    </span>
+</div>
+
+{% if expirado %}
+<div class="alert alert-warning" role="alert">
+    <i class="bi bi-clock-history me-2"></i>
+    El tiempo de espera se agotó. El pedido fue liberado y tu disponibilidad cambió a <strong>No disponible</strong>.
+</div>
+{% endif %}
+
+{% if asignado %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-truck me-2"></i>Nueva solicitud de viaje
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Comercio:</strong> {{ asignado.comercio.nombre }}
+            </div>
+            <div class="col-md-6">
+                <strong>Estado:</strong>
+                <span class="badge bg-info ms-2">{{ asignado.get_estado_display }}</span>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
+                <strong>Dirección:</strong> {{ asignado.comercio.direccion }}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
+                <strong>Contacto:</strong> {{ asignado.comercio.contacto }}
+            </div>
+        </div>
+
+        <div class="mb-3" id="countdown-container">
+            <label class="form-label fw-bold">
+                <i class="bi bi-stopwatch me-1"></i>Tiempo restante:
+            </label>
+            <div class="input-group" style="max-width: 200px;">
+                <span class="input-group-text" id="countdown-display">
+                    <span id="minutes">00</span>:<span id="seconds">00</span>
+                </span>
+            </div>
+            <div class="form-text" id="countdown-hint">Tienes 5 minutos para responder.</div>
+        </div>
+
+        <form method="post" action="{% url 'repartidor_aceptar' asignado.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-app btn-lg me-2" id="btn-aceptar" {% if not disponible %}disabled{% endif %}>
+                <i class="bi bi-check-circle me-2"></i>Aceptar viaje
+            </button>
+        </form>
+        <form method="post" action="{% url 'repartidor_rechazar' asignado.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-lg" id="btn-rechazar" {% if not disponible %}disabled{% endif %}>
+                <i class="bi bi-x-circle me-2"></i>Rechazar viaje
+            </button>
+        </form>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-inbox display-1 text-muted"></i>
+    <h3 class="mt-3 text-muted">Sin pedidos asignados</h3>
+    <p class="text-muted">Esperando nueva asignación...</p>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extrastyle %}
+<script>
+(function() {
+    const segundosTotal = {{ segundos_restantes|default:0 }};
+    const countdownDisplay = document.getElementById('countdown-display');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
+    const btnAceptar = document.getElementById('btn-aceptar');
+    const btnRechazar = document.getElementById('btn-rechazar');
+    const hintEl = document.getElementById('countdown-hint');
+
+    if (segundosTotal <= 0) return;
+
+    let segundos = segundosTotal;
+
+    function actualizar() {
+        const m = Math.floor(segundos / 60).toString().padStart(2, '0');
+        const s = (segundos % 60).toString().padStart(2, '0');
+        minutesEl.textContent = m;
+        secondsEl.textContent = s;
+
+        if (segundos <= 0) {
+            clearInterval(intervalo);
+            if (btnAceptar) btnAceptar.disabled = true;
+            if (btnRechazar) btnRechazar.disabled = true;
+            if (hintEl) hintEl.textContent = 'Tiempo agotado. Recarga la página.';
+            countdownDisplay.style.backgroundColor = 'var(--app-line)';
+            countdownDisplay.style.color = 'var(--app-muted)';
+        } else if (segundos <= 30) {
+            countdownDisplay.style.backgroundColor = '#fff3cd';
+            countdownDisplay.style.color = '#856404';
+        } else if (segundos <= 60) {
+            countdownDisplay.style.backgroundColor = '#ffe0b2';
+            countdownDisplay.style.color = '#e65100';
+        }
+
+        segundos--;
+    }
+
+    actualizar();
+    const intervalo = setInterval(actualizar, 1000);
+})();
+</script>
+{% endblock %}

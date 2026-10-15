@@ -1,16 +1,17 @@
 # Estado actual
 
-Actualizado: 2026-10-15. Revisión documental del repositorio y de las fuentes académicas versionadas. No se modificó código de la aplicación.
+Actualizado: 2026-10-15. Implementación de la HU #18 ("Aceptar asignacion de pedidos") en `main.repartidor`; no se modificó `clienteFinal`, `operario` ni `users`.
 
 ## Implementación observada
 
 - `Backend/` contiene un proyecto Django 6.1.2. `.python-version` solicita Python 3.14; `requirements.txt` fija Django, `asgiref`, `sqlparse`, `django-crispy-forms` y `crispy-bootstrap5`.
 - La configuración local usa SQLite, `DEBUG=True` y una clave de desarrollo definida en settings. No es una configuración de producción.
 - `main.operario` tiene el modelo `Comercio` y su administración. `main.users` extiende el usuario Django y agrega un vínculo a `Vehiculo`; existen migraciones iniciales.
-- La página de seguimiento acepta códigos de demostración servidos desde `PEDIDOS_SIMULADOS` en memoria. No hay un modelo persistente de pedido ni un flujo de despacho implementado.
-- La vista del repartidor requiere autenticación y renderiza una página básica. La ruta de operario intenta renderizar `hola.html`, que no existe en `Backend/templates/`.
+- `main.repartidor` agrega (migración `0001_initial`): `RepartidorPerfil` (OneToOne con `User`, campo `disponible`), `Pedido` (FK a `Comercio` y a `User`, estado con choices `registrado/asignado/retirado/en_viaje/entregado/fallido/cancelado`, `fecha_hora_asignacion`) e `HistorialPedido` (auditoría por pedido). No existían modelos previos de pedido ni de historial; los de repartidor y de `clienteFinal` siguen siendo datos simulados en memoria.
+- HU #18 implementada en `main.repartidor`: la vista `home` muestra el pedido asignado con cuenta regresiva de 300 segundos (JS propio en `templates/repartidor/index.html`, hereda `base.html`); `aceptar` confirma el pedido a `retirado` y registra el evento en el historial; `rechazar` libera el pedido a `registrado`, registra "Rechazado por repartidor [Nombre]" y marca al repartidor no disponible; la expiración de los 5 minutos se evalúa de forma perezosa al cargar `home` y al procesar aceptar/rechazar (libera el pedido y marca al repartidor no disponible). Las vistas de aceptar/rechazar usan `transaction.atomic()` + `select_for_update()` y requieren POST.
+- La página de seguimiento de `clienteFinal` sigue con `PEDIDOS_SIMULADOS` en memoria; aún no consume el modelo `Pedido` nuevo.
+- La ruta de operario sigue intentando renderizar `hola.html`, que no existe en `Backend/templates/`.
 - `Frontend/front` contiene solo un texto marcador; no hay un frontend separado implementado.
-- Hay pruebas en `main/clienteFinal/tests.py`; las pruebas de otras aplicaciones son archivos vacíos o de plantilla. No se ejecutaron en esta revisión.
 
 ## Requisitos y planificación
 
@@ -22,16 +23,18 @@ La exportación Taiga derivada y versionada contiene 28 historias de usuario, 7 
 
 ## Verificaciones de esta revisión
 
-- Project Init 1.0.0 inspeccionó el repositorio: rama `main`, estado limpio antes de esta tarea, stack detectado Python/Django.
-- Project Init 1.0.0 copió las cinco fuentes Word sin sobrescribir documentos existentes y generó `scripts/check_docs.py` y `docs/DOCUMENTATION_WORKFLOW.md`. La exportación Taiga se sanitizó con el script versionado del proyecto y se verificó el recuento 7/28/2.
-- `python3.14 -m django --version` no pudo ejecutarse: el intérprete disponible no tiene Django instalado. No se instalaron dependencias en el proyecto ni se ejecutaron `manage.py check` o las pruebas.
-- Antes de editar se guardaron hashes de los 81 archivos rastreados. Después de documentar, los 71 archivos de código, recursos, dependencias y runtime comparados mantienen el mismo hash; los cambios restantes son documentación, `.gitignore` y el `CLAUDE.md` generado.
+- Ejecutado en la rama `hu18-repartidor` con el venv del repositorio (Python 3.14.7, Django 6.1.2), desde `Backend/`:
+  - `manage.py makemigrations` (generó `main/repartidor/migrations/0001_initial.py`) y `manage.py migrate`: OK.
+  - `manage.py makemigrations --check --dry-run`: "No changes detected".
+  - `manage.py test` (suite completa): 26 pruebas, OK en ~14 s. Incluye 16 pruebas nuevas de `main.repartidor` (aceptación en tiempo, rechazo explícito, expiración a los 300 segundos, seguridad) y las 10 existentes de `clienteFinal` (no se modificaron).
+- `python3 scripts/check_docs.py .` desde la raíz del repositorio: OK, sin enlaces rotos ni rutas específicas de máquina.
+- Project Init 1.0.0 inspeccionó el repositorio (ver git log previo) y generó `scripts/check_docs.py` y `docs/DOCUMENTATION_WORKFLOW.md`.
 
 ## Pendientes
 
 - Confirmar historias y estado real con el tablero Taiga.
 - Definir la interfaz frontend, la base de datos compartida y el despliegue.
-- Completar el modelo y los flujos de pedidos según los requisitos aprobados.
+- Integrar el modelo `Pedido` con el seguimiento de `clienteFinal` y el flujo de asignación del operario (la asignación inicial no tiene vista: los pedidos se asignan por admin o por código).
+- La expiración de los 5 minutos es perezosa (se evalúa al cargar la vista o al aceptar/rechazar); si se necesita liberación inmediata sin interacción, hace falta una tarea programada (celery/cron).
 - Resolver la plantilla faltante de la ruta de operario.
-- Instalar las dependencias en un entorno de desarrollo del proyecto y ejecutar `manage.py check` y las pruebas existentes.
 - Revisar claves, `DEBUG`, hosts, HTTPS y almacenamiento antes de cualquier uso de producción.
