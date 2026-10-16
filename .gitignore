@@ -12,6 +12,7 @@ db.sqlite3
 .coverage
 htmlcov/
 .setup-venv/
+Backend/media/entregas/
 
 # Editor and operating system files
 .DS_Store
