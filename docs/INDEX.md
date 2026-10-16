@@ -9,6 +9,7 @@ Leé primero el estado para conocer qué existe en el código y qué sigue pendi
 - [`context/README.md`](context/README.md): política de privacidad, procedencia y regeneración de la exportación Taiga derivada.
 - [`CURRENT_STATE.md`](CURRENT_STATE.md): implementación observada, verificaciones y pendientes.
 - [`GUIA-EJECUCION-Y-PRUEBAS.md`](GUIA-EJECUCION-Y-PRUEBAS.md): preparación del entorno, pruebas y recorrido manual reproducible.
+- [`MANUAL-DE-USO.md`](MANUAL-DE-USO.md): procedimientos reales para operario, repartidor, cliente y administrador.
 - [`TOUR-APLICACION.md`](TOUR-APLICACION.md): mapa de módulos y recorrido del flujo de pedidos en código y base de datos.
 - [`DECISIONS.md`](DECISIONS.md): decisiones técnicas registradas y temas sin resolver.
 - [`KNOWLEDGE_BASE.md`](KNOWLEDGE_BASE.md): resumen de contexto y discrepancias entre fuentes.

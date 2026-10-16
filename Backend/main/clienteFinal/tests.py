@@ -75,6 +75,34 @@ class SeguimientoPersistidoTests(TestCase):
 
         self.assertEqual(respuesta.status_code, 404)
 
+    def test_busqueda_publica_con_codigo_valido_redirige_al_detalle(self):
+        respuesta = self.client.get(
+            reverse('clienteFinal'),
+            {'codigo': self.pedido.codigo.lower()},
+        )
+
+        self.assertRedirects(
+            respuesta,
+            reverse('seguimiento', args=[self.pedido.codigo]),
+        )
+
+    def test_busqueda_publica_invalida_muestra_error_y_conserva_codigo(self):
+        respuesta = self.client.get(
+            reverse('clienteFinal'),
+            {'codigo': 'CODIGO-INEXISTENTE'},
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'No encontramos un pedido con ese código')
+        self.assertContains(respuesta, 'CODIGO-INEXISTENTE')
+        self.assertTemplateUsed(respuesta, 'clienteFinal/index.html')
+
+    def test_formulario_de_busqueda_tiene_envio_habilitado(self):
+        respuesta = self.client.get(reverse('clienteFinal'))
+
+        self.assertContains(respuesta, 'name="codigo"')
+        self.assertNotContains(respuesta, 'type="submit" class="btn btn-app w-100 mt-3" disabled')
+
     def test_regla_de_visibilidad_de_la_estimacion(self):
         self.assertTrue(debe_mostrar_tiempo('en_viaje', self.pedido.fecha_hora_estimada_entrega))
         self.assertFalse(debe_mostrar_tiempo('en_viaje', None))

@@ -8,7 +8,7 @@ admin.site.unregister(Group)
 admin.site.site_header = 'Panel de operario'
 admin.site.site_title = 'Pedidos Martin'
 admin.site.index_title = 'Inicio'
-admin.site.site_url = None
+admin.site.site_url = '/'
 
 # Crea tu clase de administración extendiendo la de Django
 @admin.register(User)

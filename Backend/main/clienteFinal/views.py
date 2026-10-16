@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET # para restringir el acceso a una vista, permitiendo únicamente solicitudes que usen el método HTTP GET.
 from django.http import Http404 #para poder lanzar excepción que devuelva una página de error 404 si el usuario busca un pedido que no existe.
 from main.repartidor.models import HistorialEstado, Pedido
@@ -18,7 +18,17 @@ ESTADOS = {
 # Create your views here.
 
 def form(req):
-  return render(req, 'clienteFinal/index.html', {})
+    codigo = req.GET.get('codigo', '').strip().upper()
+    if not codigo:
+        return render(req, 'clienteFinal/index.html', {})
+
+    if Pedido.objects.filter(codigo=codigo).exists():
+        return redirect('seguimiento', codigo=codigo)
+
+    return render(req, 'clienteFinal/index.html', {
+        'codigo': codigo,
+        'error': 'No encontramos un pedido con ese código. Revisá que esté bien escrito.',
+    })
 
 def obtener_pedido(codigo):
     pedido = (

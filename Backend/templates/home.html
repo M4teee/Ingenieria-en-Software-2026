@@ -10,22 +10,22 @@
 
 {% block content %}
     <div class="page-heading">
-        <h1 class="h2">¿Cómo querés ingresar?</h1>
-        <p>Elegí tu perfil para ir a tu página.</p>
+        <h1 class="h2">Sistema de Gestión de Repartos</h1>
+        <p>Registrá pedidos y consultá el estado de las entregas.</p>
     </div>
 
     <div class="row g-3">
         <div class="col-12 col-md-6 col-lg-4">
-            <a href="/operario" class="role-link">
+            <a href="{% url 'login' %}?next={% url 'operario:cargar_pedido' %}" class="role-link">
                 <span class="role-icon"><i class="bi bi-clipboard-check"></i></span>
                 <span class="role-text">
                     <strong>Operario</strong>
-                    <span>Gestioná los pedidos</span>
+                    <span>Ingresá para cargar y gestionar pedidos</span>
                 </span>
             </a>
         </div>
         <div class="col-12 col-md-6 col-lg-4">
-            <a href="/clienteFinal" class="role-link">
+            <a href="{% url 'clienteFinal' %}" class="role-link">
                 <span class="role-icon"><i class="bi bi-bag"></i></span>
                 <span class="role-text">
                     <strong>Cliente final</strong>
@@ -34,7 +34,7 @@
             </a>
         </div>
         <div class="col-12 col-md-6 col-lg-4">
-            <a href="/repartidor" class="role-link">
+            <a href="{% url 'repartidor_login_pin' %}" class="role-link">
                 <span class="role-icon"><i class="bi bi-truck"></i></span>
                 <span class="role-text">
                     <strong>Repartidor</strong>
@@ -44,5 +44,7 @@
         </div>
     </div>
 
-    <a href="/admin" class="admin-link"><i class="bi bi-gear"></i> Panel de administración</a>
+    {% if user.is_authenticated and user.is_superuser %}
+        <a href="{% url 'admin:index' %}" class="admin-link"><i class="bi bi-gear"></i> Panel de administración</a>
+    {% endif %}
 {% endblock content %}

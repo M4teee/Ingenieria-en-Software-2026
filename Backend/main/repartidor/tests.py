@@ -1,3 +1,12 @@
+import shutil
+import tempfile
+from io import BytesIO
+from pathlib import Path
+from unittest.mock import patch
+
+from PIL import Image
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -98,6 +107,9 @@ class ActualizarEstadoTests(TestCase):
         self.repartidor = User.objects.create_user(
             username='repartidor_vista',
             password='test1234'
+        )
+        self.perfil = Repartidor.objects.create(
+            user=self.repartidor, pin='1201', disponible=True,
         )
 
         self.client.login(
@@ -290,6 +302,7 @@ class AsignacionConRespuestaTests(TestCase):
         )
 
         otro = User.objects.create_user(username='otro_hu18', password='x')
+        Repartidor.objects.create(user=otro, pin='6789')
         self.client.force_login(otro)
         response = self.client.post(reverse('repartidor_aceptar', args=[pedido.pk]))
 
@@ -336,6 +349,16 @@ class DisponibilidadRepartidorTests(TestCase):
         self.assertContains(response, 'PIN incorrecto. Verifique los dígitos')
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
+    def test_login_pin_no_autentica_usuario_dado_de_baja(self):
+        self.user.is_active = False
+        self.user.save(update_fields=['is_active'])
+
+        response = self.client.post('/repartidor/login-pin/', {'pin': '0123'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'PIN incorrecto. Verifique los dígitos')
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
     def test_pin_de_mas_de_cuatro_digitos_no_autentica(self):
         response = self.client.post('/repartidor/login-pin/', {'pin': '000123'})
 
@@ -366,3 +389,183 @@ class DisponibilidadRepartidorTests(TestCase):
 
         self.perfil.refresh_from_db()
         self.assertFalse(self.perfil.disponible)
+
+    def test_usuario_autenticado_sin_perfil_no_accede_al_modulo(self):
+        otro = User.objects.create_user(username='sin_perfil')
+        self.client.force_login(otro)
+
+        self.assertEqual(self.client.get(reverse('repartidor')).status_code, 403)
+        self.assertEqual(
+            self.client.post(reverse('repartidor_toggle_disponibilidad')).status_code,
+            403,
+        )
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class DetalleRepartidorTests(TestCase):
+    def setUp(self):
+        self.repartidor = User.objects.create_user(username='detalle_repartidor')
+        Repartidor.objects.create(user=self.repartidor, pin='9876')
+        self.otro_repartidor = User.objects.create_user(username='otro_detalle')
+        Repartidor.objects.create(user=self.otro_repartidor, pin='9875')
+        self.pedido = Pedido.objects.create(
+            codigo='DETALLE-01', repartidor=self.repartidor,
+            estado='entregado', direccion_destino='Destino privado',
+            especificaciones_traslado='Contenido de prueba',
+        )
+
+    def test_repartidor_consulta_solo_sus_pedidos_y_su_historial(self):
+        evento = HistorialEstado.objects.create(
+            pedido=self.pedido, estado_nuevo='entregado', usuario=self.repartidor,
+        )
+        self.client.force_login(self.repartidor)
+
+        response = self.client.get(
+            reverse('repartidor_detalle_pedido', args=[self.pedido.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Destino privado')
+        self.assertEqual(list(response.context['historial']), [evento])
+
+        otro_pedido = Pedido.objects.create(
+            codigo='DETALLE-02', repartidor=self.otro_repartidor, estado='entregado',
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse('repartidor_detalle_pedido', args=[otro_pedido.pk])
+            ).status_code,
+            404,
+        )
+
+    def test_no_expone_detalle_completo_antes_de_aceptar_asignacion(self):
+        from datetime import timedelta
+
+        pedido = Pedido.objects.create(
+            codigo='PENDIENTE-01', repartidor=self.repartidor, estado='asignado',
+            fecha_hora_asignacion=timezone.now() - timedelta(seconds=10),
+            direccion_destino='Destino antes de aceptar',
+        )
+        self.client.force_login(self.repartidor)
+
+        response = self.client.get(
+            reverse('repartidor_detalle_pedido', args=[pedido.pk])
+        )
+
+        self.assertRedirects(response, reverse('repartidor'))
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class FotografiasEntregaTests(TestCase):
+    def setUp(self):
+        self.directorio_media = tempfile.mkdtemp(prefix='sgr-test-media-')
+        self.addCleanup(shutil.rmtree, self.directorio_media, ignore_errors=True)
+        self.override_media = override_settings(MEDIA_ROOT=self.directorio_media)
+        self.override_media.enable()
+        self.addCleanup(self.override_media.disable)
+
+        self.user = User.objects.create_user(username='foto_repartidor')
+        self.perfil = Repartidor.objects.create(user=self.user, pin='1112')
+        self.pedido = Pedido.objects.create(
+            codigo='FOTO-01', repartidor=self.user, estado='en_viaje',
+        )
+        self.client.force_login(self.user)
+
+    def _imagen(self):
+        buffer = BytesIO()
+        Image.new('RGB', (12, 12), color='red').save(buffer, format='PNG')
+        return SimpleUploadedFile(
+            'evidencia.png', buffer.getvalue(), content_type='image/png',
+        )
+
+    def test_foto_valida_se_comprime_y_persiste_con_estado_e_historial(self):
+        response = self.client.post(
+            reverse('actualizar_estado', args=[self.pedido.pk]),
+            {'estado': 'entregado', 'fotografia': self._imagen()},
+        )
+
+        self.pedido.refresh_from_db()
+        self.perfil.refresh_from_db()
+        evento = HistorialEstado.objects.get(pedido=self.pedido)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.pedido.estado, 'entregado')
+        self.assertTrue(evento.fotografia.name.endswith('.jpg'))
+        self.assertTrue(evento.fotografia.storage.exists(evento.fotografia.name))
+        self.assertTrue(self.perfil.disponible)
+        imagen = self.client.get(reverse('repartidor_fotografia', args=[evento.pk]))
+        self.assertEqual(imagen.status_code, 200)
+        self.assertEqual(imagen['Content-Type'], 'image/jpeg')
+
+        otro = User.objects.create_user(username='otro_foto')
+        Repartidor.objects.create(user=otro, pin='1212')
+        self.client.force_login(otro)
+        self.assertEqual(
+            self.client.get(reverse('repartidor_fotografia', args=[evento.pk])).status_code,
+            404,
+        )
+
+    def test_foto_invalida_no_cambia_estado_ni_crea_historial(self):
+        archivo = SimpleUploadedFile(
+            'no-es-imagen.png', b'contenido invalido', content_type='image/png',
+        )
+
+        response = self.client.post(
+            reverse('actualizar_estado', args=[self.pedido.pk]),
+            {'estado': 'fallido', 'fotografia': archivo},
+        )
+
+        self.pedido.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.pedido.estado, 'en_viaje')
+        self.assertFalse(HistorialEstado.objects.exists())
+
+    def test_foto_mayor_a_limite_no_cambia_estado(self):
+        archivo = SimpleUploadedFile(
+            'grande.png', b'x' * (10 * 1024 * 1024 + 1), content_type='image/png',
+        )
+
+        self.client.post(
+            reverse('actualizar_estado', args=[self.pedido.pk]),
+            {'estado': 'entregado', 'fotografia': archivo},
+        )
+
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.estado, 'en_viaje')
+        self.assertFalse(HistorialEstado.objects.exists())
+
+    def test_fotografias_multiples_se_rechazan(self):
+        self.client.post(
+            reverse('actualizar_estado', args=[self.pedido.pk]),
+            {'estado': 'entregado', 'fotografia': [self._imagen(), self._imagen()]},
+        )
+
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.estado, 'en_viaje')
+        self.assertFalse(HistorialEstado.objects.exists())
+
+    def test_foto_se_acepta_para_entrega_fallida(self):
+        self.client.post(
+            reverse('actualizar_estado', args=[self.pedido.pk]),
+            {'estado': 'fallido', 'fotografia': self._imagen()},
+        )
+
+        self.pedido.refresh_from_db()
+        evento = HistorialEstado.objects.get(pedido=self.pedido)
+        self.assertEqual(self.pedido.estado, 'fallido')
+        self.assertTrue(evento.fotografia.name.endswith('.jpg'))
+        self.assertIn('Retornar el pedido al centro de distribución', evento.incidencia)
+
+    def test_fallo_al_persistir_estado_revierte_historial_y_elimina_foto(self):
+        with patch.object(Pedido, 'save', side_effect=IntegrityError('fallo simulado')):
+            with self.assertRaises(IntegrityError):
+                self.client.post(
+                    reverse('actualizar_estado', args=[self.pedido.pk]),
+                    {'estado': 'entregado', 'fotografia': self._imagen()},
+                )
+
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.estado, 'en_viaje')
+        self.assertFalse(HistorialEstado.objects.exists())
+        self.assertFalse(any(
+            ruta.is_file() for ruta in Path(self.directorio_media).rglob('*')
+        ))
