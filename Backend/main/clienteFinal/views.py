@@ -6,13 +6,13 @@ from main.repartidor.models import HistorialEstado, Pedido
 
 # Estados definidos en la Entrevista 02: (texto visible, color de Bootstrap)
 ESTADOS = {
-    'registrado': ('Registrado', 'secondary'),
-    'asignado': ('Asignado', 'info'),
-    'retirado': ('Retirado', 'info'),
-    'en_viaje': ('En viaje', 'primary'),
-    'entregado': ('Entregado', 'success'),
-    'fallido': ('Fallido', 'danger'),
-    'cancelado': ('Cancelado', 'dark'),
+    'registrado': ('Registrado', 'registrado'),
+    'asignado': ('Asignado', 'asignado'),
+    'retirado': ('Retirado', 'retirado'),
+    'en_viaje': ('En viaje', 'en_viaje'),
+    'entregado': ('Entregado', 'entregado'),
+    'fallido': ('Fallido', 'fallido'),
+    'cancelado': ('Cancelado', 'cancelado'),
 }
 
 # Create your views here.

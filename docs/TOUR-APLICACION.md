@@ -6,7 +6,7 @@ Este recorrido explica cómo se conectan las interfaces y los datos de un pedido
 
 | Aplicación | Responsabilidad | Archivos principales |
 |---|---|---|
-| `main.homePage` | Página de acceso y enrutamiento según la cuenta | `Backend/main/homePage/views.py`, `urls.py`, `Backend/templates/home.html` |
+| `main.homePage` | Enrutamiento de sesiones activas y entrada pública del cliente | `Backend/main/homePage/views.py`, `urls.py`, `Backend/templates/base.html` |
 | `main.operario` | Comercios, alta de pedido, panel, detalle y asignación manual | `models.py`, `forms.py`, `views.py`, `urls.py`, `Backend/templates/operario/` |
 | `main.repartidor` | Pedido, perfil, estados, historial y evidencia fotográfica | `models.py`, `forms.py`, `views.py`, `urls.py`, `Backend/templates/repartidor/` |
 | `main.clienteFinal` | Búsqueda pública e historial de solo lectura | `views.py`, `urls.py`, `Backend/templates/clienteFinal/` |
@@ -17,13 +17,13 @@ La UI se sirve con plantillas Django. `Frontend/` no contiene una app separada. 
 
 ## Recorrido funcional
 
-1. El usuario autenticado con `is_staff` llega desde `/` al panel `/operario/`. Desde ahí abre `/operario/pedidos/nuevo/`.
+1. Una persona anónima abre `/` y ve el formulario público de seguimiento. La misma vista está disponible en `/clienteFinal/`; la navegación ofrece accesos separados al login Django del operario y al PIN del repartidor. Una sesión `is_staff` que abre `/` va a `/operario/`; una sesión vinculada a un perfil activo de repartidor va a `/repartidor/`.
 2. `PedidoForm` limita el selector a comercios activos y valida campos, fecha/hora y clave de idempotencia. La vista repite la validación de comercio dentro de `_crear_pedido`.
 3. La transacción crea el pedido `registrado` sin repartidor, genera un código con `secrets` y registra el evento inicial en `HistorialEstado`. Una restricción de unicidad protege el código y la clave de solicitud; las colisiones de código se reintentan.
 4. La confirmación muestra el código y permite copiarlo. El panel permite abrir el pedido y seleccionar manualmente un repartidor disponible; el servidor verifica otra vez que siga disponible y registra el cambio a `asignado` y su historial.
 5. El repartidor autenticado por su PIN ve la asignación en `/repartidor/`, dispone de cinco minutos para responder y luego puede marcar retiro, viaje, entrega o falla, dentro de las transiciones permitidas.
 6. Cada cambio de estado guarda un evento. Si se adjunta una foto permitida, la vista valida el contenido, el tipo, el tamaño y la cantidad; la escritura de evento/estado es atómica. El acceso a la evidencia requiere ser staff o el repartidor asignado.
-7. El cliente busca el código desde `/clienteFinal/`. La búsqueda dirige al pedido persistido en `/clienteFinal/seguimiento/<codigo>/`. HU 24/38 muestran el estado e historial existentes; la interfaz pública omite contacto, especificaciones, usuarios internos y fotos. La fecha estimada se muestra solo en `en_viaje`.
+7. El cliente busca el código desde `/` o `/clienteFinal/`. La búsqueda dirige al pedido persistido en `/clienteFinal/seguimiento/<codigo>/`. HU 24/38 muestran el estado e historial existentes; la interfaz pública omite contacto, especificaciones, usuarios internos y fotos. La fecha estimada se muestra solo en `en_viaje`.
 
 La asignación manual es un puente provisional elegido para la aplicación web. Las HU 22 y 30 siguen sin implementar y no se consideran completas: el flujo no realiza asignación automática ni cálculo de cercanía.
 
@@ -33,7 +33,7 @@ La asignación manual es un puente provisional elegido para la aplicación web. 
 - **Alta:** `PedidoForm` y `ComercioActivoField` viven en `main/operario/forms.py`; `cargar_pedido`, `_crear_pedido` y confirmación están en `views.py`; las plantillas `cargar_pedido.html` y `pedido_registrado.html` construyen el formulario y el resultado.
 - **Operación del repartidor:** las URLs de `main/repartidor/urls.py` conectan el PIN, la página, el detalle, la evidencia y los cambios de estado. `ActualizarEstadoForm` en `forms.py` valida fotos. Las vistas limitan las consultas al usuario asociado al perfil y al pedido asignado.
 - **Seguimiento:** `main/clienteFinal/views.py` consulta Pedido e HistorialEstado por el código y renderiza `templates/clienteFinal/seguimiento.html`.
-- **Navegación global:** `Backend/templates/base.html` presenta enlaces según autenticación y rol. `config/urls.py` monta las rutas de las apps.
+- **Navegación global:** `Backend/templates/base.html` presenta enlaces según autenticación y rol. `main.homePage.views.rootHandler` dirige las sesiones activas a su panel y deriva las visitas anónimas a la vista pública de `main.clienteFinal`. `config/urls.py` monta las rutas de las apps y las vistas de autenticación Django.
 
 ## Modelo relacional
 
@@ -47,13 +47,15 @@ Las migraciones de `Backend/main/repartidor/migrations/` incorporan las relacion
 
 ## Recorrido de pruebas
 
-Desde `Backend/`, ejecutá `python manage.py test` para las 64 pruebas. `main.operario.tests` verifica alta, permisos, panel y asignación; `main.repartidor.tests` cubre PIN, aislamiento, cambios de estado, disponibilidad y fotos; `main.clienteFinal.tests` cubre búsqueda e historial público; `main.homePage.tests` comprueba el enrutamiento inicial. La guía tiene comandos por aplicación y comprobaciones de configuración y migraciones.
+Desde `Backend/`, ejecutá `python manage.py test` para la suite. `main.operario.tests` verifica alta, permisos, panel y asignación; `main.repartidor.tests` cubre PIN, aislamiento, cambios de estado, disponibilidad y fotos; `main.clienteFinal.tests` cubre búsqueda e historial público; `main.homePage.tests` comprueba la entrada pública, las redirecciones por rol, la navegación y el acceso a Django Admin.
 
-## Qué cambió en esta revisión
+## Estado del rediseño de navegación
 
-La aplicación tenía pedidos y varias vistas, pero la navegación no conectaba con claridad el inicio, el panel del operario y el público; faltaba un enlace claro desde el panel hacia pedidos y no había una UI del operario para la asignación que el equipo eligió. Ahora hay panel, detalles, asignación manual y acceso directo desde menús por rol. El repartidor conserva las transiciones existentes y gana un detalle/historial por pedido, protección de evidencia y validación de archivos. La búsqueda pública ofrece una entrada accesible y conserva consultas persistidas.
+La entrada anónima `/` presenta el seguimiento público y las opciones de autenticación para operario y repartidor. Las sesiones `is_staff` y las asociadas a un perfil de repartidor activo se dirigen a sus respectivos paneles, evitando que el inicio de sesión vuelva al selector público. La navegación compartida se filtra por rol y es colapsable en pantallas estrechas.
 
-La navegación y pantallas principales se inspeccionaron en el navegador local. La suite automatizada pasó; no se hizo un recorrido visual autenticado completo con creación de pedido, asignación y carga de fotos. Ver los resultados vigentes en [`CURRENT_STATE.md`](CURRENT_STATE.md).
+El operario conserva una sola acción principal de alta, el listado con estados y detalles, la asignación manual y el acceso a Django Admin. El repartidor conserva la disponibilidad, la aceptación/rechazo, las transiciones, fotografías, el historial de sus pedidos y el aislamiento por propietario. Django Admin mantiene el control estándar de Django basado en cuenta activa, `is_staff` y permisos de modelo.
+
+La entrada pública y el panel del operario se inspeccionaron en un navegador local con viewport estrecho; no se inspeccionaron visualmente sesiones de repartidor autenticadas ni escritorio amplio. Las pruebas y límites vigentes están en [`CURRENT_STATE.md`](CURRENT_STATE.md).
 
 ## Para seguir aprendiendo
 

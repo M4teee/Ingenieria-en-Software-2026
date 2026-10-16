@@ -6,7 +6,7 @@
 <p><a href="{% url 'repartidor' %}">Volver al panel</a></p>
 <div class="page-heading">
     <h1 class="h2">Pedido {{ pedido.codigo }}</h1>
-    <p>Estado: <strong>{{ pedido.get_estado_display }}</strong></p>
+    <p>Estado: <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></p>
 </div>
 
 <section class="card shadow-sm mb-4" aria-labelledby="detalle-heading">

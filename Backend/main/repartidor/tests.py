@@ -454,6 +454,24 @@ class DetalleRepartidorTests(TestCase):
 
         self.assertRedirects(response, reverse('repartidor'))
 
+    def test_no_puede_modificar_pedido_asignado_a_otro_repartidor(self):
+        pedido_ajeno = Pedido.objects.create(
+            codigo='AJENO-01',
+            repartidor=self.otro_repartidor,
+            estado='en_viaje',
+        )
+        self.client.force_login(self.repartidor)
+
+        response = self.client.post(
+            reverse('actualizar_estado', args=[pedido_ajeno.pk]),
+            {'estado': 'entregado'},
+        )
+
+        pedido_ajeno.refresh_from_db()
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(pedido_ajeno.estado, 'en_viaje')
+        self.assertFalse(HistorialEstado.objects.filter(pedido=pedido_ajeno).exists())
+
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class FotografiasEntregaTests(TestCase):

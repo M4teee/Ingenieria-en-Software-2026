@@ -6,7 +6,7 @@
 <p><a href="{% url 'operario:inicio' %}">Volver a pedidos en curso</a></p>
 <div class="page-heading">
     <h1 class="h2">Pedido {{ pedido.codigo }}</h1>
-    <p>Estado actual: <strong>{{ pedido.get_estado_display }}</strong></p>
+    <p>Estado actual: <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></p>
 </div>
 
 {% if messages %}
