@@ -1,6 +1,6 @@
 # Estado actual
 
-Actualizado: 2026-10-15. Estado contrastado en la integración local de `origin/main` con `hu18-repartidor`; la disponibilidad y el acceso por PIN dependen de integrar primero `feature/repartidor-disponibilidad`.
+Actualizado: 2026-10-15. Estado contrastado en la integración local de `origin/main`, `feature/repartidor-disponibilidad` y `hu18-repartidor`. Para integrar en `main`, disponibilidad debe entrar antes que HU 18.
 
 ## Implementación observada
 
@@ -10,7 +10,7 @@ Actualizado: 2026-10-15. Estado contrastado en la integración local de `origin/
 - La migración `0004` incorpora el perfil `Repartidor` (PIN de cuatro dígitos y disponibilidad); `0005` agrega fechas de asignación y aceptación. La misma migración `0004` está duplicada de forma idéntica en las ramas HU 18 y disponibilidad para poder integrar disponibilidad primero sin recrear el perfil.
 - El nuevo pedido queda `registrado`, sin repartidor, con código alfanumérico de 20 caracteres generado con `secrets`; su primera fila `HistorialEstado` se crea en la misma transacción e identifica al operario. Los estados conservan el avance del repartidor y agregan cancelación antes del retiro. El historial ordena por fecha y clave primaria.
 - `main.clienteFinal` consulta pedidos e historial persistidos en `/clienteFinal/seguimiento/<codigo>/`. Es una consulta pública GET; muestra estado, comercio, estimación solo durante `en_viaje` y fechas del historial, sin exponer contacto, especificaciones, operador ni fotografías.
-- `main.repartidor` conserva la vista autenticada para avanzar pedidos asignados, adjuntar fotos al retirar o entregar y registrar incidencias. HU 18 añade aceptar/rechazar asignaciones con vencimiento de cinco minutos, usando `Pedido`, `HistorialEstado` y el perfil `Repartidor`; no introduce modelos paralelos `HistorialPedido` o `RepartidorPerfil`. La aceptación detiene el temporizador y habilita el flujo existente de retiro, dejando el estado en `asignado` hasta que el repartidor marque `retirado`. El rechazo/timeout libera el pedido a `registrado` y registra el evento en `HistorialEstado`. La comprobación del vencimiento es perezosa: sucede al cargar la pantalla o responder a la solicitud, no mediante una tarea en segundo plano.
+- `main.repartidor` conserva la vista autenticada para avanzar pedidos asignados, adjuntar fotos al retirar o entregar y registrar incidencias. La escritura de estados e historial es transaccional. `feature/repartidor-disponibilidad` agrega el perfil `Repartidor`, acceso por PIN de cuatro dígitos en `/repartidor/login-pin/` y cambio autenticado de disponibilidad por POST. HU 18 agrega aceptar/rechazar asignaciones con vencimiento de cinco minutos usando `Pedido`, `HistorialEstado` y el mismo perfil; no duplica modelos de pedido, perfil o historial. La aceptación detiene el temporizador y habilita el retiro, dejando el estado en `asignado` hasta que el repartidor marque `retirado`. Rechazo/timeout libera el pedido a `registrado` y registra el evento en `HistorialEstado`. La expiración se procesa al cargar la pantalla o responder a la solicitud, no mediante tarea en segundo plano. No hay una interfaz de operario para asignar pedidos.
 - `main.users` extiende `AbstractUser` y asocia opcionalmente un vehículo. `main.homePage` enruta superusuarios al admin, personal `is_staff` a la carga y otros usuarios a la interfaz del repartidor. `Frontend/front` sigue siendo un marcador de posición; las páginas están en plantillas Django.
 
 ## Compatibilidad y límites
@@ -28,8 +28,7 @@ En la instalación `.venv` creada desde cero con Python 3.14.8 y los paquetes de
 - `python manage.py check`: aprobado, sin incidencias.
 - `python manage.py makemigrations --check --dry-run`: aprobado, no hay cambios de modelo pendientes.
 - `migrate` seguido de `migrate --check`: aprobado con SQLite en memoria; el archivo SQLite predeterminado dentro del worktree no pudo abrirse en este entorno.
-- `python manage.py migrate`: aplicó correctamente la migración de orden `0003` sobre la base local; `migrate --check` confirmó que no quedan migraciones pendientes.
-- `python manage.py test`: aprobadas 38 pruebas en la integración local de HU 18.
+- `python manage.py test`: aprobadas 43 pruebas en la integración local de HU 18 y disponibilidad.
 - `python -m pip check`: aprobado; no se detectaron dependencias rotas.
 - `python3 scripts/check_docs.py .`: aprobado, 35 enlaces Markdown locales comprobados; `git diff --check` sin errores.
 - Inspección visual local: recorrido de inicio de sesión, formulario, alta, confirmación, copiado al portapapeles y consulta pública completado. Los fixtures de navegador fueron retirados al terminar.

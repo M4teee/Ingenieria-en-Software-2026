@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import Repartidor
 
-# Register your models here.
+@admin.register(Repartidor)
+class RepartidorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'pin', 'disponible')
+    search_fields = ('user__username', 'pin')

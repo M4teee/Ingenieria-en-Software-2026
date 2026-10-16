@@ -12,10 +12,25 @@
     {% endfor %}
 {% endif %}
 
-<p>Disponibilidad:
-    {% if disponible %}<span class="badge bg-success">Disponible</span>
-    {% else %}<span class="badge bg-secondary">No disponible</span>{% endif %}
-</p>
+{% if perfil_repartidor %}
+    <section class="card mb-4" aria-labelledby="disponibilidad-heading">
+        <div class="card-body">
+            <h2 id="disponibilidad-heading" class="h5">Disponibilidad</h2>
+            <p>Estado actual:
+                {% if disponible %}<span class="badge bg-success">Disponible</span>
+                {% else %}<span class="badge bg-secondary">No disponible</span>{% endif %}
+            </p>
+            <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}">
+                {% csrf_token %}
+                {% if perfil_repartidor.disponible %}
+                    <button type="submit" class="btn btn-app-outline">Marcarme no disponible</button>
+                {% else %}
+                    <button type="submit" class="btn btn-app">Marcarme disponible</button>
+                {% endif %}
+            </form>
+        </div>
+    </section>
+{% endif %}
 
 {% if expirado %}
     <div class="alert alert-warning" role="alert">

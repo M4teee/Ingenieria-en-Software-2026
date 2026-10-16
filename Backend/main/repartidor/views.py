@@ -6,6 +6,7 @@ from io import BytesIO
 from PIL import Image
 
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -43,12 +44,25 @@ def _liberar_pedido(pedido, usuario, incidencia):
     )
 
 
-@login_required
+def login_pin(req):
+    if req.method == 'POST':
+        pin = req.POST.get('pin', '').strip()
+        repartidor = Repartidor.objects.filter(pin=pin).select_related('user').first()
+        if repartidor is None:
+            return render(req, 'repartidor/login_pin.html', {
+                'error': 'PIN incorrecto. Verifique los dígitos',
+            })
+        login(req, repartidor.user)
+        return redirect('repartidor')
+    return render(req, 'repartidor/login_pin.html', {})
+
+
+@login_required(login_url='repartidor_login_pin')
 def home(req):
     if req.user.is_superuser:
         return redirect('admin:index')
 
-    perfil = Repartidor.objects.filter(user=req.user).first()
+    repartidor = Repartidor.objects.filter(user=req.user).first()
     asignado = Pedido.objects.filter(
         repartidor=req.user,
         estado='asignado',
@@ -68,9 +82,9 @@ def home(req):
                     req.user,
                     'Desasignado por expiración del tiempo de espera (5 minutos)',
                 )
-                if perfil:
-                    perfil.disponible = False
-                    perfil.save(update_fields=['disponible'])
+                if repartidor:
+                    repartidor.disponible = False
+                    repartidor.save(update_fields=['disponible'])
         expirado = True
 
     pedido_activo = Pedido.objects.filter(
@@ -91,12 +105,13 @@ def home(req):
                 )) if asignado and not expirado else None
             ),
             'expirado': expirado,
-            'disponible': bool(perfil and perfil.disponible and req.user.disponible),
+            'perfil_repartidor': repartidor,
+            'disponible': bool(repartidor and repartidor.disponible and req.user.disponible),
         }
     )
 
 
-@login_required
+@login_required(login_url='repartidor_login_pin')
 @require_POST
 @transaction.atomic
 def aceptar(req, pedido_id):
@@ -134,7 +149,7 @@ def aceptar(req, pedido_id):
     return redirect('repartidor')
 
 
-@login_required
+@login_required(login_url='repartidor_login_pin')
 @require_POST
 @transaction.atomic
 def rechazar(req, pedido_id):
@@ -158,6 +173,31 @@ def rechazar(req, pedido_id):
         perfil.disponible = False
         perfil.save(update_fields=['disponible'])
     messages.info(req, 'El pedido se liberó para reasignación.')
+    return redirect('repartidor')
+
+
+@login_required(login_url='repartidor_login_pin')
+@require_POST
+def toggle_disponibilidad(req):
+    repartidor = Repartidor.objects.filter(user=req.user).first()
+    if repartidor is None:
+        messages.error(req, 'No se encontró tu perfil de repartidor.')
+        return redirect('repartidor')
+
+    tiene_pedido_activo = Pedido.objects.filter(
+        repartidor=req.user,
+        estado__in=['asignado', 'retirado', 'en_viaje'],
+    ).exists()
+    if not repartidor.disponible and tiene_pedido_activo:
+        messages.error(req, 'No podés marcarte disponible mientras tengas una entrega activa.')
+        return redirect('repartidor')
+
+    repartidor.disponible = not repartidor.disponible
+    repartidor.save(update_fields=['disponible'])
+    messages.success(
+        req,
+        'Ahora estás Disponible.' if repartidor.disponible else 'Ahora estás No disponible.',
+    )
     return redirect('repartidor')
 
 
