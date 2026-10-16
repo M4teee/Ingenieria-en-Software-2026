@@ -12,10 +12,17 @@ Los pasos describen las interfaces presentes en la aplicación local. Para insta
 
 El rol administrativo mantiene los datos de configuración. Para operar pedidos, usá las interfaces siguientes en vez de editar el modelo directamente desde el admin.
 
+## Cliente final
+
+1. Abrí `/`. También podés usar `/clienteFinal/` para la misma consulta pública.
+2. Escribí el código de seguimiento que te compartió el comercio y elegí **Consultar pedido**.
+3. Un código válido abre el estado y el historial persistidos. No necesitás una cuenta.
+4. Desde la parte superior podés elegir el ingreso de operario o repartidor; el cliente no tiene herramientas operativas.
+
 ## Operario
 
-1. Iniciá sesión como usuario `is_staff`; la raíz `/` abre el panel de operario. También podés ir a `/operario/`.
-2. El panel lista pedidos registrados, asignados, retirados y en viaje, con estado actualizado periódicamente. Abrí **Cargar pedido** o `/operario/pedidos/nuevo/`.
+1. En `/`, elegí **Iniciar sesión como operario** e ingresá con una cuenta activa `is_staff`. Al completar el acceso, se abre `/operario/`. También podés navegar directamente a esa ruta.
+2. El panel lista pedidos registrados, asignados, retirados y en viaje, con estado actualizado periódicamente. Usá la única acción principal **Cargar pedido** o `/operario/pedidos/nuevo/`.
 3. Seleccioná un comercio activo y completá dirección de destino, especificaciones de traslado y fecha/hora estimadas. Los campos requeridos se validan en el servidor.
 4. Presioná **Registrar Pedido**. La pantalla de confirmación presenta el mensaje de éxito y el código de seguimiento, que se puede copiar. El pedido nace como `Registrado`, sin repartidor, y su historial recibe el evento inicial.
 5. En el detalle del pedido, elegí un repartidor activo y disponible y presioná **Asignar pedido**. El sistema comprueba nuevamente la disponibilidad y registra el evento de asignación. El pedido queda `Asignado` y el repartidor tiene cinco minutos para aceptar o rechazarlo desde su panel.
@@ -33,15 +40,11 @@ La asignación manual es un puente provisional elegido por el equipo. Las HU 22 
 
 Las transiciones no permitidas se rechazan. El pedido finalizado aparece en la lista de pedidos cerrados y deja de ser una entrega activa.
 
-## Cliente
-
-1. Abrí `/clienteFinal/` y escribí el código de seguimiento mostrado al operario.
-2. Enviá la búsqueda. Un código existente abre el estado actual, el comercio y la cronología persistida. Un código inexistente mantiene el formulario con un mensaje de error.
-3. La estimación de entrega solo se muestra cuando el estado es `En viaje`, según el criterio de HU 24. La consulta es pública y de solo lectura; no presenta contacto del comercio, especificaciones internas, nombres de usuarios ni fotografías.
-
 ## Administrador
 
-Django Admin está en `/admin/` y sirve para mantener usuarios, comercios y perfiles de repartidor. No equivale al panel operativo: el registro, la asignación y la consulta de pedidos se realizan en las pantallas de la aplicación. El acceso a la administración requiere una cuenta con permisos de staff.
+Django Admin está en `/admin/` y sirve para mantener usuarios, comercios y perfiles de repartidor. El enlace se muestra en la navegación del operario. El backend conserva los controles de Django: se requiere una cuenta activa con `is_staff` y permisos para las operaciones sobre cada modelo. No se otorgan permisos al iniciar sesión.
+
+Al cerrar sesión, Django vuelve a `/`. Una persona operaria o repartidora con sesión activa que abre `/` es dirigida a su panel; una sesión inválida no recibe acceso a rutas protegidas.
 
 ## Pruebas negativas y permisos
 

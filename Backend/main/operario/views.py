@@ -61,6 +61,7 @@ def estado_pedidos(request):
             'comercio': pedido.comercio.nombre if pedido.comercio else 'Sin comercio',
             'destino': pedido.direccion_destino or 'Sin destino',
             'estado': pedido.get_estado_display(),
+            'estado_id': pedido.estado,
             'repartidor': (
                 pedido.repartidor.get_full_name() or pedido.repartidor.username
                 if pedido.repartidor else 'Sin asignar'

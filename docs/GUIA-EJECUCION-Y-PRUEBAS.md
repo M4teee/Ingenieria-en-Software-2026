@@ -79,9 +79,17 @@ git diff --check
 
 ### Resultados de esta revisión
 
-Con Python 3.14 y las dependencias de `requirements.txt`, desde `Backend/` se ejecutaron: `manage.py check` (aprobado), `manage.py test` (64 pruebas aprobadas), `makemigrations --check --dry-run` (sin cambios pendientes), `migrate --check` (aprobado) y `pip check` (sin dependencias rotas). Desde la raíz, `python3 scripts/check_docs.py .` verificó 35 enlaces y `git diff --check` no informó errores. La suite usa una base temporal y no borra la base local.
+Con Python 3.14.8 y las dependencias de `requirements.txt`, desde `Backend/` se ejecutaron en la revisión del rediseño: `../.venv/bin/python manage.py check` (aprobado) y `../.venv/bin/python manage.py test` (70 pruebas aprobadas). Desde la raíz, `python3 scripts/check_docs.py .` verificó 42 enlaces y `git diff --check` pasó. La revisión previa había aprobado además `makemigrations --check --dry-run`, `migrate --check` y `pip check`. La suite usa una base temporal y no borra la base local.
 
-La aplicación se abrió en un navegador local y se comprobó visualmente el panel autenticado de operario y sus enlaces. No se cargaron ni modificaron datos durante esa inspección. Los flujos con creación de datos se cubren con pruebas del cliente Django; no se hizo una comprobación visual autenticada de alta, asignación, subida de archivos ni portapapeles en esta revisión. Windows no se probó.
+La aplicación se abrió en un navegador local y se inspeccionaron visualmente la entrada pública y el panel de operario en un viewport estrecho, sin escribir datos. No se realizó una inspección visual autenticada del módulo del repartidor ni de escritorio amplio. El Django Test Client comprobó el acceso a la raíz, las redirecciones por rol, la navegación sin enlaces cruzados, el acceso protegido a Django Admin y las pruebas existentes de propiedad de pedidos y operaciones. Windows no se probó.
+
+### Escenarios de navegación y permisos
+
+- Persona anónima: `/` muestra la búsqueda pública y los accesos diferenciados a `/login/?next=/operario/` y `/repartidor/login-pin/`.
+- Cuenta activa `is_staff`: el login redirige al panel `/operario/`; abrir `/` desde una sesión activa también lleva al panel.
+- Cuenta con perfil activo de repartidor: el PIN inicia sesión y `/` lleva a `/repartidor/`.
+- Un usuario sin `is_staff` no obtiene acceso a Django Admin. Un operario autorizado mantiene el acceso sin requerir que se lo convierta en superusuario.
+- La navegación pública no muestra herramientas operativas; la del repartidor no ofrece seguimiento ni acciones de operario; el panel de operario mantiene una sola acción principal para cargar pedidos.
 
 ## Limitaciones conocidas
 

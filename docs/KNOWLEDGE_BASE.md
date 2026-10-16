@@ -16,6 +16,6 @@ Síntesis para orientación. Los documentos originales y la implementación tien
 - No se encontró la consigna general ni presentaciones de la cátedra en la carpeta de contexto.
 - El frontend, la base de datos compartida y el despliegue siguen sin decisión registrada.
 - La Entrevista 02 describe PC web o escritorio para el operario y web móvil para el repartidor; la tecnología/plataforma objetivo elegida por el equipo sigue pendiente.
-- La asignación de pedidos no dispone de una pantalla, aunque el modelo ya admite pedidos sin repartidor al registrarse y conserva la relación al asignar. El sistema tampoco garantiza historial inmutable ni operación sin conexión; esos requisitos requieren trabajo posterior.
+- El panel del operario dispone de asignación manual provisional a repartidores activos y disponibles. Las HU 22/30 de asignación automática y cercanía siguen pendientes. El sistema tampoco garantiza historial inmutable ni operación sin conexión; esos requisitos requieren trabajo posterior.
 - La Entrevista 02 enumera siete estados y el PGP lista cuatro en su sección de definiciones; el modelo actual contempla siete según la entrevista y HU 12, pero el alcance de operaciones todavía incompletas debe confirmarse con el equipo.
 - Estimaciones, responsables y alcance comprometido de cada sprint.

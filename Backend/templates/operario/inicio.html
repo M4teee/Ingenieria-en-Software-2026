@@ -17,12 +17,12 @@
     {% endfor %}
 {% endif %}
 
-<section class="card shadow-sm mb-4" aria-labelledby="pedidos-heading">
-    <div class="card-body">
+<section class="app-section mb-4" aria-labelledby="pedidos-heading">
+    <div class="app-section-body">
         <h2 id="pedidos-heading" class="h5">Pedidos registrados y en reparto</h2>
         {% if pedidos %}
             <div class="table-responsive">
-                <table class="table align-middle" id="pedidos-en-curso" data-status-url="{% url 'operario:estado_pedidos' %}">
+                <table class="table app-table align-middle" id="pedidos-en-curso" data-status-url="{% url 'operario:estado_pedidos' %}">
                     <thead>
                         <tr>
                             <th scope="col">Código</th>
@@ -40,7 +40,7 @@
                                 <td>{{ pedido.codigo }}</td>
                                 <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
                                 <td>{{ pedido.direccion_destino|default:"Sin destino" }}</td>
-                                <td>{{ pedido.get_estado_display }}</td>
+                                <td><span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></td>
                                 <td>{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}Sin asignar{% endif %}</td>
                                 <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
                                 <td><a class="btn btn-sm btn-app-outline" href="{% url 'operario:detalle_pedido' pedido.pk %}">Ver detalle</a></td>
@@ -55,18 +55,6 @@
     </div>
 </section>
 
-<section class="card shadow-sm" aria-labelledby="administracion-heading">
-    <div class="card-body">
-        <h2 id="administracion-heading" class="h5">Datos de configuración</h2>
-        <p class="text-secondary">El panel administrativo se usa para mantener comercios, usuarios y perfiles de repartidor. Las tareas de pedidos se gestionan desde esta aplicación.</p>
-        <div class="d-flex flex-wrap gap-2">
-            <a class="btn btn-sm btn-app-outline" href="{% url 'admin:operario_comercio_changelist' %}">Comercios</a>
-            <a class="btn btn-sm btn-app-outline" href="{% url 'admin:repartidor_repartidor_changelist' %}">Perfiles de repartidor</a>
-            <a class="btn btn-sm btn-app-outline" href="{% url 'admin:users_user_changelist' %}">Usuarios</a>
-            <a class="btn btn-sm btn-app-outline" href="{% url 'admin:index' %}">Abrir Django Admin</a>
-        </div>
-    </div>
-</section>
 {% endblock %}
 
 {% block extrascript %}
@@ -104,7 +92,11 @@
                 celda(fila, pedido.codigo);
                 celda(fila, pedido.comercio);
                 celda(fila, pedido.destino);
-                celda(fila, pedido.estado);
+                const estado = celda(fila, '');
+                const etiquetaEstado = document.createElement('span');
+                etiquetaEstado.className = `status-badge status-${pedido.estado_id}`;
+                etiquetaEstado.textContent = pedido.estado;
+                estado.appendChild(etiquetaEstado);
                 celda(fila, pedido.repartidor);
                 celda(fila, pedido.creado);
                 const accion = celda(fila, '');

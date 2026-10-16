@@ -9,7 +9,7 @@
 
             <p class="text-secondary mb-1">Estado</p>
             <p>
-                <span class="badge fs-5 text-bg-{{ estado_clase }}">{{ estado }}</span>
+                <span class="status-badge status-{{ estado_clase }} fs-6">{{ estado }}</span>
             </p>
 
             <p class="text-secondary mb-1">Enviado por</p>
@@ -28,7 +28,7 @@
             <ul class="list-unstyled mb-0">
                 {% for paso in historial %}
                     <li class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge text-bg-{{ paso.clase }}">{{ paso.etiqueta }}</span>
+                        <span class="status-badge status-{{ paso.clase }}">{{ paso.etiqueta }}</span>
                         <span class="text-secondary small">{{ paso.fecha|date:"d/m/Y H:i" }}</span>
                     </li>
                 {% endfor %}
