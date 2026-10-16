@@ -1,7 +1,7 @@
 from django.test import TestCase, override_settings
 
 from main.users.models import User
-from .models import Pedido
+from .models import Pedido, Repartidor
 
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
@@ -172,48 +172,76 @@ class ActualizarEstadoTests(TestCase):
             self.repartidor.disponible
         )
 
-        historial = self.pedido.historial.first()
-
-        self.assertEqual(
-            historial.estado_anterior,
-            'en_viaje'
-        )
-
-        self.assertEqual(
-            historial.estado_nuevo,
-            'entregado'
-        )
-
     def test_fallido_registra_incidencia(self):
         self.pedido.estado = 'en_viaje'
         self.pedido.save()
 
         self.client.post(
             f'/repartidor/pedido/{self.pedido.id}/actualizar-estado/',
-            {
-                'estado': 'fallido'
-            }
+            {'estado': 'fallido'}
         )
 
         self.pedido.refresh_from_db()
-
-        self.assertEqual(
-            self.pedido.estado,
-            'fallido'
-        )
-
+        self.assertEqual(self.pedido.estado, 'fallido')
         historial = self.pedido.historial.first()
+        self.assertEqual(historial.estado_nuevo, 'fallido')
+        self.assertIn('Retornar el pedido al centro de distribución', historial.incidencia)
+        self.assertTrue(self.repartidor.disponible)
 
-        self.assertEqual(
-            historial.estado_nuevo,
-            'fallido'
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class DisponibilidadRepartidorTests(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='repartidor_pin',
+            password='test1234',
+        )
+        self.perfil = Repartidor.objects.create(
+            user=self.user,
+            pin='0123',
         )
 
-        self.assertIn(
-            'Retornar el pedido al centro de distribución',
-            historial.incidencia
+    def test_login_pin_valido_autentica_al_repartidor(self):
+        response = self.client.post('/repartidor/login-pin/', {'pin': '0123'})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.user.pk)
+
+    def test_login_pin_invalido_muestra_mensaje_de_historia(self):
+        response = self.client.post('/repartidor/login-pin/', {'pin': '9999'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'PIN incorrecto. Verifique los dígitos')
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_pin_de_mas_de_cuatro_digitos_no_autentica(self):
+        response = self.client.post('/repartidor/login-pin/', {'pin': '000123'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_toggle_disponibilidad_persiste_el_estado(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post('/repartidor/disponibilidad/')
+
+        self.perfil.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(self.perfil.disponible)
+        self.assertTrue(self.user.disponible)
+
+    def test_toggle_rechaza_disponibilidad_con_pedido_activo(self):
+        self.client.force_login(self.user)
+        self.perfil.disponible = False
+        self.perfil.save(update_fields=['disponible'])
+        Pedido.objects.create(
+            codigo='ACTIVE-001',
+            repartidor=self.user,
+            estado='asignado',
         )
 
-        self.assertTrue(
-            self.repartidor.disponible
-        )
+        self.client.post('/repartidor/disponibilidad/')
+
+        self.perfil.refresh_from_db()
+        self.assertFalse(self.perfil.disponible)

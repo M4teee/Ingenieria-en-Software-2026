@@ -9,7 +9,7 @@ Actualizado: 2026-10-15. Estado observado en la rama `feature/hu-12-cargar-pedid
 - `main.repartidor.Pedido` persiste el comercio, código, dirección, especificaciones, fecha estimada, estado, repartidor opcional y clave de idempotencia. Los campos de alta son opcionales en la base para conservar filas previas; el formulario de altas los exige. La migración `0002` agrega los campos y estados sin eliminar los pedidos anteriores.
 - El nuevo pedido queda `registrado`, sin repartidor, con código alfanumérico de 20 caracteres generado con `secrets`; su primera fila `HistorialEstado` se crea en la misma transacción e identifica al operario. Los estados conservan el avance del repartidor y agregan cancelación antes del retiro. El historial ordena por fecha y clave primaria.
 - `main.clienteFinal` consulta pedidos e historial persistidos en `/clienteFinal/seguimiento/<codigo>/`. Es una consulta pública GET; muestra estado, comercio, estimación solo durante `en_viaje` y fechas del historial, sin exponer contacto, especificaciones, operador ni fotografías.
-- `main.repartidor` conserva la vista autenticada para que el repartidor avance pedidos asignados, adjunte fotos al retirar o entregar y registre incidencias. La escritura del estado y del historial ahora es transaccional. No se encontró una interfaz para que el operario asigne pedidos; el modelo permite la relación, pero el flujo de asignación es trabajo pendiente.
+- `main.repartidor` conserva la vista autenticada para que el repartidor avance pedidos asignados, adjunte fotos al retirar o entregar y registre incidencias. La escritura del estado y del historial ahora es transaccional. La rama añade el perfil `Repartidor`, acceso por PIN de cuatro dígitos en `/repartidor/login-pin/` y cambio autenticado de disponibilidad por POST; la disponibilidad declarada no puede sobrescribir la existencia de una entrega activa. No se encontró una interfaz para que el operario asigne pedidos.
 - `main.users` extiende `AbstractUser` y asocia opcionalmente un vehículo. `main.homePage` enruta superusuarios al admin, personal `is_staff` a la carga y otros usuarios a la interfaz del repartidor. `Frontend/front` sigue siendo un marcador de posición; las páginas están en plantillas Django.
 
 ## Compatibilidad y límites
@@ -26,8 +26,8 @@ En la instalación `.venv` creada desde cero con Python 3.14.8 y los paquetes de
 
 - `python manage.py check`: aprobado, sin incidencias.
 - `python manage.py makemigrations --check --dry-run`: aprobado, no hay cambios de modelo pendientes.
-- `python manage.py migrate`: aplicó correctamente la migración de orden `0003` sobre la base local; `migrate --check` confirmó que no quedan migraciones pendientes.
-- `python manage.py test`: aprobadas las 30 pruebas del proyecto.
+- `migrate` seguido de `migrate --check`: aprobado con SQLite en memoria; el archivo SQLite predeterminado dentro del worktree no pudo abrirse en este entorno.
+- `python manage.py test`: aprobadas 35 pruebas en esta integración.
 - `python -m pip check`: aprobado; no se detectaron dependencias rotas.
 - `python3 scripts/check_docs.py .`: aprobado, 35 enlaces Markdown locales comprobados; `git diff --check` sin errores.
 - Inspección visual local: recorrido de inicio de sesión, formulario, alta, confirmación, copiado al portapapeles y consulta pública completado. Los fixtures de navegador fueron retirados al terminar.

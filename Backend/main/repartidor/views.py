@@ -5,13 +5,27 @@ from io import BytesIO
 from PIL import Image
 
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
-from .models import Pedido, HistorialEstado
+from .models import HistorialEstado, Pedido, Repartidor
+
+
+def login_pin(req):
+    if req.method == 'POST':
+        pin = req.POST.get('pin', '').strip()
+        repartidor = Repartidor.objects.filter(pin=pin).select_related('user').first()
+        if repartidor is None:
+            return render(req, 'repartidor/login_pin.html', {
+                'error': 'PIN incorrecto. Verifique los dígitos',
+            })
+        login(req, repartidor.user)
+        return redirect('repartidor')
+    return render(req, 'repartidor/login_pin.html', {})
 
 
 @login_required
@@ -24,11 +38,44 @@ def home(req):
         estado__in=['asignado', 'retirado', 'en_viaje']
     ).first()
 
+    repartidor = Repartidor.objects.filter(user=req.user).first()
+
     return render(
         req,
         'repartidor/index.html',
-        {'pedido_activo': pedido_activo}
+        {
+            'pedido_activo': pedido_activo,
+            'perfil_repartidor': repartidor,
+            'disponible': req.user.disponible and (
+                repartidor.disponible if repartidor else True
+            ),
+        }
     )
+
+
+@login_required(login_url='repartidor_login_pin')
+@require_POST
+def toggle_disponibilidad(req):
+    repartidor = Repartidor.objects.filter(user=req.user).first()
+    if repartidor is None:
+        messages.error(req, 'No se encontró tu perfil de repartidor.')
+        return redirect('repartidor')
+
+    tiene_pedido_activo = Pedido.objects.filter(
+        repartidor=req.user,
+        estado__in=['asignado', 'retirado', 'en_viaje'],
+    ).exists()
+    if not repartidor.disponible and tiene_pedido_activo:
+        messages.error(req, 'No podés marcarte disponible mientras tengas una entrega activa.')
+        return redirect('repartidor')
+
+    repartidor.disponible = not repartidor.disponible
+    repartidor.save(update_fields=['disponible'])
+    messages.success(
+        req,
+        'Ahora estás Disponible.' if repartidor.disponible else 'Ahora estás No disponible.',
+    )
+    return redirect('repartidor')
 
 
 def comprimir_imagen(imagen):
