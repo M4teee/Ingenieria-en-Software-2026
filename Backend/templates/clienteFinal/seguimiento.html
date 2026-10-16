@@ -22,6 +22,17 @@
                     Llega aprox. a las {{ llegada_estimada|time:"H:i" }}
                 </p>
             {% endif %}
+
+            <hr class="my-4">
+            <h2 class="h6 text-secondary mb-3">Historial de estados</h2>
+            <ul class="list-unstyled mb-0">
+                {% for paso in historial %}
+                    <li class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge text-bg-{{ paso.clase }}">{{ paso.etiqueta }}</span>
+                        <span class="text-secondary small">{{ paso.fecha|date:"d/m/Y H:i" }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 {% endblock content %}

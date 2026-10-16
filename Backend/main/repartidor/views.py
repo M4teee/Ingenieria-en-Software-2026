@@ -1,41 +1,56 @@
 # main/repartidor/views.py
 
+from io import BytesIO
+
+from PIL import Image
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.db import transaction
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
-from .models import Repartidor
+from .models import HistorialEstado, Pedido, Repartidor
 
 
 def login_pin(req):
     if req.method == 'POST':
         pin = req.POST.get('pin', '').strip()
-        repartidor = Repartidor.objects.filter(pin=pin).first() if pin else None
+        repartidor = Repartidor.objects.filter(pin=pin).select_related('user').first()
         if repartidor is None:
             return render(req, 'repartidor/login_pin.html', {
-                'error': 'PIN inválido. Verificá el código e intentá de nuevo.',
+                'error': 'PIN incorrecto. Verifique los dígitos',
             })
         login(req, repartidor.user)
         return redirect('repartidor')
     return render(req, 'repartidor/login_pin.html', {})
 
 
-@login_required(login_url='repartidor_login_pin')
+@login_required
 def home(req):
     if req.user.is_superuser:
         return redirect('admin:index')
 
-    repartidor = Repartidor.objects.filter(user=req.user).first()
-    if repartidor is None:
-        return render(req, 'repartidor/index.html', {
-            'sin_perfil': True,
-        })
+    pedido_activo = Pedido.objects.filter(
+        repartidor=req.user,
+        estado__in=['asignado', 'retirado', 'en_viaje']
+    ).first()
 
-    return render(req, 'repartidor/index.html', {
-        'disponible': repartidor.disponible,
-    })
+    repartidor = Repartidor.objects.filter(user=req.user).first()
+
+    return render(
+        req,
+        'repartidor/index.html',
+        {
+            'pedido_activo': pedido_activo,
+            'perfil_repartidor': repartidor,
+            'disponible': req.user.disponible and (
+                repartidor.disponible if repartidor else True
+            ),
+        }
+    )
 
 
 @login_required(login_url='repartidor_login_pin')
@@ -46,12 +61,108 @@ def toggle_disponibilidad(req):
         messages.error(req, 'No se encontró tu perfil de repartidor.')
         return redirect('repartidor')
 
+    tiene_pedido_activo = Pedido.objects.filter(
+        repartidor=req.user,
+        estado__in=['asignado', 'retirado', 'en_viaje'],
+    ).exists()
+    if not repartidor.disponible and tiene_pedido_activo:
+        messages.error(req, 'No podés marcarte disponible mientras tengas una entrega activa.')
+        return redirect('repartidor')
+
     repartidor.disponible = not repartidor.disponible
     repartidor.save(update_fields=['disponible'])
+    messages.success(
+        req,
+        'Ahora estás Disponible.' if repartidor.disponible else 'Ahora estás No disponible.',
+    )
+    return redirect('repartidor')
 
-    if repartidor.disponible:
-        messages.success(req, 'Ahora estás Disponible.')
-    else:
-        messages.success(req, 'Ahora estás No disponible.')
+
+def comprimir_imagen(imagen):
+    img = Image.open(imagen)
+
+    if img.mode not in ('RGB', 'L'):
+        img = img.convert('RGB')
+
+    img.thumbnail((1280, 1280))
+
+    buffer = BytesIO()
+    img.save(
+        buffer,
+        format='JPEG',
+        quality=75,
+        optimize=True
+    )
+    buffer.seek(0)
+
+    nombre = imagen.name.rsplit('.', 1)[0] + '.jpg'
+
+    return InMemoryUploadedFile(
+        buffer,
+        'ImageField',
+        nombre,
+        'image/jpeg',
+        buffer.getbuffer().nbytes,
+        None
+    )
+
+
+@login_required
+@require_POST
+@transaction.atomic
+def actualizar_estado(req, pedido_id):
+    pedido = get_object_or_404(
+        Pedido,
+        id=pedido_id,
+        repartidor=req.user
+    )
+
+    nuevo_estado = req.POST.get('estado')
+
+    if not pedido.puede_cambiar_a(nuevo_estado):
+        messages.error(
+            req,
+            'La transición de estado no está permitida.'
+        )
+        return redirect('repartidor')
+
+    estado_anterior = pedido.estado
+
+    incidencia = ''
+
+    if nuevo_estado == 'fallido':
+        incidencia = (
+            'Destinatario ausente. '
+            'Retornar el pedido al centro de distribución.'
+        )
+
+    fotografia = req.FILES.get('fotografia')
+
+    if fotografia and nuevo_estado not in ['retirado', 'entregado']:
+        messages.error(
+            req,
+            'Solo se pueden adjuntar fotografías al retirar o entregar el pedido.'
+        )
+        return redirect('repartidor')
+
+    if fotografia:
+        fotografia = comprimir_imagen(fotografia)
+
+    HistorialEstado.objects.create(
+        pedido=pedido,
+        estado_anterior=estado_anterior,
+        estado_nuevo=nuevo_estado,
+        usuario=req.user,
+        fotografia=fotografia,
+        incidencia=incidencia
+    )
+
+    pedido.estado = nuevo_estado
+    pedido.save()
+
+    messages.success(
+        req,
+        'Estado de la entrega actualizado correctamente.'
+    )
 
     return redirect('repartidor')

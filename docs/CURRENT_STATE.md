@@ -1,37 +1,44 @@
 # Estado actual
 
-Actualizado: 2026-10-15. Revisión documental del repositorio y de las fuentes académicas versionadas. No se modificó código de la aplicación.
+Actualizado: 2026-10-15. Estado observado en la rama `feature/hu-12-cargar-pedido`; esta página debe contrastarse con Git antes de reutilizarla.
 
 ## Implementación observada
 
-- `Backend/` contiene un proyecto Django 6.1.2. `.python-version` solicita Python 3.14; `requirements.txt` fija Django, `asgiref`, `sqlparse`, `django-crispy-forms` y `crispy-bootstrap5`.
-- La configuración local usa SQLite, `DEBUG=True` y una clave de desarrollo definida en settings. No es una configuración de producción.
-- `main.operario` tiene el modelo `Comercio` y su administración. `main.users` extiende el usuario Django y agrega un vínculo a `Vehiculo`; existen migraciones iniciales.
-- La página de seguimiento acepta códigos de demostración servidos desde `PEDIDOS_SIMULADOS` en memoria. No hay un modelo persistente de pedido ni un flujo de despacho implementado.
-- La vista del repartidor requiere autenticación y renderiza una página básica. La ruta de operario intenta renderizar `hola.html`, que no existe en `Backend/templates/`.
-- `Frontend/front` contiene solo un texto marcador; no hay un frontend separado implementado.
-- Hay pruebas en `main/clienteFinal/tests.py`; las pruebas de otras aplicaciones son archivos vacíos o de plantilla. No se ejecutaron en esta revisión.
+- `Backend/` contiene el backend Django; `.python-version` fija Python 3.14 y `requirements.txt` fija Django 6.1.2 y sus dependencias. La configuración local usa SQLite, `USE_TZ=True` y `America/Argentina/Buenos_Aires`; `DEBUG=True` y la clave en settings son solo de desarrollo.
+- `main.operario` mantiene los comercios, permite altas desde `/operario/pedidos/nuevo/` y limita la carga y confirmación a usuarios autenticados con `is_staff`. El servidor valida que el comercio siga activo. La confirmación muestra el código y ofrece copiarlo.
+- `main.repartidor.Pedido` persiste el comercio, código, dirección, especificaciones, fecha estimada, estado, repartidor opcional y clave de idempotencia. Los campos de alta son opcionales en la base para conservar filas previas; el formulario de altas los exige. La migración `0002` agrega los campos y estados sin eliminar los pedidos anteriores.
+- El nuevo pedido queda `registrado`, sin repartidor, con código alfanumérico de 20 caracteres generado con `secrets`; su primera fila `HistorialEstado` se crea en la misma transacción e identifica al operario. Los estados conservan el avance del repartidor y agregan cancelación antes del retiro. El historial ordena por fecha y clave primaria.
+- `main.clienteFinal` consulta pedidos e historial persistidos en `/clienteFinal/seguimiento/<codigo>/`. Es una consulta pública GET; muestra estado, comercio, estimación solo durante `en_viaje` y fechas del historial, sin exponer contacto, especificaciones, operador ni fotografías.
+- `main.repartidor` conserva la vista autenticada para que el repartidor avance pedidos asignados, adjunte fotos al retirar o entregar y registre incidencias. La escritura del estado y del historial ahora es transaccional. La rama añade el perfil `Repartidor`, acceso por PIN de cuatro dígitos en `/repartidor/login-pin/` y cambio autenticado de disponibilidad por POST; la disponibilidad declarada no puede sobrescribir la existencia de una entrega activa. No se encontró una interfaz para que el operario asigne pedidos.
+- `main.users` extiende `AbstractUser` y asocia opcionalmente un vehículo. `main.homePage` enruta superusuarios al admin, personal `is_staff` a la carga y otros usuarios a la interfaz del repartidor. `Frontend/front` sigue siendo un marcador de posición; las páginas están en plantillas Django.
 
-## Requisitos y planificación
+## Compatibilidad y límites
 
-Las fuentes versionadas describen siete épicas para comercios, pedidos, repartidores, despacho, operación móvil, consulta pública y auditoría. Son alcance planificado, no evidencia de funcionalidad terminada. El PGP organiza entregas entre el 9 de octubre y el 20 de noviembre de 2026; las fechas describen el plan, no el avance real del equipo.
+- La base `Backend/db.sqlite3` no existía antes de las verificaciones del 2026-10-15. La revisión creó el archivo vacío durante `migrate --check`; luego se aplicaron las migraciones. No había pedidos locales preexistentes que migrar. La migración usa campos opcionales/defaults compatibles con filas antiguas, pero la conservación de datos de una base poblada no se ensayó en este entorno.
+- HU 24 y HU 38 estaban representadas por datos simulados antes de este trabajo; ahora consumen el modelo persistido. La confirmación del proyecto describe los requisitos HU 12, HU 24 y HU 38. No se consultó Taiga en vivo.
+- La exportación Taiga versionada contiene 28 historias, 7 épicas y 2 hitos; es una derivación privada/sanitizada y no prueba el estado actual del tablero.
+- Requisitos de fuentes que exceden esta tarea —historial inmutable, operación sin conexión y preparación para producción— no se implementan aquí. Las imágenes del flujo de repartidor usan Pillow y el almacenamiento configurado por Django.
+- `Backend/config/settings.py` referencia `STATICFILES_DIRS = [BASE_DIR / 'static']`; la aplicación incluye estáticos propios y usa CDN externos para Bootstrap, iconos y tipografías en `base.html`.
 
-La exportación Taiga derivada y versionada contiene 28 historias de usuario, 7 épicas y 2 hitos. Se omitieron las cuentas y la actividad del export privado original; no se consultó Taiga en vivo. Un documento previo de esta carpeta indicaba 29 historias; las fuentes disponibles no permiten explicar la diferencia. Confirmar cantidad y estado con el equipo o el tablero cuando corresponda.
+## Verificaciones ejecutadas
 
-`docs/context/` contiene copias de las cinco fuentes Word y una derivación sanitizada del JSON de Taiga. `docs/SOURCE_INDEX.md` identifica formato, alcance y limitaciones; `docs/DOCUMENTATION_WORKFLOW.md` describe la revisión posterior a pull y previa a push. Estos documentos nuevos no alteran la implementación.
+En la instalación `.venv` creada desde cero con Python 3.14.8 y los paquetes de `requirements.txt`:
 
-## Verificaciones de esta revisión
+- `python manage.py check`: aprobado, sin incidencias.
+- `python manage.py makemigrations --check --dry-run`: aprobado, no hay cambios de modelo pendientes.
+- `migrate` seguido de `migrate --check`: aprobado con SQLite en memoria; el archivo SQLite predeterminado dentro del worktree no pudo abrirse en este entorno.
+- `python manage.py test`: aprobadas 35 pruebas en esta integración.
+- `python -m pip check`: aprobado; no se detectaron dependencias rotas.
+- `python3 scripts/check_docs.py .`: aprobado, 35 enlaces Markdown locales comprobados; `git diff --check` sin errores.
+- Inspección visual local: recorrido de inicio de sesión, formulario, alta, confirmación, copiado al portapapeles y consulta pública completado. Los fixtures de navegador fueron retirados al terminar.
+- La instalación de dependencias requirió red. El primer intento quedó limitado por DNS del entorno aislado; la repetición autorizada completó la instalación.
 
-- Project Init 1.0.0 inspeccionó el repositorio: rama `main`, estado limpio antes de esta tarea, stack detectado Python/Django.
-- Project Init 1.0.0 copió las cinco fuentes Word sin sobrescribir documentos existentes y generó `scripts/check_docs.py` y `docs/DOCUMENTATION_WORKFLOW.md`. La exportación Taiga se sanitizó con el script versionado del proyecto y se verificó el recuento 7/28/2.
-- `python3.14 -m django --version` no pudo ejecutarse: el intérprete disponible no tiene Django instalado. No se instalaron dependencias en el proyecto ni se ejecutaron `manage.py check` o las pruebas.
-- Antes de editar se guardaron hashes de los 81 archivos rastreados. Después de documentar, los 71 archivos de código, recursos, dependencias y runtime comparados mantienen el mismo hash; los cambios restantes son documentación, `.gitignore` y el `CLAUDE.md` generado.
+Los resultados definitivos y los comandos reproducibles están en [`GUIA-EJECUCION-Y-PRUEBAS.md`](GUIA-EJECUCION-Y-PRUEBAS.md). El recorrido por componentes está en [`TOUR-APLICACION.md`](TOUR-APLICACION.md).
 
-## Pendientes
+## Pendientes conocidos
 
-- Confirmar historias y estado real con el tablero Taiga.
-- Definir la interfaz frontend, la base de datos compartida y el despliegue.
-- Completar el modelo y los flujos de pedidos según los requisitos aprobados.
-- Resolver la plantilla faltante de la ruta de operario.
-- Instalar las dependencias en un entorno de desarrollo del proyecto y ejecutar `manage.py check` y las pruebas existentes.
-- Revisar claves, `DEBUG`, hosts, HTTPS y almacenamiento antes de cualquier uso de producción.
+- No hay pantalla de asignación de pedidos; solo existe el flujo de avance del repartidor una vez asignado.
+- La interacción visual se comprobó en el navegador integrado y el copiado real funcionó; no se validó Windows.
+- No se ensayó una migración con pedidos heredados reales ni una instalación Windows.
+- Confirmar con el equipo el alcance y prioridad vigentes de las historias en Taiga; no se consultó el tablero en vivo.
+- Configurar secretos, hosts, HTTPS, base compartida y almacenamiento antes de cualquier despliegue. Django está configurado para desarrollo.

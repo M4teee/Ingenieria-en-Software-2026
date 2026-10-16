@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido registrado{% endblock %}
+
+{% block content %}
+    <div class="card shadow-sm mx-auto p-4" style="max-width: 38rem;">
+        <div class="alert alert-success" role="status">
+            Pedido registrado con éxito
+        </div>
+
+        <h1 class="h4">Código de seguimiento</h1>
+        <p>Compartí este código con el comercio para que pueda enviárselo al cliente.</p>
+
+        <div class="input-group">
+            <input
+                type="text"
+                id="codigo-seguimiento"
+                class="form-control"
+                value="{{ pedido.codigo }}"
+                aria-label="Código de seguimiento"
+                readonly
+            >
+            <button type="button" class="btn btn-outline-primary" id="copiar-codigo">
+                Copiar código
+            </button>
+        </div>
+        <p id="resultado-copiado" class="small mt-2" aria-live="polite"></p>
+
+        <dl class="row mt-4 mb-0">
+            <dt class="col-sm-4">Estado</dt>
+            <dd class="col-sm-8">{{ pedido.get_estado_display }}</dd>
+            <dt class="col-sm-4">Comercio</dt>
+            <dd class="col-sm-8">{{ pedido.comercio.nombre }}</dd>
+        </dl>
+
+        <a class="btn btn-primary align-self-start mt-4" href="{% url 'operario:cargar_pedido' %}">
+            Cargar otro pedido
+        </a>
+    </div>
+
+    <script>
+        document.getElementById('copiar-codigo').addEventListener('click', async () => {
+            const codigo = document.getElementById('codigo-seguimiento');
+            const resultado = document.getElementById('resultado-copiado');
+            try {
+                await navigator.clipboard.writeText(codigo.value);
+                resultado.textContent = 'Código copiado.';
+            } catch (error) {
+                codigo.select();
+                resultado.textContent = 'No se pudo copiar automáticamente. Seleccioná y copiá el código.';
+            }
+        });
+    </script>
+{% endblock %}

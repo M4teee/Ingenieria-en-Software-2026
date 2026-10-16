@@ -3,33 +3,140 @@
 {% block title %}Repartidor{% endblock %}
 
 {% block content %}
-    <h1>Sitio del repartidor</h1>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success" role="alert">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+<h1 class="mb-4">Mi entrega activa</h1>
 
-    {% if sin_perfil %}
-        <p>No se encontró un perfil de repartidor asociado a tu usuario.</p>
-    {% else %}
-        <p>
-            Estado actual:
-            {% if disponible %}
-                <span class="badge bg-success">Disponible</span>
-            {% else %}
-                <span class="badge bg-secondary">No disponible</span>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+{% if perfil_repartidor %}
+    <section class="card mb-4" aria-labelledby="disponibilidad-heading">
+        <div class="card-body">
+            <h2 id="disponibilidad-heading" class="h5">Disponibilidad</h2>
+            <p>Estado actual:
+                {% if disponible %}<span class="badge bg-success">Disponible</span>
+                {% else %}<span class="badge bg-secondary">No disponible</span>{% endif %}
+            </p>
+            <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}">
+                {% csrf_token %}
+                {% if perfil_repartidor.disponible %}
+                    <button type="submit" class="btn btn-app-outline">Marcarme no disponible</button>
+                {% else %}
+                    <button type="submit" class="btn btn-app">Marcarme disponible</button>
+                {% endif %}
+            </form>
+        </div>
+    </section>
+{% endif %}
+
+{% if pedido_activo %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h2 class="h5">
+                Pedido {{ pedido_activo.codigo }}
+            </h2>
+
+            <p>
+                <strong>Estado actual:</strong>
+                {{ pedido_activo.get_estado_display }}
+            </p>
+
+            {% if pedido_activo.estado == 'asignado' %}
+
+                <form method="post"
+                      action="{% url 'actualizar_estado' pedido_activo.id %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="retirado">
+
+                    <div class="mb-3">
+                    <label for="foto-retirado" class="form-label">
+                   Fotografía (opcional)
+                  </label>
+
+                 <input
+                  type="file"
+                  id="foto-retirado"
+                  name="fotografia"
+                  class="form-control"
+                  accept="image/*"
+                 >
+                 </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Marcar como Retirado
+                    </button>
+                </form>
+
+            {% elif pedido_activo.estado == 'retirado' %}
+
+                <form method="post"
+                      action="{% url 'actualizar_estado' pedido_activo.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="en_viaje">
+
+                    <button type="submit" class="btn btn-primary">
+                        Marcar como En viaje
+                    </button>
+                </form>
+
+            {% elif pedido_activo.estado == 'en_viaje' %}
+
+             <form method="post"
+                 action="{% url 'actualizar_estado' pedido_activo.id %}"
+                 class="mb-2"
+                 enctype="multipart/form-data">
+
+               {% csrf_token %}
+
+              <input type="hidden" name="estado" value="entregado">
+
+              <div class="mb-3">
+                 <label for="foto-entregado" class="form-label">
+                     Fotografía de entrega (opcional)
+                </label>
+
+                <input
+                  type="file"
+                  id="foto-entregado"
+                  name="fotografia"
+                 class="form-control"
+                 accept="image/*"
+             >
+             </div>
+
+             <button type="submit" class="btn btn-success">
+                 Marcar como Entregado
+             </button>
+
+             </form>
+
+                <form method="post"
+                      action="{% url 'actualizar_estado' pedido_activo.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="fallido">
+
+                    <button type="submit" class="btn btn-danger">
+                        Marcar Entrega Fallida
+                    </button>
+                </form>
+
             {% endif %}
-        </p>
 
-        <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}">
-            {% csrf_token %}
-            {% if disponible %}
-                <button type="submit" class="btn btn-app-outline">Marcarme no disponible</button>
-            {% else %}
-                <button type="submit" class="btn btn-app">Marcarme disponible</button>
-            {% endif %}
-        </form>
-    {% endif %}
+        </div>
+    </div>
+
+{% else %}
+
+    <div class="alert alert-info">
+        No tenés ninguna entrega activa.
+    </div>
+
+{% endif %}
+
 {% endblock content %}
