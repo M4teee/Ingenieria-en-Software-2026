@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from main.operario.models import Comercio
+from main.repartidor.models import Pedido, Repartidor
 
 
 MENSAJE_COMERCIO_INACTIVO = (
@@ -53,3 +54,25 @@ class PedidoForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['comercio'].widget.attrs['class'] = 'form-select'
+
+
+class AsignarPedidoForm(forms.Form):
+    repartidor = forms.ModelChoiceField(
+        queryset=Repartidor.objects.none(),
+        label='Repartidor disponible',
+        empty_label='Seleccioná un repartidor',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        activos = Pedido.objects.filter(
+            estado__in=('asignado', 'retirado', 'en_viaje'),
+            repartidor__isnull=False,
+        ).values('repartidor_id')
+        self.fields['repartidor'].queryset = (
+            Repartidor.objects.select_related('user')
+            .filter(disponible=True, user__is_active=True)
+            .exclude(user_id__in=activos)
+            .order_by('user__username')
+        )

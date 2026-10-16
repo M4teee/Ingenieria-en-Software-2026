@@ -4,11 +4,11 @@
 
 {% block content %}
 
-<h1 class="mb-4">Mi entrega activa</h1>
+<h1 class="mb-4">Panel del repartidor</h1>
 
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">{{ message }}</div>
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="alert">{{ message }}</div>
     {% endfor %}
 {% endif %}
 
@@ -85,6 +85,14 @@
                     </script>
                 {% else %}
 
+                <dl class="row">
+                    <dt class="col-sm-4">Comercio</dt><dd class="col-sm-8">{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
+                    {% if pedido_activo.comercio %}<dt class="col-sm-4">Contacto</dt><dd class="col-sm-8">{{ pedido_activo.comercio.contacto }}</dd>{% endif %}
+                    <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
+                    <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido_activo.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
+                </dl>
+                <p><a href="{% url 'repartidor_detalle_pedido' pedido_activo.pk %}">Ver detalle e historial</a></p>
+
                 <form method="post"
                       action="{% url 'actualizar_estado' pedido_activo.id %}"
                       enctype="multipart/form-data">
@@ -101,7 +109,7 @@
                   id="foto-retirado"
                   name="fotografia"
                   class="form-control"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                  >
                  </div>
 
@@ -114,6 +122,14 @@
 
             {% elif pedido_activo.estado == 'retirado' %}
 
+                <dl class="row">
+                    <dt class="col-sm-4">Comercio</dt><dd class="col-sm-8">{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
+                    {% if pedido_activo.comercio %}<dt class="col-sm-4">Contacto</dt><dd class="col-sm-8">{{ pedido_activo.comercio.contacto }}</dd>{% endif %}
+                    <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
+                    <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido_activo.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
+                </dl>
+                <p><a href="{% url 'repartidor_detalle_pedido' pedido_activo.pk %}">Ver detalle e historial</a></p>
+
                 <form method="post"
                       action="{% url 'actualizar_estado' pedido_activo.id %}">
                     {% csrf_token %}
@@ -125,6 +141,14 @@
                 </form>
 
             {% elif pedido_activo.estado == 'en_viaje' %}
+
+             <dl class="row">
+                <dt class="col-sm-4">Comercio</dt><dd class="col-sm-8">{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
+                {% if pedido_activo.comercio %}<dt class="col-sm-4">Contacto</dt><dd class="col-sm-8">{{ pedido_activo.comercio.contacto }}</dd>{% endif %}
+                <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
+                <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido_activo.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
+             </dl>
+             <p><a href="{% url 'repartidor_detalle_pedido' pedido_activo.pk %}">Ver detalle e historial</a></p>
 
              <form method="post"
                  action="{% url 'actualizar_estado' pedido_activo.id %}"
@@ -145,7 +169,7 @@
                   id="foto-entregado"
                   name="fotografia"
                  class="form-control"
-                 accept="image/*"
+                 accept="image/jpeg,image/png,image/webp"
              >
              </div>
 
@@ -156,9 +180,15 @@
              </form>
 
                 <form method="post"
-                      action="{% url 'actualizar_estado' pedido_activo.id %}">
+                      action="{% url 'actualizar_estado' pedido_activo.id %}"
+                      enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="estado" value="fallido">
+
+                    <div class="mb-3">
+                        <label for="foto-fallido" class="form-label">Fotografía de evidencia (opcional)</label>
+                        <input type="file" id="foto-fallido" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
+                    </div>
 
                     <button type="submit" class="btn btn-danger">
                         Marcar Entrega Fallida
@@ -177,5 +207,30 @@
     </div>
 
 {% endif %}
+
+<section class="card shadow-sm mt-4" aria-labelledby="entregas-anteriores-heading">
+    <div class="card-body">
+        <h2 id="entregas-anteriores-heading" class="h5">Entregas finalizadas</h2>
+        {% if pedidos_cerrados %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th scope="col">Código</th><th scope="col">Comercio</th><th scope="col">Estado</th><th scope="col">Detalle</th></tr></thead>
+                    <tbody>
+                        {% for pedido in pedidos_cerrados %}
+                            <tr>
+                                <td>{{ pedido.codigo }}</td>
+                                <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
+                                <td>{{ pedido.get_estado_display }}</td>
+                                <td><a href="{% url 'repartidor_detalle_pedido' pedido.pk %}">Ver detalle e historial</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-secondary mb-0">Todavía no tenés entregas finalizadas.</p>
+        {% endif %}
+    </div>
+</section>
 
 {% endblock content %}

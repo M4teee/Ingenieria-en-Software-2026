@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from main.operario.models import Comercio
 from main.repartidor.models import HistorialEstado, Pedido
+from main.repartidor.models import Repartidor
 from main.users.models import User
 
 
@@ -111,7 +112,134 @@ class CargarPedidoTests(TestCase):
             'El comercio seleccionado se encuentra inhabilitado para nuevos pedidos',
         )
         self.assertFalse(Pedido.objects.exists())
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class PanelOperarioTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='panel_operario', password='test1234', is_staff=True,
+        )
+        self.usuario_comun = User.objects.create_user(
+            username='panel_comun', password='test1234',
+        )
+        self.comercio = Comercio.objects.create(
+            nombre='Panel Comercio', direccion='Calle 10', contacto='111',
+        )
+        self.pedido = Pedido.objects.create(
+            codigo='PANEL-001', comercio=self.comercio,
+            direccion_destino='Destino 10', estado='registrado',
+        )
+        self.client.force_login(self.operario)
+
+    def test_panel_lista_pedido_y_detalle_muestra_historial(self):
+        HistorialEstado.objects.create(
+            pedido=self.pedido,
+            estado_nuevo='registrado',
+            usuario=self.operario,
+        )
+
+        lista = self.client.get(reverse('operario:inicio'))
+        detalle = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.pedido.pk])
+        )
+
+        self.assertEqual(lista.status_code, 200)
+        self.assertContains(lista, 'PANEL-001')
+        self.assertContains(lista, 'Sin asignar')
+        self.assertEqual(detalle.status_code, 200)
+        self.assertContains(detalle, 'Historial del pedido')
+        self.assertContains(detalle, 'Registrado')
+
+    def test_usuario_sin_is_staff_no_accede_al_panel_ni_detalle(self):
+        self.client.force_login(self.usuario_comun)
+
+        self.assertEqual(self.client.get(reverse('operario:inicio')).status_code, 403)
+        self.assertEqual(
+            self.client.get(reverse('operario:detalle_pedido', args=[self.pedido.pk])).status_code,
+            403,
+        )
+
+    def test_asignar_disponible_cambia_estado_y_registra_evento(self):
+        usuario_repartidor = User.objects.create_user(
+            username='repartidor_disponible', first_name='Rosa', password='test1234',
+        )
+        perfil = Repartidor.objects.create(
+            user=usuario_repartidor, pin='1111', disponible=True,
+        )
+
+        respuesta = self.client.post(
+            reverse('operario:asignar_repartidor', args=[self.pedido.pk]),
+            {'repartidor': perfil.pk},
+        )
+
+        self.pedido.refresh_from_db()
+        evento = HistorialEstado.objects.get(pedido=self.pedido)
+        self.assertRedirects(
+            respuesta,
+            reverse('operario:detalle_pedido', args=[self.pedido.pk]),
+        )
+        self.assertEqual(self.pedido.estado, 'asignado')
+        self.assertEqual(self.pedido.repartidor, usuario_repartidor)
+        self.assertIsNotNone(self.pedido.fecha_hora_asignacion)
+        self.assertEqual(evento.estado_anterior, 'registrado')
+        self.assertEqual(evento.estado_nuevo, 'asignado')
+        self.assertEqual(evento.usuario, self.operario)
+
+    def test_pedido_no_se_asigna_a_repartidor_inactivo(self):
+        usuario_repartidor = User.objects.create_user(
+            username='repartidor_inactivo', password='test1234', is_active=False,
+        )
+        perfil = Repartidor.objects.create(
+            user=usuario_repartidor, pin='2222', disponible=True,
+        )
+
+        respuesta = self.client.post(
+            reverse('operario:asignar_repartidor', args=[self.pedido.pk]),
+            {'repartidor': perfil.pk},
+        )
+
+        self.pedido.refresh_from_db()
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertEqual(self.pedido.estado, 'registrado')
+        self.assertIsNone(self.pedido.repartidor)
         self.assertFalse(HistorialEstado.objects.exists())
+
+    def test_asignar_requiere_post(self):
+        respuesta = self.client.get(
+            reverse('operario:asignar_repartidor', args=[self.pedido.pk])
+        )
+
+        self.assertEqual(respuesta.status_code, 405)
+        self.assertFalse(HistorialEstado.objects.exists())
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class CargarPedidoValidacionesTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_validaciones', password='test1234', is_staff=True,
+        )
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio validaciones',
+            direccion='Av. Siempre Viva 123',
+            contacto='comercio@example.test',
+        )
+        self.url = reverse('operario:cargar_pedido')
+        self.client.force_login(self.operario)
+
+    def _datos_formulario(self, **cambios):
+        respuesta = self.client.get(self.url)
+        return {
+            'clave_idempotencia': str(
+                respuesta.context['form']['clave_idempotencia'].value()
+            ),
+            'comercio': str(self.comercio.pk),
+            'direccion_destino': 'Calle Destino 456',
+            'especificaciones_traslado': 'Manipular con cuidado',
+            'fecha_hora_estimada_entrega': '2026-10-16T15:45',
+            **cambios,
+        }
 
     def test_campos_obligatorios_y_fecha_invalida_no_crean_pedido(self):
         datos = self._datos_formulario(

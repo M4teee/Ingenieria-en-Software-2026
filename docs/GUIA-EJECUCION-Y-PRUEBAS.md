@@ -1,172 +1,101 @@
-# Guía de ejecución y pruebas
+# Guía de instalación, ejecución y pruebas
 
-Guía para preparar y recorrer el backend completo en desarrollo. Los comandos y resultados de verificación citados corresponden a macOS, Python 3.14.8 y Django 6.1.2 en la rama `feature/hu-12-cargar-pedido`; Windows no se probó.
+Esta guía prepara el backend Django para desarrollo local y reúne los comandos automatizados. Para los procedimientos desde la interfaz, consultá el [manual de uso](MANUAL-DE-USO.md).
 
-## Requisitos previos
+## Requisitos
 
-- Python 3.14 (el archivo `.python-version` indica la serie `3.14`; esta revisión instaló Python 3.14.8) y `pip` incluido con Python.
-- Git y una terminal. No se requiere Node.js ni una base externa.
-- Dependencias fijadas en `requirements.txt`: Django, asgiref, sqlparse, django-crispy-forms, crispy-bootstrap5 y Pillow.
-- SQLite está configurado en `Backend/config/settings.py`; no se requieren variables de entorno ni servicios externos para la configuración local.
-- La configuración Django usa `DEBUG=True`, una clave de desarrollo y `ALLOWED_HOSTS=[]`. Es solo para desarrollo. Las plantillas cargan Bootstrap, iconos y tipografías desde CDN; para ver esos estilos se necesita conexión a Internet.
+- Python 3.14 y `pip`; la serie está fijada en `.python-version`.
+- Git y una terminal.
+- SQLite, incluida con Python. No se requiere un servicio de base de datos ni variables de entorno.
+- Dependencias fijadas en `requirements.txt`: Django 6.1.2, asgiref, sqlparse, django-crispy-forms, crispy-bootstrap5 y Pillow.
+- Conexión a Internet para descargar dependencias y para cargar Bootstrap, iconos y tipografías desde CDN durante la navegación.
+
+`Backend/config/settings.py` usa `DEBUG=True`, una clave de desarrollo y SQLite. Esta configuración es exclusivamente local y no debe utilizarse en producción.
 
 ## Preparación desde cero
 
-Desde una copia del repositorio:
+Cloná el repositorio y ubicáte en su raíz:
 
 ```sh
 git clone <URL-del-repositorio>
 cd Ingenieria-en-Software-2026
 ```
 
-En macOS o Linux:
+En macOS o Linux, creá el entorno e instalá las versiones fijadas:
 
 ```sh
 python3.14 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 cd Backend
 python manage.py check
 python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
 ```
 
-En Windows PowerShell, usando una instalación de Python 3.14:
+En Fish, activá el mismo entorno con `source .venv/bin/activate.fish` antes de entrar a `Backend/`. En Windows PowerShell:
 
 ```powershell
 py -3.14 -m venv .venv
 .venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 cd Backend
 python manage.py check
 python manage.py migrate
-```
-
-La instalación de paquetes requiere acceso a PyPI. En esta revisión se completó con las versiones exactas de `requirements.txt`; al primer intento la red del entorno aislado bloqueó DNS y luego se habilitó la instalación. `pip check` no encontró requisitos rotos.
-
-`migrate` crea o actualiza `Backend/db.sqlite3`, que está excluido de Git. No borres esa base si contiene trabajo que querés conservar. Para una base vacía, creá un administrador:
-
-```sh
 python manage.py createsuperuser
-```
-
-El comando solicita usuario, correo y contraseña en forma interactiva; no hay credenciales de ejemplo. Iniciá el servidor:
-
-```sh
 python manage.py runserver
 ```
 
-Abrí `http://127.0.0.1:8000/`. Para apagarlo, usá `Ctrl+C`; para salir del entorno virtual, `deactivate`.
+`createsuperuser` solicita los datos de acceso en forma interactiva; el repositorio no contiene cuentas de prueba. `migrate` prepara `Backend/db.sqlite3`. No borres esa base para resolver errores: podría contener datos locales que deban conservarse. El comando `runserver` imprime la dirección local, normalmente `http://127.0.0.1:8000/`. Detenelo con `Ctrl+C`.
 
-## Ejecutar pruebas y comprobaciones
+Los pasos de instalación se basan en la configuración real. En esta revisión, la instalación de los paquetes fijados se completó en el entorno virtual local. Una instalación limpia en otra computadora depende del acceso a PyPI.
 
-Ejecutá desde `Backend/` con el entorno virtual activo:
+## Pruebas y comprobaciones
+
+Con el entorno virtual activo y desde `Backend/`:
 
 ```sh
 python manage.py test
-```
-
-Ejecuta toda la suite de las aplicaciones instaladas. Para una aplicación o clase concreta:
-
-```sh
 python manage.py test main.operario
 python manage.py test main.repartidor
 python manage.py test main.clienteFinal
-python manage.py test main.operario.tests.CargarPedidoTests
-```
-
-Para un caso individual, agregá el nombre del método, por ejemplo `main.operario.tests.CargarPedidoTests.test_alta_crea_pedido_historial_y_muestra_codigo`.
-
-Comprobaciones de configuración, migraciones y dependencias:
-
-```sh
+python manage.py test main.operario.tests.PanelOperarioTests
+python manage.py test main.repartidor.tests.ActualizarEstadoTests.test_fallido_registra_incidencia
 python manage.py check
 python manage.py makemigrations --check --dry-run
 python manage.py migrate --check
 python -m pip check
 ```
 
-`check` analiza configuración Django; `makemigrations --check --dry-run` detecta cambios de modelos sin migración; `migrate --check` falla si hay migraciones sin aplicar; `pip check` informa paquetes incompatibles. El proyecto no declara una herramienta de lint o formato.
+La primera línea ejecuta la suite completa; las siguientes permiten acotar por aplicación, clase o caso. `check` revisa la configuración Django; `makemigrations --check --dry-run` informa si los modelos requieren una migración nueva; `migrate --check` detecta migraciones pendientes; `pip check` revisa dependencias instaladas incompatibles. No hay una herramienta de lint o formato declarada.
 
-## Recorrido manual de las funcionalidades
-
-Las acciones de alta, consulta pública y avance del repartidor modifican SQLite. Usá datos de desarrollo. No ejecutes `flush`, no borres `db.sqlite3` y no uses información real.
-
-1. Iniciá sesión como superusuario en `http://127.0.0.1:8000/admin/`.
-2. En **Comercios**, creá un comercio activo con nombre, dirección y contacto ficticios.
-3. En **Usuarios**, creá un usuario de operario y marcá `is_staff`. Cerrá la sesión administrativa y accedé con ese usuario.
-4. Abrí `/operario/pedidos/nuevo/`. El selector debe listar solo comercios activos. Intentá enviar el formulario vacío y comprobá que no se cree un pedido y se indiquen los campos obligatorios.
-5. Completá comercio, dirección, especificaciones y fecha/hora estimadas, y presioná **Registrar Pedido**. La confirmación muestra “Pedido registrado con éxito”, el código, estado `Registrado` y botón **Copiar código**. En `localhost`, el navegador puede ofrecer la API del portapapeles; si la bloquea, la pantalla selecciona el código para copiarlo manualmente.
-6. Abrí `/clienteFinal/seguimiento/<codigo>/` con el código de confirmación. La consulta pública muestra el estado, comercio e historial inicial `Registrado`. En ese estado todavía no muestra la estimación: el diseño existente solo la enseña cuando el pedido está `en_viaje`.
-7. Reenviar el mismo formulario con la misma clave de solicitud no duplica el pedido; recargar la confirmación tampoco lo crea de nuevo. Probá un código inexistente: la consulta debe responder 404.
-8. Para probar el rechazo por comercio inactivo, volvé al admin, desactivá el comercio y enviá un POST con ese comercio seleccionado. El servidor debe rechazarlo con “El comercio seleccionado se encuentra inhabilitado para nuevos pedidos”. El formulario impide elegirlo normalmente, por lo que esta prueba negativa requiere forjar el POST desde las herramientas del navegador o un cliente HTTP autenticado; no reutilices formularios de producción.
-9. Cerrá sesión y comprobá permisos: un usuario anónimo que abre la carga va a `/login/`; un usuario autenticado sin `is_staff` recibe 403. Las pruebas automatizadas cubren ambos casos y la vista de confirmación.
-
-### Avance del repartidor
-
-No hay una pantalla de asignación de pedidos. Para explorar la interfaz existente, primero creá con el admin un usuario de repartidor (sin `is_staff`) y un pedido de prueba asignado, o prepará el pedido con el shell de Django. El siguiente ejemplo inserta un pedido ficticio asignado al usuario cuyo nombre y comercio adaptes; agrega la historia inicial y la asignación en el mismo bloque:
+Desde la raíz, comprobá enlaces y rutas relativas de documentación con:
 
 ```sh
-python manage.py shell
+python3 scripts/check_docs.py .
+git diff --check
 ```
 
-```python
-from datetime import timedelta
-from django.db import transaction
-from django.utils import timezone
-from main.operario.models import Comercio
-from main.repartidor.models import HistorialEstado, Pedido
-from main.users.models import User
+### Resultados de esta revisión
 
-repartidor = User.objects.get(username="usuario_repartidor_de_prueba")
-comercio = Comercio.objects.get(nombre="Comercio ficticio")
-codigo = Pedido.generar_codigo()
-while Pedido.objects.filter(codigo=codigo).exists():
-    codigo = Pedido.generar_codigo()
+Con Python 3.14 y las dependencias de `requirements.txt`, desde `Backend/` se ejecutaron: `manage.py check` (aprobado), `manage.py test` (64 pruebas aprobadas), `makemigrations --check --dry-run` (sin cambios pendientes), `migrate --check` (aprobado) y `pip check` (sin dependencias rotas). Desde la raíz, `python3 scripts/check_docs.py .` verificó 35 enlaces y `git diff --check` no informó errores. La suite usa una base temporal y no borra la base local.
 
-with transaction.atomic():
-    pedido = Pedido.objects.create(
-        codigo=codigo,
-        comercio=comercio,
-        direccion_destino="Dirección ficticia 123",
-        especificaciones_traslado="Pedido de prueba",
-        fecha_hora_estimada_entrega=timezone.now() + timedelta(hours=3),
-        estado="asignado",
-        repartidor=repartidor,
-    )
-    HistorialEstado.objects.create(
-        pedido=pedido,
-        estado_nuevo="registrado",
-        usuario=repartidor,
-    )
-    HistorialEstado.objects.create(
-        pedido=pedido,
-        estado_anterior="registrado",
-        estado_nuevo="asignado",
-        usuario=repartidor,
-    )
-print(pedido.codigo)
-```
+La aplicación se abrió en un navegador local y se comprobó visualmente el panel autenticado de operario y sus enlaces. No se cargaron ni modificaron datos durante esa inspección. Los flujos con creación de datos se cubren con pruebas del cliente Django; no se hizo una comprobación visual autenticada de alta, asignación, subida de archivos ni portapapeles en esta revisión. Windows no se probó.
 
-Salí del shell con `exit()`, iniciá sesión como ese repartidor y abrí `/repartidor/`. Avanzá `Asignado → Retirado → En viaje`; después consultá el código impreso en la URL pública. Para el recorrido de cierre, avanzá de `En viaje` a `Entregado` o `Fallido`. Cada transición crea un evento persistido. Cancelación es válida antes del retiro, pero todavía no hay interfaz para operar esa transición.
+## Limitaciones conocidas
 
-### Datos y limpieza
+- No hay configuración de CI ni comprobaciones estáticas adicionales declaradas.
+- Los estilos e iconos se cargan desde CDN; sin red, el contenido sigue disponible pero puede presentarse sin esos recursos.
+- No se ensayó la migración sobre una base poblada con datos heredados reales.
+- No se validó el despliegue en producción, el almacenamiento remoto de fotografías ni el comportamiento en Windows.
+- La asignación desde el panel del operario es un puente provisional manual. Las HU 22 y 30, que piden asignación automática, siguen sin implementar y no se consideran completas. La decisión está descrita en [`DECISIONS.md`](DECISIONS.md).
 
-Los pasos de navegador crean usuarios, comercios, pedidos e historial en `Backend/db.sqlite3`. Conservalos si los necesitás. Para repetir pruebas sin perder otros registros, usá nombres y pedidos nuevos. La suite `manage.py test` usa una base temporal separada y la elimina al finalizar. No hay un comando de limpieza de fixtures documentado porque podría borrar datos útiles.
+## Errores frecuentes
 
-## Diagnóstico de errores frecuentes
-
-- **Falta Django u otra dependencia:** activá `.venv` e instalá `python -m pip install -r requirements.txt`; luego `python -m pip check`. En esta revisión se verificó que las seis dependencias fijadas se instalaron y resolvieron.
-- **Error de DNS al instalar:** verificá conectividad a PyPI o usá el entorno de paquetes institucional. Durante esta tarea el primer intento fue bloqueado por la red aislada; la instalación posterior terminó correctamente.
-- **Migraciones pendientes:** ejecutá `python manage.py migrate`; revisá `showmigrations` si necesitás identificar cuáles faltan. No elimines la base como método de reparación.
-- **No existe la base/tablas:** ejecutá `python manage.py migrate` desde `Backend/`.
-- **No aparece un comercio en el selector:** verificá `activo=True` en el admin. Los comercios inactivos se excluyen deliberadamente y el servidor vuelve a validarlo.
-- **403 en carga:** iniciá sesión con un usuario que tenga `is_staff=True`. Ser usuario autenticado no alcanza.
-- **Error en una prueba:** volvé a ejecutar el caso específico con el identificador de la sección anterior y leé el traceback; la salida señala archivo, línea y aserción que falló.
-- **Sin estilos o iconos:** la plantilla obtiene Bootstrap y recursos gráficos desde CDN; comprobá conectividad. El HTML del sistema se sirve localmente.
-- **No podés asignar un pedido desde una pantalla:** esa interfaz todavía no existe; el flujo de repartidor solo opera pedidos ya asignados.
-
-## Estado de validación de esta guía
-
-Se verificaron en la instalación local: `check`, `makemigrations --check --dry-run`, `migrate --check`, `pip check` y las 30 pruebas de la suite completa. También se recorrió en navegador local el login de operario, formulario, alta, confirmación con código, copiado real al portapapeles y consulta pública. Se retiraron de SQLite el usuario, comercio y pedido ficticios usados para esa comprobación; la base mantiene aplicadas las migraciones y queda sin esos fixtures. La instalación limpia se ejecutó en un entorno virtual nuevo; Windows queda pendiente de validación.
+- **No se puede activar el entorno en Fish:** usá `source .venv/bin/activate.fish`, no el script de Bash/Zsh `activate`.
+- **No se encuentra Django:** confirmá que el entorno `.venv` esté activo y ejecutá `python -m pip install -r requirements.txt` desde la raíz.
+- **Migraciones pendientes:** desde `Backend/`, revisá `showmigrations` y ejecutá `python manage.py migrate`. No recrees ni borres SQLite.
+- **Carga denegada:** el usuario debe tener `is_staff=True` y haber iniciado sesión.
+- **No aparece un comercio o repartidor:** comprobá en Django Admin que el comercio esté activo y que el perfil del repartidor esté activo y disponible, y que no tenga otro pedido activo.
+- **Prueba fallida:** ejecutá el caso por separado y revisá el traceback antes de cambiar datos locales.

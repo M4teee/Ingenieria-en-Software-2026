@@ -14,7 +14,11 @@
         <p>Ingresá el código de seguimiento que recibiste para ver el estado de tu pedido.</p>
     </div>
 
-    <form method="get" class="tracking-card">
+    {% if error %}
+        <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form method="get" action="{% url 'clienteFinal' %}" class="tracking-card">
         <label for="codigo-seguimiento" class="form-label fw-semibold">Código de seguimiento</label>
         <div class="input-group">
             <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
@@ -25,10 +29,11 @@
                 class="form-control"
                 placeholder="Ej: ABC123456"
                 autocomplete="off"
+                value="{{ codigo }}"
                 required
             >
         </div>
-        <button type="submit" class="btn btn-app w-100 mt-3" disabled>
+        <button type="submit" class="btn btn-app w-100 mt-3">
             <i class="bi bi-search"></i> Buscar envío
         </button>
     </form>

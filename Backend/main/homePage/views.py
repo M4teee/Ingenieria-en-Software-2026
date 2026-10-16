@@ -1,13 +1,14 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
+
+
+def _es_repartidor(user):
+    return user.is_authenticated and hasattr(user, 'repartidor') and user.repartidor.user.is_active
 
 def rootHandler(request):
-    if not request.user.is_authenticated:
-        return redirect('clienteFinal')
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('operario:inicio')
 
-    if request.user.is_superuser:
-        return redirect('admin:index')
+    if _es_repartidor(request.user):
+        return redirect('repartidor')
 
-    if request.user.is_staff:
-        return redirect('operario:cargar_pedido')
-
-    return redirect('repartidor')
+    return render(request, 'home.html')
