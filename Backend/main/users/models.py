@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    # No tiene sentido hacer un modelo Vehiculo a parte. Debería ser un campo mas tipo CHOICES en Usuario
     vehiculo = models.ForeignKey(
         'users.Vehiculo',
         on_delete=models.PROTECT,
@@ -24,7 +25,7 @@ class User(AbstractUser):
         verbose_name_plural = 'Usuarios'
 
 
-class Vehiculo(models.Model):
+class Vehiculo(models.Model): # No tiene sentido hacer un modelo Vehiculo. Debería ser un campo mas tipo CHOICES en Usuario
     name = models.CharField(max_length=30)
 
     def __str__(self):
