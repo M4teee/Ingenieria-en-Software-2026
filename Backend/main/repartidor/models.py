@@ -5,23 +5,6 @@ from django.conf import settings
 from django.db import models
 
 
-class Repartidor(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='repartidor',
-    )
-    pin = models.CharField(max_length=4, unique=True)
-    disponible = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = 'Repartidor'
-        verbose_name_plural = 'Repartidores'
-
-    def __str__(self):
-        return self.user.get_username()
-
-
 class Pedido(models.Model):
     ESTADOS = [
         ('registrado', 'Registrado'),
@@ -35,7 +18,7 @@ class Pedido(models.Model):
 
     TRANSICIONES_PERMITIDAS = {
         'registrado': ['asignado', 'cancelado'],
-        'asignado': ['retirado', 'cancelado'],
+        'asignado': ['retirado', 'cancelado', 'registrado'],
         'retirado': ['en_viaje'],
         'en_viaje': ['entregado', 'fallido'],
         'entregado': [],
@@ -81,6 +64,10 @@ class Pedido(models.Model):
         null=True,
         blank=True
     )
+
+    fecha_hora_asignacion = models.DateTimeField(null=True, blank=True)
+    fecha_hora_aceptacion = models.DateTimeField(null=True, blank=True)
+    LIMITE_ACEPTACION_SEGUNDOS = 300
 
     estado = models.CharField(
         max_length=20,
@@ -168,3 +155,20 @@ class HistorialEstado(models.Model):
 
     def __str__(self):
         return f'{self.pedido.codigo}: {self.estado_nuevo}'
+
+
+class Repartidor(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='repartidor',
+    )
+    pin = models.CharField(max_length=4, unique=True)
+    disponible = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Repartidor'
+        verbose_name_plural = 'Repartidores'
+
+    def __str__(self):
+        return self.user.get_username()

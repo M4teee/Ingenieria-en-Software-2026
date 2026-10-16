@@ -42,6 +42,10 @@ def obtener_historial(codigo):
     ).order_by('fecha', 'pk')
 
     for cambio in cambios:
+        # Eventos de auditoría sin transición (por ejemplo, aceptar un viaje)
+        # no deben aparecer como un segundo paso del mismo estado en el timeline.
+        if cambio.estado_anterior == cambio.estado_nuevo:
+            continue
         etiqueta, clase = ESTADOS[cambio.estado_nuevo]
         historial.append({
             'etiqueta': etiqueta,

@@ -1,7 +1,10 @@
 from django.test import TestCase, override_settings
+from django.urls import reverse
+from django.utils import timezone
 
+from main.operario.models import Comercio
 from main.users.models import User
-from .models import Pedido, Repartidor
+from .models import HistorialEstado, Pedido, Repartidor
 
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
@@ -187,6 +190,124 @@ class ActualizarEstadoTests(TestCase):
         self.assertEqual(historial.estado_nuevo, 'fallido')
         self.assertIn('Retornar el pedido al centro de distribución', historial.incidencia)
         self.assertTrue(self.repartidor.disponible)
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class AsignacionConRespuestaTests(TestCase):
+
+    def setUp(self):
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio HU18', direccion='Calle 100', contacto='111222333',
+        )
+        self.user = User.objects.create_user(
+            username='repartidor_hu18', password='test1234',
+            first_name='Ana', last_name='Pérez',
+        )
+        self.perfil = Repartidor.objects.create(
+            user=self.user, pin='4321', disponible=True,
+        )
+        self.client.force_login(self.user)
+
+    def crear_pedido_asignado(self, segundos=0):
+        from datetime import timedelta
+
+        return Pedido.objects.create(
+            codigo='HU18-TEST-001',
+            comercio=self.comercio,
+            estado='asignado',
+            repartidor=self.user,
+            fecha_hora_asignacion=timezone.now() - timedelta(seconds=segundos),
+        )
+
+    def test_aceptar_confirma_y_detiene_temporizador_sin_marcar_retirado(self):
+        pedido = self.crear_pedido_asignado(segundos=60)
+
+        response = self.client.post(reverse('repartidor_aceptar', args=[pedido.pk]))
+
+        pedido.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(pedido.estado, 'asignado')
+        self.assertIsNone(pedido.fecha_hora_asignacion)
+        self.assertIsNotNone(pedido.fecha_hora_aceptacion)
+        self.assertEqual(pedido.repartidor, self.user)
+        self.assertTrue(
+            pedido.historial.filter(incidencia__contains='Aceptado por repartidor Ana Pérez').exists()
+        )
+
+    def test_aceptacion_habilita_la_accion_existente_de_retiro(self):
+        pedido = self.crear_pedido_asignado()
+        self.client.post(reverse('repartidor_aceptar', args=[pedido.pk]))
+
+        response = self.client.get(reverse('repartidor'))
+
+        self.assertContains(response, 'Marcar como Retirado')
+        self.assertNotContains(response, 'Aceptar viaje')
+
+    def test_rechazo_libera_pedido_y_registra_historial_de_estado(self):
+        pedido = self.crear_pedido_asignado()
+
+        response = self.client.post(reverse('repartidor_rechazar', args=[pedido.pk]))
+
+        pedido.refresh_from_db()
+        self.perfil.refresh_from_db()
+        historial = HistorialEstado.objects.get(pedido=pedido)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(pedido.estado, 'registrado')
+        self.assertIsNone(pedido.repartidor)
+        self.assertEqual(historial.estado_anterior, 'asignado')
+        self.assertEqual(historial.estado_nuevo, 'registrado')
+        self.assertEqual(historial.usuario, self.user)
+        self.assertEqual(historial.incidencia, 'Rechazado por repartidor Ana Pérez')
+        self.assertFalse(self.perfil.disponible)
+
+    def test_expiracion_en_home_libera_pedido_y_registra_evento(self):
+        pedido = self.crear_pedido_asignado(segundos=301)
+
+        response = self.client.get(reverse('repartidor'))
+
+        pedido.refresh_from_db()
+        self.perfil.refresh_from_db()
+        self.assertContains(response, 'El tiempo de espera se agotó')
+        self.assertEqual(pedido.estado, 'registrado')
+        self.assertIsNone(pedido.repartidor)
+        self.assertFalse(self.perfil.disponible)
+        self.assertIn('expiración', pedido.historial.get().incidencia)
+
+    def test_aceptar_al_limite_de_300_segundos_libera_pedido(self):
+        pedido = self.crear_pedido_asignado(segundos=300)
+
+        self.client.post(reverse('repartidor_aceptar', args=[pedido.pk]))
+
+        pedido.refresh_from_db()
+        self.assertEqual(pedido.estado, 'registrado')
+        self.assertIsNone(pedido.repartidor)
+
+    def test_aceptar_requiere_post_y_asignacion_al_usuario(self):
+        pedido = self.crear_pedido_asignado()
+        self.assertEqual(
+            self.client.get(reverse('repartidor_aceptar', args=[pedido.pk])).status_code,
+            405,
+        )
+
+        otro = User.objects.create_user(username='otro_hu18', password='x')
+        self.client.force_login(otro)
+        response = self.client.post(reverse('repartidor_aceptar', args=[pedido.pk]))
+
+        self.assertEqual(response.status_code, 400)
+        pedido.refresh_from_db()
+        self.assertEqual(pedido.estado, 'asignado')
+
+    def test_no_se_libera_un_pedido_por_el_endpoint_de_avance_de_estado(self):
+        pedido = self.crear_pedido_asignado()
+
+        self.client.post(
+            reverse('actualizar_estado', args=[pedido.pk]),
+            {'estado': 'registrado'},
+        )
+
+        pedido.refresh_from_db()
+        self.assertEqual(pedido.estado, 'asignado')
+        self.assertEqual(pedido.repartidor, self.user)
 
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])

@@ -8,6 +8,8 @@ urlpatterns = [
         views.actualizar_estado,
         name='actualizar_estado'
     ),
+    path('pedido/<int:pedido_id>/aceptar/', views.aceptar, name='repartidor_aceptar'),
+    path('pedido/<int:pedido_id>/rechazar/', views.rechazar, name='repartidor_rechazar'),
     path('login-pin/', views.login_pin, name='repartidor_login_pin'),
     path(
         'disponibilidad/',

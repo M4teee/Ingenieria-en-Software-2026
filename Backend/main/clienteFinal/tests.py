@@ -129,3 +129,18 @@ class SeguimientoPersistidoTests(TestCase):
         )
         self.assertNotContains(respuesta, 'contacto@example.test')
         self.assertNotContains(respuesta, 'Frágil')
+
+    def test_evento_de_auditoria_sin_transicion_no_duplica_estado_en_timeline(self):
+        HistorialEstado.objects.create(
+            pedido=self.pedido,
+            estado_anterior='asignado',
+            estado_nuevo='asignado',
+            usuario=self.usuario,
+            incidencia='Aceptado por repartidor',
+        )
+
+        respuesta = self.client.get(reverse('seguimiento', args=[self.pedido.codigo]))
+
+        eventos = list(respuesta.context['historial'])
+        self.assertEqual(len(eventos), 1)
+        self.assertEqual(eventos[0]['etiqueta'], 'Registrado')

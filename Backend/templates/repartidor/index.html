@@ -32,6 +32,12 @@
     </section>
 {% endif %}
 
+{% if expirado %}
+    <div class="alert alert-warning" role="alert">
+        El tiempo de espera se agotó. El pedido fue liberado y tu disponibilidad cambió a <strong>No disponible</strong>.
+    </div>
+{% endif %}
+
 {% if pedido_activo %}
 
     <div class="card shadow-sm">
@@ -47,6 +53,37 @@
             </p>
 
             {% if pedido_activo.estado == 'asignado' %}
+
+                {% if esperando_respuesta %}
+                    <p>Comercio: {{ pedido_activo.comercio.nombre }}</p>
+                    <p>Dirección: {{ pedido_activo.direccion_destino }}</p>
+                    <div class="mb-3" id="countdown-container">
+                        Tiempo para responder:
+                        <strong id="countdown-display">{{ segundos_restantes }}</strong> segundos
+                    </div>
+                    <form method="post" action="{% url 'repartidor_aceptar' pedido_activo.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-app">Aceptar viaje</button>
+                    </form>
+                    <form method="post" action="{% url 'repartidor_rechazar' pedido_activo.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">Rechazar viaje</button>
+                    </form>
+                    <script>
+                        (() => {
+                            const display = document.getElementById('countdown-display');
+                            let seconds = Number(display.textContent);
+                            const timer = window.setInterval(() => {
+                                seconds = Math.max(0, seconds - 1);
+                                display.textContent = seconds;
+                                if (seconds === 0) {
+                                    window.clearInterval(timer);
+                                    window.setTimeout(() => window.location.reload(), 1000);
+                                }
+                            }, 1000);
+                        })();
+                    </script>
+                {% else %}
 
                 <form method="post"
                       action="{% url 'actualizar_estado' pedido_activo.id %}"
@@ -72,6 +109,8 @@
                         Marcar como Retirado
                     </button>
                 </form>
+
+                {% endif %}
 
             {% elif pedido_activo.estado == 'retirado' %}
 

@@ -26,7 +26,10 @@ La interfaz de carga y las consultas públicas se implementan con las plantillas
 - Plataformas/arquitectura objetivo (la inicialización declara “Pendiente de definir”). La Entrevista 02 describe PC web o escritorio para operario y web móvil para repartidor, pero no consta una elección tecnológica posterior del equipo.
 - Despliegue, seguridad de producción y manejo de archivos/fotografías.
 - Alcance y prioridad de las historias y fechas vigentes de los sprints.
-- HU 12 cubre el alta y estado `registrado`; la lista de siete estados del ciclo de vida proviene de Entrevista 02 y se mantiene en el modelo. La asignación del pedido al repartidor no dispone aún de una interfaz; requiere una historia/decisión de flujo posterior.
+- HU 18: el código recibido registra la solicitud de reasignación en `HistorialEstado`, pero no envía una notificación activa al operario aunque ese paso aparece en el criterio de aceptación. Falta acordar e implementar el canal de notificación.
+- HU 18: la expiración de cinco minutos se evalúa de forma perezosa al cargar la vista del repartidor o responder a la solicitud; la liberación en segundo plano requeriría una tarea programada.
+- HU 18: la aceptación deja el pedido en `asignado`, registra la hora de aceptación y habilita la acción existente de retiro; `retirado` se conserva como transición posterior. Esta interpretación mantiene el criterio de aceptación y el flujo de estados implementado en el backend. Confirmar con el equipo si se requiere un estado distinto para la confirmación.
+- No se encontró una interfaz de operario para asignar pedidos; el modelo permite relacionar el repartidor, pero el flujo de asignación es trabajo pendiente.
 - Para una futura migración productiva, ensayar el esquema contra una copia autorizada con pedidos heredados: en este entorno no existía una base poblada para validar sus datos reales.
 
 Al cerrar una decisión, agregá fecha, contexto, opciones consideradas, acuerdo y fuente o acta que lo respalda.

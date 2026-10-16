@@ -1,5 +1,6 @@
 # main/repartidor/views.py
 
+from datetime import timedelta
 from io import BytesIO
 
 from PIL import Image
@@ -9,10 +10,38 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import HistorialEstado, Pedido, Repartidor
+
+
+def _expirado(pedido):
+    return (
+        pedido.fecha_hora_asignacion is None
+        or timezone.now() - pedido.fecha_hora_asignacion
+        >= timedelta(seconds=Pedido.LIMITE_ACEPTACION_SEGUNDOS)
+    )
+
+
+def _liberar_pedido(pedido, usuario, incidencia):
+    estado_anterior = pedido.estado
+    pedido.repartidor = None
+    pedido.fecha_hora_asignacion = None
+    pedido.fecha_hora_aceptacion = None
+    pedido.estado = 'registrado'
+    pedido.save(update_fields=[
+        'repartidor', 'fecha_hora_asignacion', 'fecha_hora_aceptacion', 'estado',
+    ])
+    HistorialEstado.objects.create(
+        pedido=pedido,
+        estado_anterior=estado_anterior,
+        estado_nuevo='registrado',
+        usuario=usuario,
+        incidencia=incidencia,
+    )
 
 
 def login_pin(req):
@@ -28,29 +57,123 @@ def login_pin(req):
     return render(req, 'repartidor/login_pin.html', {})
 
 
-@login_required
+@login_required(login_url='repartidor_login_pin')
 def home(req):
     if req.user.is_superuser:
         return redirect('admin:index')
+
+    repartidor = Repartidor.objects.filter(user=req.user).first()
+    asignado = Pedido.objects.filter(
+        repartidor=req.user,
+        estado='asignado',
+        fecha_hora_asignacion__isnull=False,
+        fecha_hora_aceptacion__isnull=True,
+    ).order_by('fecha_hora_asignacion').first()
+    expirado = False
+    if asignado and _expirado(asignado):
+        with transaction.atomic():
+            pedido = Pedido.objects.select_for_update().filter(
+                pk=asignado.pk, estado='asignado',
+                fecha_hora_aceptacion__isnull=True,
+            ).first()
+            if pedido and _expirado(pedido):
+                _liberar_pedido(
+                    pedido,
+                    req.user,
+                    'Desasignado por expiración del tiempo de espera (5 minutos)',
+                )
+                if repartidor:
+                    repartidor.disponible = False
+                    repartidor.save(update_fields=['disponible'])
+        expirado = True
 
     pedido_activo = Pedido.objects.filter(
         repartidor=req.user,
         estado__in=['asignado', 'retirado', 'en_viaje']
     ).first()
 
-    repartidor = Repartidor.objects.filter(user=req.user).first()
-
     return render(
         req,
         'repartidor/index.html',
         {
             'pedido_activo': pedido_activo,
-            'perfil_repartidor': repartidor,
-            'disponible': req.user.disponible and (
-                repartidor.disponible if repartidor else True
+            'esperando_respuesta': bool(asignado and not expirado),
+            'segundos_restantes': (
+                max(0, int(
+                    Pedido.LIMITE_ACEPTACION_SEGUNDOS
+                    - (timezone.now() - asignado.fecha_hora_asignacion).total_seconds()
+                )) if asignado and not expirado else None
             ),
+            'expirado': expirado,
+            'perfil_repartidor': repartidor,
+            'disponible': bool(repartidor and repartidor.disponible and req.user.disponible),
         }
     )
+
+
+@login_required(login_url='repartidor_login_pin')
+@require_POST
+@transaction.atomic
+def aceptar(req, pedido_id):
+    pedido = Pedido.objects.select_for_update().filter(
+        pk=pedido_id,
+        repartidor=req.user,
+        estado='asignado',
+        fecha_hora_aceptacion__isnull=True,
+    ).first()
+    if pedido is None:
+        return HttpResponseBadRequest('El pedido no está asignado a este repartidor.')
+    if _expirado(pedido):
+        _liberar_pedido(
+            pedido,
+            req.user,
+            'Desasignado por expiración del tiempo de espera (5 minutos)',
+        )
+        perfil = Repartidor.objects.filter(user=req.user).first()
+        if perfil:
+            perfil.disponible = False
+            perfil.save(update_fields=['disponible'])
+        return redirect('repartidor')
+
+    pedido.fecha_hora_aceptacion = timezone.now()
+    pedido.fecha_hora_asignacion = None
+    pedido.save(update_fields=['fecha_hora_aceptacion', 'fecha_hora_asignacion'])
+    HistorialEstado.objects.create(
+        pedido=pedido,
+        estado_anterior='asignado',
+        estado_nuevo='asignado',
+        usuario=req.user,
+        incidencia=f'Aceptado por repartidor {req.user.get_full_name() or req.user.username}',
+    )
+    messages.success(req, 'Asignación confirmada. Ya podés retirar el pedido.')
+    return redirect('repartidor')
+
+
+@login_required(login_url='repartidor_login_pin')
+@require_POST
+@transaction.atomic
+def rechazar(req, pedido_id):
+    pedido = Pedido.objects.select_for_update().filter(
+        pk=pedido_id,
+        repartidor=req.user,
+        estado='asignado',
+        fecha_hora_aceptacion__isnull=True,
+    ).first()
+    if pedido is None:
+        return HttpResponseBadRequest('El pedido no está asignado a este repartidor.')
+
+    incidencia = (
+        'Desasignado por expiración del tiempo de espera (5 minutos)'
+        if _expirado(pedido)
+        else f'Rechazado por repartidor {req.user.get_full_name() or req.user.username}'
+    )
+    _liberar_pedido(pedido, req.user, incidencia)
+    perfil = Repartidor.objects.filter(user=req.user).first()
+    if perfil:
+        perfil.disponible = False
+        perfil.save(update_fields=['disponible'])
+    messages.info(req, 'El pedido se liberó para reasignación.')
+    return redirect('repartidor')
 
 
 @login_required(login_url='repartidor_login_pin')
@@ -119,7 +242,7 @@ def actualizar_estado(req, pedido_id):
 
     nuevo_estado = req.POST.get('estado')
 
-    if not pedido.puede_cambiar_a(nuevo_estado):
+    if nuevo_estado == 'registrado' or not pedido.puede_cambiar_a(nuevo_estado):
         messages.error(
             req,
             'La transición de estado no está permitida.'
