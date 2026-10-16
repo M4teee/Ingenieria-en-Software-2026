@@ -1,74 +1,174 @@
-# main\repartidor\models.py
+import secrets
+import string
 
 from django.conf import settings
 from django.db import models
 
-ESTADOS_PEDIDO = [
-    ('registrado', 'Registrado'),
-    ('asignado', 'Asignado'),
-    ('retirado', 'Retirado'),
-    ('en_viaje', 'En viaje'),
-    ('entregado', 'Entregado'),
-    ('fallido', 'Fallido'),
-    ('cancelado', 'Cancelado'),
-]
-
-class RepartidorPerfil(models.Model):
-    """Perfil de repartidor asociado a un User existente (no duplica User)."""
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='perfil_repartidor',
-    )
-    disponible = models.BooleanField(default=True)
-
-    class Meta:
-        verbose_name = 'Perfil de repartidor'
-        verbose_name_plural = 'Perfiles de repartidor'
-
-    def __str__(self):
-        return f'{self.user.get_full_name() or self.user.username}'
 
 class Pedido(models.Model):
+    ESTADOS = [
+        ('registrado', 'Registrado'),
+        ('asignado', 'Asignado'),
+        ('retirado', 'Retirado'),
+        ('en_viaje', 'En viaje'),
+        ('entregado', 'Entregado'),
+        ('fallido', 'Fallido'),
+        ('cancelado', 'Cancelado'),
+    ]
+
+    TRANSICIONES_PERMITIDAS = {
+        'registrado': ['asignado', 'cancelado'],
+        'asignado': ['retirado', 'cancelado', 'registrado'],
+        'retirado': ['en_viaje'],
+        'en_viaje': ['entregado', 'fallido'],
+        'entregado': [],
+        'fallido': [],
+        'cancelado': [],
+    }
+
+    LONGITUD_CODIGO = 20
+    INTENTOS_CODIGO = 5
+
+    codigo = models.CharField(
+        max_length=50,
+        unique=True
+    )
+
+    clave_idempotencia = models.UUIDField(
+        unique=True,
+        null=True,
+        blank=True,
+        editable=False
+    )
+
     comercio = models.ForeignKey(
         'operario.Comercio',
         on_delete=models.PROTECT,
         related_name='pedidos',
+        null=True,
+        blank=True
     )
-    estado = models.CharField(max_length=20, choices=ESTADOS_PEDIDO, default='registrado')
+
+    direccion_destino = models.CharField(
+        max_length=255,
+        blank=True,
+        default=''
+    )
+
+    especificaciones_traslado = models.TextField(
+        blank=True,
+        default=''
+    )
+
+    fecha_hora_estimada_entrega = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    fecha_hora_asignacion = models.DateTimeField(null=True, blank=True)
+    fecha_hora_aceptacion = models.DateTimeField(null=True, blank=True)
+    LIMITE_ACEPTACION_SEGUNDOS = 300
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADOS,
+        default='registrado'
+    )
+
     repartidor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
+        related_name='pedidos_asignados',
         null=True,
-        blank=True,
-        related_name='pedidos',
+        blank=True
     )
-    fecha_hora_asignacion = models.DateTimeField(null=True, blank=True)
-    # ponytail: expiración con pereza (cálculo al cargar); cron/tarea celery si hay many assignments
-    LIMITE_ACEPTACION_SEGUNDOS = 300
+
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
         verbose_name = 'Pedido'
         verbose_name_plural = 'Pedidos'
-        ordering = ['-id']
+        ordering = ['-fecha_creacion']
+
+    def puede_cambiar_a(self, nuevo_estado):
+        return nuevo_estado in self.TRANSICIONES_PERMITIDAS.get(
+            self.estado,
+            []
+        )
+
+    @classmethod
+    def generar_codigo(cls):
+        """Genera un código de seguimiento alfanumérico impredecible."""
+        caracteres = string.ascii_uppercase + string.digits
+        return ''.join(
+            secrets.choice(caracteres)
+            for _ in range(cls.LONGITUD_CODIGO)
+        )
 
     def __str__(self):
-        return f'Pedido #{self.id} ({self.get_estado_display()})'
+        return self.codigo
 
-class HistorialPedido(models.Model):
-    """Auditoría de eventos de un pedido (asignaciones, aceptaciones, rechazos, etc.)."""
+
+class HistorialEstado(models.Model):
     pedido = models.ForeignKey(
         Pedido,
         on_delete=models.CASCADE,
-        related_name='historial',
+        related_name='historial'
     )
-    descripcion = models.CharField(max_length=255)
-    fecha_hora = models.DateTimeField(auto_now_add=True)
+
+    estado_anterior = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    estado_nuevo = models.CharField(
+        max_length=20,
+        choices=Pedido.ESTADOS
+    )
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='cambios_estado_entrega'
+    )
+
+    fecha = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    fotografia = models.ImageField(
+        upload_to='entregas/',
+        blank=True,
+        null=True
+    )
+
+    incidencia = models.TextField(
+        blank=True
+    )
 
     class Meta:
-        verbose_name = 'Historial de pedido'
-        verbose_name_plural = 'Historiales de pedidos'
-        ordering = ['fecha_hora']
+        verbose_name = 'Historial de estado'
+        verbose_name_plural = 'Historial de estados'
+        ordering = ['fecha', 'pk']
 
     def __str__(self):
-        return f'{self.pedido} - {self.descripcion}'
+        return f'{self.pedido.codigo}: {self.estado_nuevo}'
+
+
+class Repartidor(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='repartidor',
+    )
+    pin = models.CharField(max_length=4, unique=True)
+    disponible = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Repartidor'
+        verbose_name_plural = 'Repartidores'
+
+    def __str__(self):
+        return self.user.get_username()

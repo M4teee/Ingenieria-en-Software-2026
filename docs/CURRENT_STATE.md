@@ -1,40 +1,47 @@
 # Estado actual
 
-Actualizado: 2026-10-15. Implementación de la HU #18 ("Aceptar asignacion de pedidos") en `main.repartidor`; no se modificó `clienteFinal`, `operario` ni `users`.
+Actualizado: 2026-10-15. Estado contrastado en la integración local de `origin/main` con `hu18-repartidor`; la disponibilidad y el acceso por PIN dependen de integrar primero `feature/repartidor-disponibilidad`.
 
 ## Implementación observada
 
-- `Backend/` contiene un proyecto Django 6.1.2. `.python-version` solicita Python 3.14; `requirements.txt` fija Django, `asgiref`, `sqlparse`, `django-crispy-forms` y `crispy-bootstrap5`.
-- La configuración local usa SQLite, `DEBUG=True` y una clave de desarrollo definida en settings. No es una configuración de producción.
-- `main.operario` tiene el modelo `Comercio` y su administración. `main.users` extiende el usuario Django y agrega un vínculo a `Vehiculo`; existen migraciones iniciales.
-- `main.repartidor` agrega (migración `0001_initial`): `RepartidorPerfil` (OneToOne con `User`, campo `disponible`), `Pedido` (FK a `Comercio` y a `User`, estado con choices `registrado/asignado/retirado/en_viaje/entregado/fallido/cancelado`, `fecha_hora_asignacion`) e `HistorialPedido` (auditoría por pedido). No existían modelos previos de pedido ni de historial; los de repartidor y de `clienteFinal` siguen siendo datos simulados en memoria.
-- HU #18 implementada en `main.repartidor`: la vista `home` muestra el pedido asignado con cuenta regresiva de 300 segundos (JS propio en `templates/repartidor/index.html`, hereda `base.html`); `aceptar` confirma el pedido a `retirado` y registra el evento en el historial; `rechazar` libera el pedido a `registrado`, registra "Rechazado por repartidor [Nombre]" y marca al repartidor no disponible; la expiración de los 5 minutos se evalúa de forma perezosa al cargar `home` y al procesar aceptar/rechazar (libera el pedido y marca al repartidor no disponible). Las vistas de aceptar/rechazar usan `transaction.atomic()` + `select_for_update()` y requieren POST.
-- La página de seguimiento de `clienteFinal` sigue con `PEDIDOS_SIMULADOS` en memoria; aún no consume el modelo `Pedido` nuevo.
-- La ruta de operario sigue intentando renderizar `hola.html`, que no existe en `Backend/templates/`.
-- `Frontend/front` contiene solo un texto marcador; no hay un frontend separado implementado.
+- `Backend/` contiene el backend Django; `.python-version` fija Python 3.14 y `requirements.txt` fija Django 6.1.2 y sus dependencias. La configuración local usa SQLite, `USE_TZ=True` y `America/Argentina/Buenos_Aires`; `DEBUG=True` y la clave en settings son solo de desarrollo.
+- `main.operario` mantiene los comercios, permite altas desde `/operario/pedidos/nuevo/` y limita la carga y confirmación a usuarios autenticados con `is_staff`. El servidor valida que el comercio siga activo. La confirmación muestra el código y ofrece copiarlo.
+- `main.repartidor.Pedido` persiste el comercio, código, dirección, especificaciones, fecha estimada, estado, repartidor opcional y clave de idempotencia. Los campos de alta son opcionales en la base para conservar filas previas; el formulario de altas los exige. La migración `0002` agrega los campos y estados sin eliminar los pedidos anteriores.
+- La migración `0004` incorpora el perfil `Repartidor` (PIN de cuatro dígitos y disponibilidad); `0005` agrega fechas de asignación y aceptación. La misma migración `0004` está duplicada de forma idéntica en las ramas HU 18 y disponibilidad para poder integrar disponibilidad primero sin recrear el perfil.
+- El nuevo pedido queda `registrado`, sin repartidor, con código alfanumérico de 20 caracteres generado con `secrets`; su primera fila `HistorialEstado` se crea en la misma transacción e identifica al operario. Los estados conservan el avance del repartidor y agregan cancelación antes del retiro. El historial ordena por fecha y clave primaria.
+- `main.clienteFinal` consulta pedidos e historial persistidos en `/clienteFinal/seguimiento/<codigo>/`. Es una consulta pública GET; muestra estado, comercio, estimación solo durante `en_viaje` y fechas del historial, sin exponer contacto, especificaciones, operador ni fotografías.
+- `main.repartidor` conserva la vista autenticada para avanzar pedidos asignados, adjuntar fotos al retirar o entregar y registrar incidencias. HU 18 añade aceptar/rechazar asignaciones con vencimiento de cinco minutos, usando `Pedido`, `HistorialEstado` y el perfil `Repartidor`; no introduce modelos paralelos `HistorialPedido` o `RepartidorPerfil`. La aceptación detiene el temporizador y habilita el flujo existente de retiro, dejando el estado en `asignado` hasta que el repartidor marque `retirado`. El rechazo/timeout libera el pedido a `registrado` y registra el evento en `HistorialEstado`. La comprobación del vencimiento es perezosa: sucede al cargar la pantalla o responder a la solicitud, no mediante una tarea en segundo plano.
+- `main.users` extiende `AbstractUser` y asocia opcionalmente un vehículo. `main.homePage` enruta superusuarios al admin, personal `is_staff` a la carga y otros usuarios a la interfaz del repartidor. `Frontend/front` sigue siendo un marcador de posición; las páginas están en plantillas Django.
 
-## Requisitos y planificación
+## Compatibilidad y límites
 
-Las fuentes versionadas describen siete épicas para comercios, pedidos, repartidores, despacho, operación móvil, consulta pública y auditoría. Son alcance planificado, no evidencia de funcionalidad terminada. El PGP organiza entregas entre el 9 de octubre y el 20 de noviembre de 2026; las fechas describen el plan, no el avance real del equipo.
+- La base `Backend/db.sqlite3` no existía antes de las verificaciones del 2026-10-15. La revisión creó el archivo vacío durante `migrate --check`; luego se aplicaron las migraciones. No había pedidos locales preexistentes que migrar. La migración usa campos opcionales/defaults compatibles con filas antiguas, pero la conservación de datos de una base poblada no se ensayó en este entorno.
+- HU 24 y HU 38 estaban representadas por datos simulados antes de este trabajo; ahora consumen el modelo persistido. La confirmación del proyecto describe los requisitos HU 12, HU 24 y HU 38. No se consultó Taiga en vivo.
+- La exportación Taiga versionada contiene 28 historias, 7 épicas y 2 hitos; es una derivación privada/sanitizada y no prueba el estado actual del tablero.
+- Requisitos de fuentes que exceden esta tarea —historial inmutable, operación sin conexión y preparación para producción— no se implementan aquí. Las imágenes del flujo de repartidor usan Pillow y el almacenamiento configurado por Django.
+- `Backend/config/settings.py` referencia `STATICFILES_DIRS = [BASE_DIR / 'static']`; la aplicación incluye estáticos propios y usa CDN externos para Bootstrap, iconos y tipografías en `base.html`.
 
-La exportación Taiga derivada y versionada contiene 28 historias de usuario, 7 épicas y 2 hitos. Se omitieron las cuentas y la actividad del export privado original; no se consultó Taiga en vivo. Un documento previo de esta carpeta indicaba 29 historias; las fuentes disponibles no permiten explicar la diferencia. Confirmar cantidad y estado con el equipo o el tablero cuando corresponda.
+## Verificaciones ejecutadas
 
-`docs/context/` contiene copias de las cinco fuentes Word y una derivación sanitizada del JSON de Taiga. `docs/SOURCE_INDEX.md` identifica formato, alcance y limitaciones; `docs/DOCUMENTATION_WORKFLOW.md` describe la revisión posterior a pull y previa a push. Estos documentos nuevos no alteran la implementación.
+En la instalación `.venv` creada desde cero con Python 3.14.8 y los paquetes de `requirements.txt`:
 
-## Verificaciones de esta revisión
+- `python manage.py check`: aprobado, sin incidencias.
+- `python manage.py makemigrations --check --dry-run`: aprobado, no hay cambios de modelo pendientes.
+- `migrate` seguido de `migrate --check`: aprobado con SQLite en memoria; el archivo SQLite predeterminado dentro del worktree no pudo abrirse en este entorno.
+- `python manage.py migrate`: aplicó correctamente la migración de orden `0003` sobre la base local; `migrate --check` confirmó que no quedan migraciones pendientes.
+- `python manage.py test`: aprobadas 38 pruebas en la integración local de HU 18.
+- `python -m pip check`: aprobado; no se detectaron dependencias rotas.
+- `python3 scripts/check_docs.py .`: aprobado, 35 enlaces Markdown locales comprobados; `git diff --check` sin errores.
+- Inspección visual local: recorrido de inicio de sesión, formulario, alta, confirmación, copiado al portapapeles y consulta pública completado. Los fixtures de navegador fueron retirados al terminar.
+- La instalación de dependencias requirió red. El primer intento quedó limitado por DNS del entorno aislado; la repetición autorizada completó la instalación.
 
-- Ejecutado en la rama `hu18-repartidor` con el venv del repositorio (Python 3.14.7, Django 6.1.2), desde `Backend/`:
-  - `manage.py makemigrations` (generó `main/repartidor/migrations/0001_initial.py`) y `manage.py migrate`: OK.
-  - `manage.py makemigrations --check --dry-run`: "No changes detected".
-  - `manage.py test` (suite completa): 26 pruebas, OK en ~14 s. Incluye 16 pruebas nuevas de `main.repartidor` (aceptación en tiempo, rechazo explícito, expiración a los 300 segundos, seguridad) y las 10 existentes de `clienteFinal` (no se modificaron).
-- `python3 scripts/check_docs.py .` desde la raíz del repositorio: OK, sin enlaces rotos ni rutas específicas de máquina.
-- Project Init 1.0.0 inspeccionó el repositorio (ver git log previo) y generó `scripts/check_docs.py` y `docs/DOCUMENTATION_WORKFLOW.md`.
+Los resultados definitivos y los comandos reproducibles están en [`GUIA-EJECUCION-Y-PRUEBAS.md`](GUIA-EJECUCION-Y-PRUEBAS.md). El recorrido por componentes está en [`TOUR-APLICACION.md`](TOUR-APLICACION.md).
 
-## Pendientes
+## Pendientes conocidos
 
-- Confirmar historias y estado real con el tablero Taiga.
-- Definir la interfaz frontend, la base de datos compartida y el despliegue.
-- Integrar el modelo `Pedido` con el seguimiento de `clienteFinal` y el flujo de asignación del operario (la asignación inicial no tiene vista: los pedidos se asignan por admin o por código).
-- La expiración de los 5 minutos es perezosa (se evalúa al cargar la vista o al aceptar/rechazar); si se necesita liberación inmediata sin interacción, hace falta una tarea programada (celery/cron).
-- Resolver la plantilla faltante de la ruta de operario.
-- Revisar claves, `DEBUG`, hosts, HTTPS y almacenamiento antes de cualquier uso de producción.
+- No hay pantalla de asignación de pedidos; solo existe el flujo de avance del repartidor una vez asignado.
+- La historia HU 18 pide notificar al operario después de un rechazo. El código recibido solo registra el evento; esta integración mantiene ese alcance y no agrega un mecanismo de notificación activa.
+- La interacción visual se comprobó en el navegador integrado y el copiado real funcionó; no se validó Windows.
+- No se ensayó una migración con pedidos heredados reales ni una instalación Windows.
+- Confirmar con el equipo el alcance y prioridad vigentes de las historias en Taiga; no se consultó el tablero en vivo.
+- Configurar secretos, hosts, HTTPS, base compartida y almacenamiento antes de cualquier despliegue. Django está configurado para desarrollo.

@@ -3,123 +3,164 @@
 {% block title %}Repartidor{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Panel del repartidor</h1>
-    <span class="badge {% if disponible %}bg-success{% else %}bg-secondary{% endif %} fs-6 px-3 py-2">
-        {% if disponible %}Disponible{% else %}No disponible{% endif %}
-    </span>
-</div>
+
+<h1 class="mb-4">Mi entrega activa</h1>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<p>Disponibilidad:
+    {% if disponible %}<span class="badge bg-success">Disponible</span>
+    {% else %}<span class="badge bg-secondary">No disponible</span>{% endif %}
+</p>
 
 {% if expirado %}
-<div class="alert alert-warning" role="alert">
-    <i class="bi bi-clock-history me-2"></i>
-    El tiempo de espera se agotó. El pedido fue liberado y tu disponibilidad cambió a <strong>No disponible</strong>.
-</div>
+    <div class="alert alert-warning" role="alert">
+        El tiempo de espera se agotó. El pedido fue liberado y tu disponibilidad cambió a <strong>No disponible</strong>.
+    </div>
 {% endif %}
 
-{% if asignado %}
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-info text-white">
-        <i class="bi bi-truck me-2"></i>Nueva solicitud de viaje
-    </div>
-    <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <strong>Comercio:</strong> {{ asignado.comercio.nombre }}
-            </div>
-            <div class="col-md-6">
-                <strong>Estado:</strong>
-                <span class="badge bg-info ms-2">{{ asignado.get_estado_display }}</span>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-12">
-                <strong>Dirección:</strong> {{ asignado.comercio.direccion }}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-12">
-                <strong>Contacto:</strong> {{ asignado.comercio.contacto }}
-            </div>
-        </div>
+{% if pedido_activo %}
 
-        <div class="mb-3" id="countdown-container">
-            <label class="form-label fw-bold">
-                <i class="bi bi-stopwatch me-1"></i>Tiempo restante:
-            </label>
-            <div class="input-group" style="max-width: 200px;">
-                <span class="input-group-text" id="countdown-display">
-                    <span id="minutes">00</span>:<span id="seconds">00</span>
-                </span>
-            </div>
-            <div class="form-text" id="countdown-hint">Tienes 5 minutos para responder.</div>
-        </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-        <form method="post" action="{% url 'repartidor_aceptar' asignado.id %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-app btn-lg me-2" id="btn-aceptar" {% if not disponible %}disabled{% endif %}>
-                <i class="bi bi-check-circle me-2"></i>Aceptar viaje
-            </button>
-        </form>
-        <form method="post" action="{% url 'repartidor_rechazar' asignado.id %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-outline-danger btn-lg" id="btn-rechazar" {% if not disponible %}disabled{% endif %}>
-                <i class="bi bi-x-circle me-2"></i>Rechazar viaje
-            </button>
-        </form>
+            <h2 class="h5">
+                Pedido {{ pedido_activo.codigo }}
+            </h2>
+
+            <p>
+                <strong>Estado actual:</strong>
+                {{ pedido_activo.get_estado_display }}
+            </p>
+
+            {% if pedido_activo.estado == 'asignado' %}
+
+                {% if esperando_respuesta %}
+                    <p>Comercio: {{ pedido_activo.comercio.nombre }}</p>
+                    <p>Dirección: {{ pedido_activo.direccion_destino }}</p>
+                    <div class="mb-3" id="countdown-container">
+                        Tiempo para responder:
+                        <strong id="countdown-display">{{ segundos_restantes }}</strong> segundos
+                    </div>
+                    <form method="post" action="{% url 'repartidor_aceptar' pedido_activo.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-app">Aceptar viaje</button>
+                    </form>
+                    <form method="post" action="{% url 'repartidor_rechazar' pedido_activo.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">Rechazar viaje</button>
+                    </form>
+                    <script>
+                        (() => {
+                            const display = document.getElementById('countdown-display');
+                            let seconds = Number(display.textContent);
+                            const timer = window.setInterval(() => {
+                                seconds = Math.max(0, seconds - 1);
+                                display.textContent = seconds;
+                                if (seconds === 0) {
+                                    window.clearInterval(timer);
+                                    window.setTimeout(() => window.location.reload(), 1000);
+                                }
+                            }, 1000);
+                        })();
+                    </script>
+                {% else %}
+
+                <form method="post"
+                      action="{% url 'actualizar_estado' pedido_activo.id %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="retirado">
+
+                    <div class="mb-3">
+                    <label for="foto-retirado" class="form-label">
+                   Fotografía (opcional)
+                  </label>
+
+                 <input
+                  type="file"
+                  id="foto-retirado"
+                  name="fotografia"
+                  class="form-control"
+                  accept="image/*"
+                 >
+                 </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Marcar como Retirado
+                    </button>
+                </form>
+
+                {% endif %}
+
+            {% elif pedido_activo.estado == 'retirado' %}
+
+                <form method="post"
+                      action="{% url 'actualizar_estado' pedido_activo.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="en_viaje">
+
+                    <button type="submit" class="btn btn-primary">
+                        Marcar como En viaje
+                    </button>
+                </form>
+
+            {% elif pedido_activo.estado == 'en_viaje' %}
+
+             <form method="post"
+                 action="{% url 'actualizar_estado' pedido_activo.id %}"
+                 class="mb-2"
+                 enctype="multipart/form-data">
+
+               {% csrf_token %}
+
+              <input type="hidden" name="estado" value="entregado">
+
+              <div class="mb-3">
+                 <label for="foto-entregado" class="form-label">
+                     Fotografía de entrega (opcional)
+                </label>
+
+                <input
+                  type="file"
+                  id="foto-entregado"
+                  name="fotografia"
+                 class="form-control"
+                 accept="image/*"
+             >
+             </div>
+
+             <button type="submit" class="btn btn-success">
+                 Marcar como Entregado
+             </button>
+
+             </form>
+
+                <form method="post"
+                      action="{% url 'actualizar_estado' pedido_activo.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="fallido">
+
+                    <button type="submit" class="btn btn-danger">
+                        Marcar Entrega Fallida
+                    </button>
+                </form>
+
+            {% endif %}
+
+        </div>
     </div>
-</div>
+
 {% else %}
-<div class="text-center py-5">
-    <i class="bi bi-inbox display-1 text-muted"></i>
-    <h3 class="mt-3 text-muted">Sin pedidos asignados</h3>
-    <p class="text-muted">Esperando nueva asignación...</p>
-</div>
+
+    <div class="alert alert-info">
+        No tenés ninguna entrega activa.
+    </div>
+
 {% endif %}
 
-{% endblock %}
-
-{% block extrastyle %}
-<script>
-(function() {
-    const segundosTotal = {{ segundos_restantes|default:0 }};
-    const countdownDisplay = document.getElementById('countdown-display');
-    const minutesEl = document.getElementById('minutes');
-    const secondsEl = document.getElementById('seconds');
-    const btnAceptar = document.getElementById('btn-aceptar');
-    const btnRechazar = document.getElementById('btn-rechazar');
-    const hintEl = document.getElementById('countdown-hint');
-
-    if (segundosTotal <= 0) return;
-
-    let segundos = segundosTotal;
-
-    function actualizar() {
-        const m = Math.floor(segundos / 60).toString().padStart(2, '0');
-        const s = (segundos % 60).toString().padStart(2, '0');
-        minutesEl.textContent = m;
-        secondsEl.textContent = s;
-
-        if (segundos <= 0) {
-            clearInterval(intervalo);
-            if (btnAceptar) btnAceptar.disabled = true;
-            if (btnRechazar) btnRechazar.disabled = true;
-            if (hintEl) hintEl.textContent = 'Tiempo agotado. Recarga la página.';
-            countdownDisplay.style.backgroundColor = 'var(--app-line)';
-            countdownDisplay.style.color = 'var(--app-muted)';
-        } else if (segundos <= 30) {
-            countdownDisplay.style.backgroundColor = '#fff3cd';
-            countdownDisplay.style.color = '#856404';
-        } else if (segundos <= 60) {
-            countdownDisplay.style.backgroundColor = '#ffe0b2';
-            countdownDisplay.style.color = '#e65100';
-        }
-
-        segundos--;
-    }
-
-    actualizar();
-    const intervalo = setInterval(actualizar, 1000);
-})();
-</script>
-{% endblock %}
+{% endblock content %}
