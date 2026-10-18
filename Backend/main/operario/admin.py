@@ -5,10 +5,10 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin
 
 admin.site.unregister(Group)
-admin.site.site_header = 'Panel de operario'
+admin.site.site_header = 'Administración'
 admin.site.site_title = 'Pedidos Martin'
 admin.site.index_title = 'Inicio'
-admin.site.site_url = '/'
+admin.site.site_url = None
 
 # Crea tu clase de administración extendiendo la de Django
 @admin.register(User)

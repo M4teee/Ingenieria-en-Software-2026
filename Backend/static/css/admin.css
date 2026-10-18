@@ -121,3 +121,17 @@ html[data-theme="dark"] {
         --default-button-hover-bg: #3A7650;
     }
 }
+
+/* NAV */
+.admin-nav {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.admin-nav > *{
+    margin: 4px 10px;
+}

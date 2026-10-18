@@ -29,17 +29,20 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navigation-content">
-                <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2 py-3 py-lg-0">
+                <div class="navbar-nav ms-auto me-auto align-items-lg-center gap-lg-3 py-3 py-lg-0">
                     {% if user.is_authenticated and user.is_staff %}
-                        <a class="nav-link" href="{% url 'operario:inicio' %}">Panel operario</a>
-                        <a class="btn btn-sm btn-app-outline" href="{% url 'admin:index' %}">Administración</a>
+                        <a class="nav-link" href="{% url 'operario:inicio' %}">Pedidos</a>
+                        <a class="nav-link" href="{% url 'admin:operario_comercio_changelist' %}">Comercios</a>
+                        <a class="nav-link" href="{% url 'admin:repartidor_repartidor_changelist' %}">Repartidores</a>
                     {% elif user.is_authenticated and user.repartidor %}
                         <a class="nav-link" href="{% url 'repartidor' %}">Panel repartidor</a>
                     {% elif not user.is_authenticated %}
                         <a class="btn btn-sm btn-app-outline" href="{% url 'login' %}?next={% url 'operario:inicio' %}">Iniciar sesión como operario</a>
                         <a class="btn btn-sm btn-app" href="{% url 'repartidor_login_pin' %}">Iniciar sesión como repartidor</a>
                     {% endif %}
-                    {% if user.is_authenticated %}
+                </div>
+                {% if user.is_authenticated %}
+                    <div class="navbar-nav align-items-lg-center gap-lg-2 py-3 py-lg-0">
                         <span class="navbar-user d-none d-lg-inline">
                             <i class="bi bi-person-circle" aria-hidden="true"></i> {{ user.get_username }}
                         </span>
@@ -49,8 +52,8 @@
                                 <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Cerrar sesión
                             </button>
                         </form>
-                    {% endif %}
-                </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </nav>
