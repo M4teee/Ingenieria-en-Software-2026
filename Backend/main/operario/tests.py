@@ -1,3 +1,4 @@
+from datetime import timedelta
 from uuid import UUID
 from unittest.mock import patch
 
@@ -158,6 +159,57 @@ class PanelOperarioTests(TestCase):
         self.assertEqual(
             self.client.get(reverse('operario:detalle_pedido', args=[self.pedido.pk])).status_code,
             403,
+        )
+
+    def test_asignado_sin_aceptar_no_aparece_en_el_panel(self):
+        repartidor_usuario = User.objects.create_user(
+            username='panel_repartidor_pendiente', password='test1234',
+        )
+        Repartidor.objects.create(user=repartidor_usuario, pin='1111', disponible=True)
+        self.pedido.repartidor = repartidor_usuario
+        self.pedido.estado = 'asignado'
+        self.pedido.fecha_hora_asignacion = timezone.now()
+        self.pedido.fecha_hora_aceptacion = None
+        self.pedido.save()
+
+        lista = self.client.get(reverse('operario:inicio'))
+        estado = self.client.get(reverse('operario:estado_pedidos'))
+
+        self.assertNotContains(lista, 'PANEL-001')
+        self.assertEqual(estado.json()['pedidos'], [])
+
+    def test_asignado_y_aceptado_aparece_en_el_panel(self):
+        repartidor_usuario = User.objects.create_user(
+            username='panel_repartidor_aceptado', password='test1234',
+        )
+        Repartidor.objects.create(user=repartidor_usuario, pin='2222', disponible=True)
+        self.pedido.repartidor = repartidor_usuario
+        self.pedido.estado = 'asignado'
+        self.pedido.fecha_hora_asignacion = None
+        self.pedido.fecha_hora_aceptacion = timezone.now()
+        self.pedido.save()
+
+        lista = self.client.get(reverse('operario:inicio'))
+        estado = self.client.get(reverse('operario:estado_pedidos'))
+
+        self.assertContains(lista, 'PANEL-001')
+        self.assertEqual(len(estado.json()['pedidos']), 1)
+        self.assertEqual(estado.json()['pedidos'][0]['codigo'], 'PANEL-001')
+
+    def test_panel_ordena_pedidos_por_antiguedad(self):
+        anterior = Pedido.objects.create(
+            codigo='PANEL-000', comercio=self.comercio,
+            direccion_destino='Destino 0', estado='registrado',
+        )
+        Pedido.objects.filter(pk=anterior.pk).update(
+            fecha_creacion=timezone.now() - timedelta(days=1),
+        )
+
+        lista = self.client.get(reverse('operario:inicio'))
+
+        self.assertLess(
+            lista.content.index(b'PANEL-000'),
+            lista.content.index(b'PANEL-001'),
         )
 
     def test_asignar_disponible_cambia_estado_y_registra_evento(self):
