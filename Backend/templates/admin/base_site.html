@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% load static i18n %}
+{% comment %} {% block userlinks %} 
+    <a href="{% url 'admin:operario_comercio_changelist' %}">Comercios</a> /
+    <a href="{% url 'admin:repartidor_repartidor_changelist' %}">Repartidores</a> /
+    {{ block.super }}
+{% endblock %} {% endcomment %}
+
+{% block userlinks %}
+    {% comment %} <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+        {% csrf_token %}
+        <button type="submit">{% translate 'Cerrar sesión' %}</button>
+    </form> {% endcomment %}
+{% endblock %}
+{% block welcome-msg %}{% endblock %}
+{% block nav-global %}
+    <nav class="admin-nav">
+        {% if user.is_authenticated and user.is_staff %}
+            <a class="nav-link" href="{% url 'operario:inicio' %}">Pedidos</a>
+            <a class="nav-link" href="{% url 'admin:operario_comercio_changelist' %}">Comercios</a>
+            <a class="nav-link" href="{% url 'admin:repartidor_repartidor_changelist' %}">Repartidores</a>
+        {% endif %}
+        <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+            {% csrf_token %}
+            <span style="margin: 0 20px 0 2px;">|</span><span style="margin-right: 4px;"><i class="bi bi-person-circle" aria-hidden="true" style="margin-right: 4px"></i>{{ user.get_username }}</span>
+            <button type="submit">{% translate 'Cerrar sesión' %}</button>
+        </form> 
+    </nav>
+{% endblock %}
