@@ -5,14 +5,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    # No tiene sentido hacer un modelo Vehiculo a parte. Debería ser un campo mas tipo CHOICES en Usuario
-    vehiculo = models.ForeignKey(
-        'users.Vehiculo',
-        on_delete=models.PROTECT,
-        related_name='usuarios',
-        null=True,
-        blank=True
-    )
 
     @property
     def disponible(self):
