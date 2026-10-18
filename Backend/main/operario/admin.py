@@ -10,19 +10,10 @@ admin.site.site_title = 'Pedidos Martin'
 admin.site.index_title = 'Inicio'
 admin.site.site_url = None
 
-# Crea tu clase de administración extendiendo la de Django
+
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = UserAdmin.list_display + ('vehiculo',)
-    list_select_related = ('vehiculo',)
-    list_filter = UserAdmin.list_filter + ('vehiculo',)
-
-    fieldsets = UserAdmin.fieldsets + (
-        ('Datos adicionales', {'fields': ('vehiculo',)}),
-    )
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Datos adicionales', {'fields': ('vehiculo',)}),
-    )
+    pass
 
 @admin.register(Comercio)
 class ComercioAdmin(admin.ModelAdmin):

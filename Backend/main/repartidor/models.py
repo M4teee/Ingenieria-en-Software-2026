@@ -158,6 +158,12 @@ class HistorialEstado(models.Model):
 
 
 class Repartidor(models.Model):
+    VEHICULOS = [
+        ("bicicleta", "Bicicleta"),
+        ("moto","Moto"),
+        ("auto","Auto"),
+        ("camion","Camión")
+    ]
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -165,6 +171,11 @@ class Repartidor(models.Model):
     )
     pin = models.CharField(max_length=4, unique=True)
     disponible = models.BooleanField(default=False)
+    vehiculo = models.CharField(
+        max_length=20,
+        choices=VEHICULOS,
+        default='moto'
+    )
 
     class Meta:
         verbose_name = 'Repartidor'
