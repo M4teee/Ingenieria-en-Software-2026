@@ -15,7 +15,6 @@ from main.operario.models import Comercio
 from main.users.models import User
 from .models import HistorialEstado, Pedido, Repartidor
 
-
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class PedidoTransicionesTests(TestCase):
 
@@ -399,6 +398,118 @@ class DisponibilidadRepartidorTests(TestCase):
             self.client.post(reverse('repartidor_toggle_disponibilidad')).status_code,
             403,
         )
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class HistorialEntregasTests(TestCase):
+    def setUp(self):
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio Historial', direccion='Calle 200', contacto='111222333',
+        )
+        self.repartidor = User.objects.create_user(
+            username='historial_repartidor', password='test1234',
+        )
+        self.perfil = Repartidor.objects.create(
+            user=self.repartidor, pin='3344',
+        )
+        self.otro_repartidor = User.objects.create_user(
+            username='otro_historial', password='test1234',
+        )
+        Repartidor.objects.create(user=self.otro_repartidor, pin='4433')
+
+    def _crear_pedido_finalizado(self, codigo, estado, repartidor, destino='Destino prueba'):
+        return Pedido.objects.create(
+            codigo=codigo,
+            repartidor=repartidor,
+            estado=estado,
+            direccion_destino=destino,
+            comercio=self.comercio,
+        )
+
+    def test_historial_muestra_entregas_finalizadas_con_sus_datos(self):
+        self._crear_pedido_finalizado('HIST-ENT-01', 'entregado', self.repartidor, 'Calle 1')
+        self._crear_pedido_finalizado('HIST-FAL-02', 'fallido', self.repartidor, 'Calle 2')
+        self._crear_pedido_finalizado('HIST-CAN-03', 'cancelado', self.repartidor, 'Calle 3')
+        pedido_activo = Pedido.objects.create(
+            codigo='HIST-ACT-04', repartidor=self.repartidor, estado='en_viaje',
+        )
+
+        self.client.force_login(self.repartidor)
+        response = self.client.get(reverse('historial_entregas'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'HIST-ENT-01')
+        self.assertContains(response, 'HIST-FAL-02')
+        self.assertContains(response, 'HIST-CAN-03')
+        self.assertContains(response, 'Comercio Historial')
+        self.assertContains(response, 'Calle 1')
+        self.assertNotContains(response, 'HIST-ACT-04')
+
+    def test_historial_ordenado_por_fecha_de_cierre_mas_reciente_primero(self):
+        from datetime import timedelta
+
+        for indice, estado in enumerate(['entregado', 'fallido']):
+            pedido = self._crear_pedido_finalizado(
+                f'HIST-ORD-{indice:02d}', estado, self.repartidor,
+            )
+            evento = HistorialEstado.objects.create(
+                pedido=pedido,
+                estado_nuevo=estado,
+                usuario=self.repartidor,
+            )
+            HistorialEstado.objects.filter(pk=evento.pk).update(
+                fecha=timezone.now() - timedelta(days=indice),
+            )
+
+        self.client.force_login(self.repartidor)
+        response = self.client.get(reverse('historial_entregas'))
+
+        codigos = [pedido.codigo for pedido in response.context['entregas']]
+        self.assertEqual(codigos, ['HIST-ORD-00', 'HIST-ORD-01'])
+
+    def test_historial_vacio_muestra_mensaje_exacto(self):
+        self.client.force_login(self.repartidor)
+
+        response = self.client.get(reverse('historial_entregas'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Aún no tienes entregas registradas en tu historial',
+        )
+        self.assertFalse(bool(response.context['entregas']))
+
+    def test_historial_no_muestra_entregas_de_otros_repartidores(self):
+        self._crear_pedido_finalizado('HIST-PROPIO', 'entregado', self.repartidor)
+        pedido_ajeno = self._crear_pedido_finalizado(
+            'HIST-AJENO', 'entregado', self.otro_repartidor,
+        )
+        HistorialEstado.objects.create(
+            pedido=pedido_ajeno, estado_nuevo='entregado', usuario=self.otro_repartidor,
+        )
+
+        self.client.force_login(self.repartidor)
+        response = self.client.get(reverse('historial_entregas'))
+
+        self.assertContains(response, 'HIST-PROPIO')
+        self.assertNotContains(response, 'HIST-AJENO')
+
+    def test_historial_exige_autenticacion(self):
+        response = self.client.get(reverse('historial_entregas'))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f"{reverse('repartidor_login_pin')}?next={reverse('historial_entregas')}",
+        )
+
+    def test_historial_rechaza_usuario_sin_perfil_de_repartidor(self):
+        sin_perfil = User.objects.create_user(username='sin_perfil_historial')
+        self.client.force_login(sin_perfil)
+
+        response = self.client.get(reverse('historial_entregas'))
+
+        self.assertEqual(response.status_code, 403)
 
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
