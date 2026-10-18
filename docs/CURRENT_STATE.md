@@ -1,37 +1,51 @@
 # Estado actual
 
-Actualizado: 2026-10-15. Revisión documental del repositorio y de las fuentes académicas versionadas. No se modificó código de la aplicación.
+Actualizado: 2026-10-16. Contrasta el código de la rama de rediseño con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
 
 ## Implementación observada
 
-- `Backend/` contiene un proyecto Django 6.1.2. `.python-version` solicita Python 3.14; `requirements.txt` fija Django, `asgiref`, `sqlparse`, `django-crispy-forms` y `crispy-bootstrap5`.
-- La configuración local usa SQLite, `DEBUG=True` y una clave de desarrollo definida en settings. No es una configuración de producción.
-- `main.operario` tiene el modelo `Comercio` y su administración. `main.users` extiende el usuario Django y agrega un vínculo a `Vehiculo`; existen migraciones iniciales.
-- La página de seguimiento acepta códigos de demostración servidos desde `PEDIDOS_SIMULADOS` en memoria. No hay un modelo persistente de pedido ni un flujo de despacho implementado.
-- La vista del repartidor requiere autenticación y renderiza una página básica. La ruta de operario intenta renderizar `hola.html`, que no existe en `Backend/templates/`.
-- `Frontend/front` contiene solo un texto marcador; no hay un frontend separado implementado.
-- Hay pruebas en `main/clienteFinal/tests.py`; las pruebas de otras aplicaciones son archivos vacíos o de plantilla. No se ejecutaron en esta revisión.
+- `Backend/` contiene el backend Django en Python 3.14; `requirements.txt` fija Django 6.1.2 y las dependencias de formularios e imágenes. SQLite es la base local configurada. `Frontend/` es un marcador, no una aplicación frontend aparte.
+- `main.homePage` deriva las visitas anónimas de `/` al formulario público de seguimiento; `/clienteFinal/` mantiene la misma consulta. Las sesiones `is_staff` se dirigen a `/operario/` y las sesiones con perfil activo de repartidor a `/repartidor/`. La navegación compartida muestra accesos de login por rol cuando no hay sesión y opciones del propio rol cuando la hay.
+- `main.operario` mantiene comercios y gestiona pedidos desde plantillas Django. El operario registra pedidos asociados a comercios activos; la vista vuelve a validar el comercio durante la escritura. El alta es idempotente por clave de solicitud, genera un código seguro y registra `Registrado` en el historial dentro de una transacción.
+- El panel de operario en `/operario/` lista pedidos activos, permite abrir el detalle y asignar manualmente un repartidor disponible a un pedido registrado sin asignar. Estado, asignación e historial se guardan juntos. Una respuesta JSON actualiza la lista cada 15 segundos mientras el panel permanece abierto.
+- `main.repartidor` conserva el perfil con PIN de cuatro dígitos, disponibilidad, respuesta a la asignación en cinco minutos y transiciones del pedido. El repartidor autenticado ve los pedidos que le pertenecen, consulta detalles e historial, y puede adjuntar una fotografía opcional al retirar, entregar o registrar una falla. Las imágenes se limitan a JPEG, PNG o WebP, máximo 10 MB y una por transición. El acceso a evidencia está restringido al personal del sistema o al repartidor dueño del pedido.
+- `main.clienteFinal` ofrece búsqueda pública de solo lectura por código en `/clienteFinal/` y consulta en `/clienteFinal/seguimiento/<codigo>/`. Lee el pedido y el historial persistidos. La página pública no presenta datos de contacto, especificaciones, usuarios internos ni fotografías.
+- Django Admin mantiene datos de configuración: usuarios, comercios y perfiles de repartidor. No reemplaza los flujos operativos de las plantillas propias.
+- Las plantillas comparten identidad SGR y conservan la paleta verde/menta. La navegación es colapsable en pantallas estrechas; operario y repartidor tienen paneles propios y la vista pública concentra el seguimiento.
+- Django Admin conserva la autorización estándar de Django: requiere usuario activo con `is_staff`, y cada operación requiere permisos de modelo. El enlace se muestra solo a usuarios `is_staff`; no se modificó la política ni se otorgaron permisos nuevos.
 
-## Requisitos y planificación
+## Requisitos, acuerdos y discrepancias
 
-Las fuentes versionadas describen siete épicas para comercios, pedidos, repartidores, despacho, operación móvil, consulta pública y auditoría. Son alcance planificado, no evidencia de funcionalidad terminada. El PGP organiza entregas entre el 9 de octubre y el 20 de noviembre de 2026; las fechas describen el plan, no el avance real del equipo.
+- **Requisito de HU 12:** comercio activo, estado inicial Registrado, código no predecible, destino, especificaciones y estimación. La implementación actual los satisface en el flujo web; las pruebas cubren alta, repetición, invalidación del comercio, colisión y permisos.
+- **Acuerdo del equipo (2026-10-16):** el operario elige manualmente un repartidor disponible desde la web como solución provisional entre los pedidos registrados y el módulo del repartidor.
+- **HU 22/30 no implementadas:** sus criterios originales de asignación automática —incluida la cercanía donde corresponde— siguen pendientes. El flujo manual provisional no satisface ni completa esas historias. El modelo tampoco registra ubicación suficiente para calcular cercanía.
+- **HU 18:** el repartidor puede aceptar o rechazar la asignación, y la expiración se procesa al entrar al módulo o responder. No se envía una notificación externa al repartidor ni una notificación activa al operario tras un rechazo; el operario puede observar los cambios en el panel al actualizarse.
+- No se encontró interfaz para cancelar un pedido, ni una operación de asignación automática. Tampoco se encontraron campos de dimensión/volumen para seleccionar vehículos por capacidad.
+- Las fuentes académicas listadas en `SOURCE_INDEX.md` describen necesidades y alternativas; no convierten por sí solas cada propuesta en una implementación confirmada.
 
-La exportación Taiga derivada y versionada contiene 28 historias de usuario, 7 épicas y 2 hitos. Se omitieron las cuentas y la actividad del export privado original; no se consultó Taiga en vivo. Un documento previo de esta carpeta indicaba 29 historias; las fuentes disponibles no permiten explicar la diferencia. Confirmar cantidad y estado con el equipo o el tablero cuando corresponda.
+## Datos y compatibilidad
 
-`docs/context/` contiene copias de las cinco fuentes Word y una derivación sanitizada del JSON de Taiga. `docs/SOURCE_INDEX.md` identifica formato, alcance y limitaciones; `docs/DOCUMENTATION_WORKFLOW.md` describe la revisión posterior a pull y previa a push. Estos documentos nuevos no alteran la implementación.
+- Los pedidos nuevos se relacionan con `Comercio`; `Pedido.repartidor` es opcional para que un pedido pueda existir antes de su asignación. `HistorialEstado` conserva estado anterior/nuevo, usuario, fecha, incidencia y archivo fotográfico.
+- El rediseño no cambió modelos ni datos. La revisión previa ejecutó `makemigrations --check --dry-run` sin detectar cambios de modelo pendientes.
+- La base local contiene datos de desarrollo preexistentes. No se alteraron ni usaron como evidencia funcional; la inspección del panel fue de solo lectura. La compatibilidad con una base productiva poblada no se validó.
+- `DEBUG=True`, clave de desarrollo, almacenamiento local y servicio `runserver` hacen que esta configuración sea solo de desarrollo.
 
 ## Verificaciones de esta revisión
 
-- Project Init 1.0.0 inspeccionó el repositorio: rama `main`, estado limpio antes de esta tarea, stack detectado Python/Django.
-- Project Init 1.0.0 copió las cinco fuentes Word sin sobrescribir documentos existentes y generó `scripts/check_docs.py` y `docs/DOCUMENTATION_WORKFLOW.md`. La exportación Taiga se sanitizó con el script versionado del proyecto y se verificó el recuento 7/28/2.
-- `python3.14 -m django --version` no pudo ejecutarse: el intérprete disponible no tiene Django instalado. No se instalaron dependencias en el proyecto ni se ejecutaron `manage.py check` o las pruebas.
-- Antes de editar se guardaron hashes de los 81 archivos rastreados. Después de documentar, los 71 archivos de código, recursos, dependencias y runtime comparados mantienen el mismo hash; los cambios restantes son documentación, `.gitignore` y el `CLAUDE.md` generado.
+En esta tarea, con Python 3.14.8 y las dependencias de `requirements.txt` desde `Backend/`:
 
-## Pendientes
+- `../.venv/bin/python manage.py check`: aprobado.
+- `../.venv/bin/python manage.py test`: 70 pruebas aprobadas.
+- `python3 scripts/check_docs.py .` desde la raíz: 42 enlaces locales verificados.
+- `git diff --check`: aprobado.
+- La revisión previa ejecutó `makemigrations --check --dry-run` sin cambios detectados, `migrate --check` aprobado y `pip check` sin dependencias rotas.
+- La suite validó la raíz pública, login y redirecciones por rol, ausencia de enlaces cruzados, entrada única de carga, control de acceso al Admin y rechazo de una mutación sobre pedido de otro repartidor, además de los flujos preexistentes.
+- Se inspeccionaron visualmente en el navegador local las vistas públicas y del operario con un viewport estrecho. No se accedió con credenciales a la vista autenticada del repartidor ni se hizo una revisión visual de escritorio amplio; las rutas, el aislamiento y las acciones del repartidor sí están cubiertos por pruebas automatizadas.
 
-- Confirmar historias y estado real con el tablero Taiga.
-- Definir la interfaz frontend, la base de datos compartida y el despliegue.
-- Completar el modelo y los flujos de pedidos según los requisitos aprobados.
-- Resolver la plantilla faltante de la ruta de operario.
-- Instalar las dependencias en un entorno de desarrollo del proyecto y ejecutar `manage.py check` y las pruebas existentes.
-- Revisar claves, `DEBUG`, hosts, HTTPS y almacenamiento antes de cualquier uso de producción.
+## Límites y pendientes
+
+- Confirmar y priorizar con el equipo cómo conciliar asignación manual con los criterios originales de asignación automática de HU 22/30.
+- Definir un canal de notificaciones para los criterios de HU 18 que requieren avisar al operario.
+- No se validó producción, Windows, migración desde una base poblada, ni almacenamiento remoto de archivos.
+- Las versiones de Django/paquetes y el entorno se ejecutaron localmente en Python 3.14. No se declara compatibilidad con otras versiones.
+- Consultar el [manual de uso](MANUAL-DE-USO.md), la [guía de ejecución y pruebas](GUIA-EJECUCION-Y-PRUEBAS.md) y el [tour técnico](TOUR-APLICACION.md) para los recorridos.

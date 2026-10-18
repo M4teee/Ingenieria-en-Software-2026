@@ -1,116 +1,176 @@
 {% extends "base.html" %}
 
-{% block title %}Repartidor{% endblock %}
+{% block title %}Panel repartidor{% endblock %}
 
 {% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Mi jornada</p>
+    <h1>Panel del repartidor</h1>
+    <p>Consultá tu pedido asignado, actualizá su recorrido y revisá tus entregas anteriores.</p>
+</header>
 
-<h1 class="mb-4">Mi entrega activa</h1>
-
-{% if pedido_activo %}
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-
-            <h2 class="h5">
-                Pedido {{ pedido_activo.codigo }}
-            </h2>
-
-            <p>
-                <strong>Estado actual:</strong>
-                {{ pedido_activo.get_estado_display }}
-            </p>
-
-            {% if pedido_activo.estado == 'asignado' %}
-
-                <form method="post"
-                      action="{% url 'actualizar_estado' pedido_activo.id %}"
-                      enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="hidden" name="estado" value="retirado">
-
-                    <div class="mb-3">
-                    <label for="foto-retirado" class="form-label">
-                   Fotografía (opcional)
-                  </label>
-
-                 <input
-                  type="file"
-                  id="foto-retirado"
-                  name="fotografia"
-                  class="form-control"
-                  accept="image/*"
-                 >
-                 </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        Marcar como Retirado
-                    </button>
-                </form>
-
-            {% elif pedido_activo.estado == 'retirado' %}
-
-                <form method="post"
-                      action="{% url 'actualizar_estado' pedido_activo.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="estado" value="en_viaje">
-
-                    <button type="submit" class="btn btn-primary">
-                        Marcar como En viaje
-                    </button>
-                </form>
-
-            {% elif pedido_activo.estado == 'en_viaje' %}
-
-             <form method="post"
-                 action="{% url 'actualizar_estado' pedido_activo.id %}"
-                 class="mb-2"
-                 enctype="multipart/form-data">
-
-               {% csrf_token %}
-
-              <input type="hidden" name="estado" value="entregado">
-
-              <div class="mb-3">
-                 <label for="foto-entregado" class="form-label">
-                     Fotografía de entrega (opcional)
-                </label>
-
-                <input
-                  type="file"
-                  id="foto-entregado"
-                  name="fotografia"
-                 class="form-control"
-                 accept="image/*"
-             >
-             </div>
-
-             <button type="submit" class="btn btn-success">
-                 Marcar como Entregado
-             </button>
-
-             </form>
-
-                <form method="post"
-                      action="{% url 'actualizar_estado' pedido_activo.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="estado" value="fallido">
-
-                    <button type="submit" class="btn btn-danger">
-                        Marcar Entrega Fallida
-                    </button>
-                </form>
-
-            {% endif %}
-
-        </div>
+{% if messages %}
+    <div class="message-stack" aria-live="polite">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
     </div>
-
-{% else %}
-
-    <div class="alert alert-info">
-        No tenés ninguna entrega activa.
-    </div>
-
 {% endif %}
 
+{% if perfil_repartidor %}
+    <section class="availability-bar" aria-labelledby="disponibilidad-heading">
+        <div>
+            <h2 id="disponibilidad-heading" class="h6 mb-1">Disponibilidad</h2>
+            <p class="mb-0">Estado actual: <strong>{% if disponible %}Disponible{% else %}No disponible{% endif %}</strong></p>
+        </div>
+        <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}">
+            {% csrf_token %}
+            {% if perfil_repartidor.disponible %}
+                <button type="submit" class="btn btn-sm btn-app-outline">Marcarme no disponible</button>
+            {% else %}
+                <button type="submit" class="btn btn-sm btn-app">Marcarme disponible</button>
+            {% endif %}
+        </form>
+    </section>
+{% endif %}
+
+{% if expirado %}
+    <div class="alert alert-warning mt-4" role="status">
+        El tiempo de espera se agotó. El pedido fue liberado y tu disponibilidad cambió a <strong>No disponible</strong>.
+    </div>
+{% endif %}
+
+<section class="app-section mt-4" aria-labelledby="active-order-heading">
+    <div class="app-section-heading">
+        <div>
+            {% if esperando_respuesta %}
+                <p class="eyebrow">Asignación pendiente de respuesta</p>
+            {% elif pedido_activo %}
+                <p class="eyebrow">Pedido en curso</p>
+            {% else %}
+                <p class="eyebrow">Sin pedido activo</p>
+            {% endif %}
+            <h2 id="active-order-heading" class="h5 mb-0">Tu pedido actual</h2>
+        </div>
+        {% if pedido_activo %}<span class="status-badge status-{{ pedido_activo.estado }}">{{ pedido_activo.get_estado_display }}</span>{% endif %}
+    </div>
+
+    {% if pedido_activo %}
+        <div class="app-section-body">
+            {% if esperando_respuesta %}
+                <div class="driver-request">
+                    <div>
+                        <h3 class="h5">Nueva asignación</h3>
+                        <p class="text-secondary">Respondé dentro de los cinco minutos para aceptar o liberar este pedido.</p>
+                        <dl class="order-details">
+                            <dt>Comercio</dt><dd>{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
+                            <dt>Destino</dt><dd>{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
+                        </dl>
+                        <p class="countdown mb-0" id="countdown-container">Tiempo para responder: <strong id="countdown-display">{{ segundos_restantes }}</strong> segundos</p>
+                    </div>
+                    <div class="driver-actions" aria-label="Responder asignación">
+                        <form method="post" action="{% url 'repartidor_aceptar' pedido_activo.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-app">Aceptar pedido</button>
+                        </form>
+                        <form method="post" action="{% url 'repartidor_rechazar' pedido_activo.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-app-outline">Rechazar</button>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    (() => {
+                        const display = document.getElementById('countdown-display');
+                        let seconds = Number(display.textContent);
+                        const timer = window.setInterval(() => {
+                            seconds = Math.max(0, seconds - 1);
+                            display.textContent = seconds;
+                            if (seconds === 0) {
+                                window.clearInterval(timer);
+                                window.setTimeout(() => window.location.reload(), 1000);
+                            }
+                        }, 1000);
+                    })();
+                </script>
+            {% else %}
+                <div class="driver-order">
+                    <div>
+                        <h3 class="h5">Pedido {{ pedido_activo.codigo }}</h3>
+                        <dl class="order-details">
+                            <dt>Comercio</dt><dd>{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
+                            {% if pedido_activo.comercio %}<dt>Contacto</dt><dd>{{ pedido_activo.comercio.contacto }}</dd>{% endif %}
+                            <dt>Destino</dt><dd>{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
+                            <dt>Especificaciones</dt><dd>{{ pedido_activo.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
+                        </dl>
+                        <a href="{% url 'repartidor_detalle_pedido' pedido_activo.pk %}">Ver detalle e historial</a>
+                    </div>
+
+                    <div class="driver-actions">
+                        {% if pedido_activo.estado == 'asignado' %}
+                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="estado" value="retirado">
+                                <label for="foto-retirado" class="form-label">Foto de retiro <span class="text-secondary">(opcional)</span></label>
+                                <input type="file" id="foto-retirado" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <button type="submit" class="btn btn-app mt-3">Marcar como Retirado</button>
+                            </form>
+                        {% elif pedido_activo.estado == 'retirado' %}
+                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="estado" value="en_viaje">
+                                <button type="submit" class="btn btn-app">Iniciar viaje</button>
+                            </form>
+                        {% elif pedido_activo.estado == 'en_viaje' %}
+                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="estado" value="entregado">
+                                <label for="foto-entregado" class="form-label">Foto de entrega <span class="text-secondary">(opcional)</span></label>
+                                <input type="file" id="foto-entregado" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <button type="submit" class="btn btn-app mt-3">Marcar como entregado</button>
+                            </form>
+                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="estado" value="fallido">
+                                <label for="foto-fallido" class="form-label">Foto de incidencia <span class="text-secondary">(opcional)</span></label>
+                                <input type="file" id="foto-fallido" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <button type="submit" class="btn btn-app-outline mt-3">Marcar entrega fallida</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="empty-state">No tenés pedidos asignados o en curso.</p>
+    {% endif %}
+</section>
+
+<section class="app-section mt-4" aria-labelledby="history-heading">
+    <div class="app-section-heading">
+        <div>
+            <p class="eyebrow">Pedidos finalizados</p>
+            <h2 id="history-heading" class="h5 mb-0">Historial de tus pedidos</h2>
+        </div>
+    </div>
+    {% if pedidos_cerrados %}
+        <div class="table-responsive">
+            <table class="table app-table align-middle mb-0">
+                <thead><tr><th scope="col">Código</th><th scope="col">Comercio</th><th scope="col">Estado</th><th scope="col">Detalle</th></tr></thead>
+                <tbody>
+                    {% for pedido in pedidos_cerrados %}
+                        <tr>
+                            <td>{{ pedido.codigo }}</td>
+                            <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
+                            <td><span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></td>
+                            <td><a class="btn btn-sm btn-app-outline" href="{% url 'repartidor_detalle_pedido' pedido.pk %}">Ver historial</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty-state">Todavía no hay pedidos finalizados en tu historial.</p>
+    {% endif %}
+</section>
 {% endblock content %}

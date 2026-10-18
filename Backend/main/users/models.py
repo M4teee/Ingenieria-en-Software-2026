@@ -16,9 +16,14 @@ class User(AbstractUser):
 
     @property
     def disponible(self):
-        return not self.pedidos_asignados.filter(
+        tiene_pedido_activo = self.pedidos_asignados.filter(
             estado__in=['asignado', 'retirado', 'en_viaje']
         ).exists()
+        try:
+            disponibilidad_declarada = self.repartidor.disponible
+        except User.repartidor.RelatedObjectDoesNotExist:
+            disponibilidad_declarada = True
+        return disponibilidad_declarada and not tiene_pedido_activo
 
     class Meta:
         verbose_name = 'Usuario'

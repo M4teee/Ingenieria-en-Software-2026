@@ -1,15 +1,17 @@
 
-/* ---------- Seguimiento de envío ---------- */
 .tracking-card {
-    max-width: 32rem;
-    padding: 1.5rem;
+    max-width: 100%;
+    padding: clamp(1.25rem, 3vw, 2rem);
     background: #ffffff;
     border: 1px solid var(--app-line);
-    border-radius: 20px;
-    box-shadow: 0 12px 32px rgba(35, 70, 50, 0.08);
+    border-radius: 14px;
 }
 
 .tracking-card .form-control:focus {
     border-color: var(--app-green);
     box-shadow: 0 0 0 0.2rem rgba(47, 93, 63, 0.2);
+}
+
+.tracking-card .form-label {
+    font-weight: 700;
 }

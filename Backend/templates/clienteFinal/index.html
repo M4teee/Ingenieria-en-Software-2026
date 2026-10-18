@@ -2,34 +2,43 @@
 
 {% load static %}
 
-{% block title %}Seguimiento de envío{% endblock %}
+{% block title %}Seguimiento{% endblock %}
 
-{% block extrastyles %}
+{% block extrastyle %}
     <link rel="stylesheet" href="{% static 'css/tracking_card.css' %}">
-{% endblock extrastyles %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock extrastyle %}
 
 {% block content %}
-    <div class="page-heading">
-        <h1 class="h2">Seguí tu envío</h1>
-        <p>Ingresá el código de seguimiento que recibiste para ver el estado de tu pedido.</p>
-    </div>
-
-    <form method="get" class="tracking-card">
-        <label for="codigo-seguimiento" class="form-label fw-semibold">Código de seguimiento</label>
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-            <input
-                type="text"
-                id="codigo-seguimiento"
-                name="codigo"
-                class="form-control"
-                placeholder="Ej: ABC123456"
-                autocomplete="off"
-                required
-            >
+    <section class="customer-hero" aria-labelledby="customer-title">
+        <div class="customer-copy">
+            <p class="eyebrow">Seguimiento de pedidos</p>
+            <h1 id="customer-title">Tu envío, en cada etapa.</h1>
+            <p>Ingresá el código que te compartió el comercio para consultar el estado y el historial de tu pedido.</p>
         </div>
-        <button type="submit" class="btn btn-app w-100 mt-3" disabled>
-            <i class="bi bi-search"></i> Buscar envío
-        </button>
-    </form>
+        <form method="get" action="{% url 'clienteFinal' %}" class="tracking-card" aria-label="Buscar un pedido">
+            <label for="codigo-seguimiento" class="form-label">Código de seguimiento</label>
+            {% if error %}
+                <div class="alert alert-danger" id="codigo-error" role="alert">{{ error }}</div>
+            {% endif %}
+            <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="bi bi-upc-scan"></i></span>
+                <input
+                    type="text"
+                    id="codigo-seguimiento"
+                    name="codigo"
+                    class="form-control"
+                    placeholder="Ingresá tu código"
+                    autocomplete="off"
+                    value="{{ codigo }}"
+                    {% if error %}aria-describedby="codigo-error"{% endif %}
+                    required
+                >
+            </div>
+            <button type="submit" class="btn btn-app w-100 mt-3">
+                <i class="bi bi-search" aria-hidden="true"></i> Consultar pedido
+            </button>
+            <p class="tracking-help">No necesitás crear una cuenta.</p>
+        </form>
+    </section>
 {% endblock %}

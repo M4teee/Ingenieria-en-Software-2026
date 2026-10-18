@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de entrega{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'repartidor' %}">Volver al panel</a></p>
+<div class="page-heading">
+    <h1 class="h2">Pedido {{ pedido.codigo }}</h1>
+    <p>Estado: <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></p>
+</div>
+
+<section class="card shadow-sm mb-4" aria-labelledby="detalle-heading">
+    <div class="card-body">
+        <h2 id="detalle-heading" class="h5">Datos del viaje</h2>
+        <dl class="row mb-0">
+            <dt class="col-sm-4">Comercio</dt><dd class="col-sm-8">{{ pedido.comercio.nombre|default:"Sin comercio" }}</dd>
+            {% if pedido.comercio %}<dt class="col-sm-4">Dirección del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.direccion }}</dd><dt class="col-sm-4">Contacto</dt><dd class="col-sm-8">{{ pedido.comercio.contacto }}</dd>{% endif %}
+            <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido.direccion_destino|default:"Sin destino" }}</dd>
+            <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
+            <dt class="col-sm-4">Entrega estimada</dt><dd class="col-sm-8">{% if pedido.fecha_hora_estimada_entrega %}{{ pedido.fecha_hora_estimada_entrega|date:"d/m/Y H:i" }}{% else %}Sin estimación{% endif %}</dd>
+        </dl>
+    </div>
+</section>
+
+<section class="card shadow-sm" aria-labelledby="historial-heading">
+    <div class="card-body">
+        <h2 id="historial-heading" class="h5">Historial de estados</h2>
+        {% if historial %}
+            <ol class="list-group list-group-numbered">
+                {% for evento in historial %}
+                    <li class="list-group-item">
+                        <strong>{{ evento.get_estado_nuevo_display }}</strong>
+                        <span class="text-secondary">{{ evento.fecha|date:"d/m/Y H:i:s" }}</span>
+                        {% if evento.incidencia %}<p class="mb-1">{{ evento.incidencia }}</p>{% endif %}
+                        {% if evento.fotografia %}<a href="{% url 'repartidor_fotografia' evento.pk %}" target="_blank" rel="noopener"><img src="{% url 'repartidor_fotografia' evento.pk %}" alt="Evidencia del estado {{ evento.get_estado_nuevo_display }}" class="img-thumbnail mt-2" style="max-width: 14rem; max-height: 14rem;"></a>{% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
+        {% else %}
+            <p class="text-secondary mb-0">No hay eventos de historial.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
