@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from main.operario.models import Comercio
 from main.users.models import User
@@ -398,6 +399,12 @@ class DisponibilidadRepartidorTests(TestCase):
             self.client.post(reverse('repartidor_toggle_disponibilidad')).status_code,
             403,
         )
+
+    def test_pin_alfanumerico_es_invalido(self):
+        self.perfil.pin = 'A123'
+
+        with self.assertRaises(ValidationError):
+         self.perfil.full_clean()
 
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])

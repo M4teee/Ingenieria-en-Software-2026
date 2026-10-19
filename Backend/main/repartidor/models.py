@@ -3,6 +3,7 @@ import string
 
 from django.conf import settings
 from django.db import models
+from django.core.validators import RegexValidator
 
 
 class Pedido(models.Model):
@@ -169,7 +170,16 @@ class Repartidor(models.Model):
         on_delete=models.CASCADE,
         related_name='repartidor',
     )
-    pin = models.CharField(max_length=4, unique=True)
+    pin = models.CharField(
+     max_length=4,
+     unique=True,
+     validators=[
+          RegexValidator(
+              regex=r'^\d{4}$',
+              message='El PIN debe contener exactamente 4 dígitos numéricos.'
+           )
+        ]
+    )
     disponible = models.BooleanField(default=False)
     vehiculo = models.CharField(
         max_length=20,
