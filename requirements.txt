@@ -4,3 +4,5 @@ sqlparse==0.6.0
 django-crispy-forms==2.7
 crispy-bootstrap5==2026.9
 Pillow==12.3.0
+python-dotenv
+psycopg2-binary
