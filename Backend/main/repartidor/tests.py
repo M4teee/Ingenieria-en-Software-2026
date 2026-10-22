@@ -193,15 +193,28 @@ class ActualizarEstadoTests(TestCase):
 
         self.client.post(
             f'/repartidor/pedido/{self.pedido.id}/actualizar-estado/',
-            {'estado': 'fallido'}
+            {'estado': 'fallido', 'motivo_fallo': 'Destinatario ausente, no respondió al timbre.'}
         )
 
         self.pedido.refresh_from_db()
         self.assertEqual(self.pedido.estado, 'fallido')
         historial = self.pedido.historial.first()
         self.assertEqual(historial.estado_nuevo, 'fallido')
-        self.assertIn('Retornar el pedido al centro de distribución', historial.incidencia)
+        self.assertEqual(historial.incidencia, 'Destinatario ausente, no respondió al timbre.')
         self.assertTrue(self.repartidor.disponible)
+
+    def test_fallido_sin_motivo_no_cambia_estado_ni_crea_historial(self):
+        self.pedido.estado = 'en_viaje'
+        self.pedido.save()
+
+        self.client.post(
+            f'/repartidor/pedido/{self.pedido.id}/actualizar-estado/',
+            {'estado': 'fallido'}
+        )
+
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.estado, 'en_viaje')
+        self.assertFalse(self.pedido.historial.exists())
 
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
@@ -682,14 +695,18 @@ class FotografiasEntregaTests(TestCase):
     def test_foto_se_acepta_para_entrega_fallida(self):
         self.client.post(
             reverse('actualizar_estado', args=[self.pedido.pk]),
-            {'estado': 'fallido', 'fotografia': self._imagen()},
+            {
+                'estado': 'fallido',
+                'motivo_fallo': 'Dirección inexistente.',
+                'fotografia': self._imagen(),
+            },
         )
 
         self.pedido.refresh_from_db()
         evento = HistorialEstado.objects.get(pedido=self.pedido)
         self.assertEqual(self.pedido.estado, 'fallido')
         self.assertTrue(evento.fotografia.name.endswith('.jpg'))
-        self.assertIn('Retornar el pedido al centro de distribución', evento.incidencia)
+        self.assertEqual(evento.incidencia, 'Dirección inexistente.')
 
     def test_fallo_al_persistir_estado_revierte_historial_y_elimina_foto(self):
         with patch.object(Pedido, 'save', side_effect=IntegrityError('fallo simulado')):

@@ -10,6 +10,13 @@ FORMATOS_FOTOGRAFIA = {'JPEG', 'PNG', 'WEBP'}
 class ActualizarEstadoForm(forms.Form):
     estado = forms.CharField()
     fotografia = forms.ImageField(required=False)
+    motivo_fallo = forms.CharField(required=False, max_length=500, strip=True)
+
+    def clean_motivo_fallo(self):
+        motivo = self.cleaned_data.get('motivo_fallo', '').strip()
+        if self.data.get('estado') == 'fallido' and not motivo:
+            raise ValidationError('Indicá brevemente por qué falló la entrega.')
+        return motivo
 
     def clean_fotografia(self):
         fotografia = self.cleaned_data.get('fotografia')

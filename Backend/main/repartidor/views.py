@@ -374,10 +374,7 @@ def actualizar_estado(req, pedido_id):
     incidencia = ''
 
     if nuevo_estado == 'fallido':
-        incidencia = (
-            'Destinatario ausente. '
-            'Retornar el pedido al centro de distribución.'
-        )
+        incidencia = formulario.cleaned_data['motivo_fallo']
 
     fotografia = formulario.cleaned_data['fotografia']
 
