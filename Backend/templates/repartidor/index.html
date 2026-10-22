@@ -132,7 +132,9 @@
                             <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <input type="hidden" name="estado" value="fallido">
-                                <label for="foto-fallido" class="form-label">Foto de incidencia <span class="text-secondary">(opcional)</span></label>
+                                <label for="motivo-fallido" class="form-label">Motivo de la entrega fallida</label>
+                                <textarea id="motivo-fallido" name="motivo_fallo" class="form-control" rows="2" required maxlength="500" placeholder="Ej: destinatario ausente, dirección inexistente, etc."></textarea>
+                                <label for="foto-fallido" class="form-label mt-2">Foto de incidencia <span class="text-secondary">(opcional)</span></label>
                                 <input type="file" id="foto-fallido" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
                                 <button type="submit" class="btn btn-app-outline mt-3">Marcar entrega fallida</button>
                             </form>
