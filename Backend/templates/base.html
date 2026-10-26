@@ -33,7 +33,7 @@
                     {% if user.is_authenticated and user.is_staff %}
                         <a class="nav-link" href="{% url 'operario:inicio' %}">Pedidos</a>
                         <a class="nav-link" href="{% url 'admin:operario_comercio_changelist' %}">Comercios</a>
-                        <a class="nav-link" href="{% url 'admin:repartidor_repartidor_changelist' %}">Repartidores</a>
+                        <a class="nav-link" href="{% url 'operario:repartidores' %}">Repartidores</a>
                     {% elif user.is_authenticated and user.repartidor %}
                         <a class="nav-link" href="{% url 'repartidor' %}">Panel repartidor</a>
                     {% elif not user.is_authenticated %}

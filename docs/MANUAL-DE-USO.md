@@ -22,11 +22,12 @@ El rol administrativo mantiene los datos de configuración. Para operar pedidos,
 ## Operario
 
 1. En `/`, elegí **Iniciar sesión como operario** e ingresá con una cuenta activa `is_staff`. Al completar el acceso, se abre `/operario/`. También podés navegar directamente a esa ruta.
-2. El panel lista pedidos registrados, asignados, retirados y en viaje, con estado actualizado periódicamente. Usá la única acción principal **Cargar pedido** o `/operario/pedidos/nuevo/`.
+2. El panel lista pedidos registrados, asignados, retirados y en viaje, con estado actualizado periódicamente. Usá **Cargar pedido** o `/operario/pedidos/nuevo/`.
 3. Seleccioná un comercio activo y completá dirección de destino, especificaciones de traslado y fecha/hora estimadas. Los campos requeridos se validan en el servidor.
 4. Presioná **Registrar Pedido**. La pantalla de confirmación presenta el mensaje de éxito y el código de seguimiento, que se puede copiar. El pedido nace como `Registrado`, sin repartidor, y su historial recibe el evento inicial.
 5. En el detalle del pedido, elegí un repartidor activo y disponible y presioná **Asignar pedido**. El sistema comprueba nuevamente la disponibilidad y registra el evento de asignación. El pedido queda `Asignado` y el repartidor tiene cinco minutos para aceptar o rechazarlo desde su panel.
 6. Si el comercio se inactiva antes de enviar el formulario, el servidor rechaza el alta con el mensaje exigido por HU 12. Si un repartidor ya no está disponible, no se realiza la asignación.
+7. Abrí **Repartidores** o `/operario/repartidores/` para consultar usuario, vehículo y disponibilidad. En **Nuevo repartidor** o `/operario/repartidores/nuevo/`, ingresá un usuario y un PIN numérico de cuatro dígitos; nombre, apellido y e-mail son opcionales. El perfil comienza no disponible y su vehículo inicial es moto.
 
 La asignación manual es un puente provisional elegido por el equipo. Las HU 22 y 30 siguen sin implementar y no se consideran completas: no hay cálculo automático ni de cercanía. Tampoco se envía aviso externo; el repartidor ve la solicitud al abrir o actualizar `/repartidor/`.
 

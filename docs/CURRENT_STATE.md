@@ -1,12 +1,13 @@
 # Estado actual
 
-Actualizado: 2026-10-18. Contrasta el código de la rama de rediseño con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
+Actualizado: 2026-10-26. Contrasta el código de la rama actual con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
 
 ## Implementación observada
 
-- `Backend/` contiene el backend Django en Python 3.14; `requirements.txt` fija Django 6.1.2 y las dependencias de formularios e imágenes. SQLite es la base local configurada. `Frontend/` es un marcador, no una aplicación frontend aparte.
+- `Backend/` contiene el backend Django en Python 3.14; `requirements.txt` fija Django 6.1.2 y las dependencias de formularios e imágenes. SQLite es la base predeterminada, reemplazada si `.env` define `DATABASE_URL`. `Frontend/` es un marcador, no una aplicación frontend aparte.
 - `main.homePage` deriva las visitas anónimas de `/` al formulario público de seguimiento; `/clienteFinal/` mantiene la misma consulta. Las sesiones `is_staff` se dirigen a `/operario/` y las sesiones con perfil activo de repartidor a `/repartidor/`. La navegación compartida muestra accesos de login por rol cuando no hay sesión y opciones del propio rol cuando la hay.
 - `main.operario` mantiene comercios y gestiona pedidos desde plantillas Django. El operario registra pedidos asociados a comercios activos; la vista vuelve a validar el comercio durante la escritura. El alta es idempotente por clave de solicitud, genera un código seguro y registra `Registrado` en el historial dentro de una transacción.
+- `main.operario` ofrece `/operario/repartidores/`, una lista protegida para `is_staff` con usuario, vehículo y disponibilidad; y `/operario/repartidores/nuevo/`, que crea en una transacción un usuario sin contraseña utilizable y su perfil con PIN ingresado de cuatro dígitos. Nombre, apellido y correo son opcionales. Los perfiles nuevos empiezan no disponibles y usan el vehículo predeterminado del modelo (`moto`).
 - El panel de operario en `/operario/` lista los pedidos no finalizados (`registrado`, `asignado`, `retirado`, `en_viaje`) ordenados por antigüedad, con comercio, destino, estado y repartidor asignado; permite abrir el detalle y asignar manualmente un repartidor disponible a un pedido registrado sin asignar. Un pedido `asignado` que todavía espera la aceptación del repartidor (sin `fecha_hora_aceptacion`) no se incluye en esa lista; aparece recién cuando el repartidor confirma. Estado, asignación e historial se guardan juntos. Una respuesta JSON con el mismo filtro actualiza la lista cada 15 segundos mientras el panel permanece abierto.
 - `main.repartidor` conserva el perfil con PIN de cuatro dígitos, disponibilidad, respuesta a la asignación en cinco minutos y transiciones del pedido. El repartidor autenticado ve los pedidos que le pertenecen, consulta detalles e historial, y puede adjuntar una fotografía opcional al retirar, entregar o registrar una falla. Las imágenes se limitan a JPEG, PNG o WebP, máximo 10 MB y una por transición. El acceso a evidencia está restringido al personal del sistema o al repartidor dueño del pedido.
 - `main.repartidor` incluye el historial de entregas del repartidor en `/repartidor/historial/` (`historial_entregas`): lista de solo lectura, filtrada al repartidor de la sesión, con los pedidos en estado `entregado`, `fallido` o `cancelado`, ordenados del más reciente primero según la fecha del evento de cierre del historial (con `fecha_creacion` como respaldo), usando `select_related('comercio')` y una subconsulta anotada para la fecha de cierre. Muestra código, comercio, destino, estado final y fecha/hora de cierre; sin entregas muestra "Aún no tienes entregas registradas en tu historial". El índice del repartidor enlaza a esta sección y la vista exige sesión y perfil activo de repartidor (redirección al login por PIN; 403 sin perfil).
@@ -35,6 +36,10 @@ Actualizado: 2026-10-18. Contrasta el código de la rama de rediseño con la con
 ## Verificaciones de esta revisión
 
 En esta tarea, con Python 3.14.8 y las dependencias de `requirements.txt` desde `Backend/`:
+
+- `python manage.py test` desde `Backend/`, con `DATABASE_URL` vacío para usar la base de prueba SQLite: 86 pruebas aprobadas; chequeo del sistema sin problemas.
+- `python scripts/check_docs.py .` desde la raíz: 42 enlaces Markdown locales verificados.
+- `git diff --check`: aprobado.
 
 - `../.venv/bin/python manage.py check`: aprobado.
 - `../.venv/bin/python manage.py test`: 79 pruebas aprobadas (73 previas más 6 nuevas del historial de entregas del repartidor: listado con datos de entregas finalizadas, orden cronológico descendente por fecha de cierre, mensaje exacto de historial vacío, aislamiento entre repartidores, redirección a login sin sesión y 403 sin perfil de repartidor).
