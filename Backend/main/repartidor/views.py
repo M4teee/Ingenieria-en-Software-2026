@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import transaction
+from django.db.models import F, OuterRef, Subquery
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import FileResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
@@ -127,6 +128,31 @@ def home(req):
             'pedidos_cerrados': pedidos_cerrados,
         }
     )
+
+
+@login_required(login_url='repartidor_login_pin')
+def historial_entregas(req):
+    _exigir_repartidor_activo(req.user)
+
+    fecha_cierre = HistorialEstado.objects.filter(
+        pedido=OuterRef('pk'),
+        estado_nuevo__in=['entregado', 'fallido', 'cancelado'],
+    ).order_by('-fecha', '-pk')
+
+    entregas = (
+        Pedido.objects
+        .filter(
+            repartidor=req.user,
+            estado__in=['entregado', 'fallido', 'cancelado'],
+        )
+        .select_related('comercio')
+        .annotate(fecha_cierre=Subquery(fecha_cierre.values('fecha')[:1]))
+        .order_by(F('fecha_cierre').desc(nulls_last=True), '-fecha_creacion')
+    )
+
+    return render(req, 'repartidor/historial.html', {
+        'entregas': entregas,
+    })
 
 
 @login_required(login_url='repartidor_login_pin')
@@ -348,10 +374,7 @@ def actualizar_estado(req, pedido_id):
     incidencia = ''
 
     if nuevo_estado == 'fallido':
-        incidencia = (
-            'Destinatario ausente. '
-            'Retornar el pedido al centro de distribución.'
-        )
+        incidencia = formulario.cleaned_data['motivo_fallo']
 
     fotografia = formulario.cleaned_data['fotografia']
 

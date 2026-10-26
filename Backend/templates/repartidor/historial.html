@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de entregas{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'repartidor' %}">Volver al panel</a></p>
+<header class="page-heading">
+    <p class="eyebrow">Mi jornada</p>
+    <h1>Historial de entregas</h1>
+    <p>Consultá tus viajes finalizados, del más reciente al más antiguo.</p>
+</header>
+
+<section class="app-section" aria-labelledby="historial-entregas-heading">
+    <div class="app-section-heading">
+        <div>
+            <p class="eyebrow">Viajes finalizados</p>
+            <h2 id="historial-entregas-heading" class="h5 mb-0">Entregas registradas</h2>
+        </div>
+    </div>
+    {% if entregas %}
+        <div class="table-responsive">
+            <table class="table app-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Código</th>
+                        <th scope="col">Comercio</th>
+                        <th scope="col">Destino</th>
+                        <th scope="col">Estado final</th>
+                        <th scope="col">Cierre</th>
+                        <th scope="col">Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in entregas %}
+                        <tr>
+                            <td>{{ pedido.codigo }}</td>
+                            <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
+                            <td>{{ pedido.direccion_destino|default:"Sin destino" }}</td>
+                            <td><span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></td>
+                            <td>{% if pedido.fecha_cierre %}{{ pedido.fecha_cierre|date:"d/m/Y H:i" }}{% else %}{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}{% endif %}</td>
+                            <td><a class="btn btn-sm btn-app-outline" href="{% url 'repartidor_detalle_pedido' pedido.pk %}">Ver detalle</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty-state">Aún no tienes entregas registradas en tu historial</p>
+    {% endif %}
+</section>
+{% endblock content %}

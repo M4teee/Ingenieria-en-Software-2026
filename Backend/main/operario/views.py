@@ -32,29 +32,28 @@ def _exigir_operario(request):
         raise PermissionDenied
 
 
-@login_required
-def inicio(request):
-    _exigir_operario(request)
-    pedidos = (
+def _pedidos_en_curso():
+    return (
         Pedido.objects.filter(
             estado__in=('registrado', 'asignado', 'retirado', 'en_viaje')
         )
+        .exclude(estado='asignado', fecha_hora_aceptacion__isnull=True)
         .select_related('comercio', 'repartidor')
         .order_by('fecha_creacion', 'pk')
     )
+
+
+@login_required
+def inicio(request):
+    _exigir_operario(request)
+    pedidos = _pedidos_en_curso()
     return render(request, 'operario/inicio.html', {'pedidos': pedidos})
 
 
 @login_required
 def estado_pedidos(request):
     _exigir_operario(request)
-    pedidos = (
-        Pedido.objects.filter(
-            estado__in=('registrado', 'asignado', 'retirado', 'en_viaje')
-        )
-        .select_related('comercio', 'repartidor')
-        .order_by('fecha_creacion', 'pk')
-    )
+    pedidos = _pedidos_en_curso()
     return JsonResponse({
         'pedidos': [{
             'codigo': pedido.codigo,
