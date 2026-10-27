@@ -16,6 +16,7 @@ from main.users.models import User
 
 from .forms import (
     AsignarPedidoForm,
+    ComercioForm,
     MENSAJE_COMERCIO_INACTIVO,
     PedidoForm,
     RepartidorForm,
@@ -34,7 +35,7 @@ class NoSePudoGenerarCodigoError(Exception):
 
 
 def _exigir_operario(request):
-    if not request.user.is_staff:
+    if not request.user.is_operario:
         raise PermissionDenied
 
 
@@ -54,6 +55,30 @@ def inicio(request):
     _exigir_operario(request)
     pedidos = _pedidos_en_curso()
     return render(request, 'operario/inicio.html', {'pedidos': pedidos})
+
+
+@login_required
+def comercios(request):
+    _exigir_operario(request)
+    return render(request, 'operario/comercios.html', {
+        'comercios': Comercio.objects.all(),
+    })
+
+
+@login_required
+def nuevo_comercio(request):
+    _exigir_operario(request)
+
+    if request.method == 'POST':
+        formulario = ComercioForm(request.POST)
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, 'Comercio dado de alta exitosamente.')
+            return redirect('operario:comercios')
+    else:
+        formulario = ComercioForm()
+
+    return render(request, 'operario/nuevo_comercio.html', {'form': formulario})
 
 
 @login_required
@@ -79,7 +104,11 @@ def nuevo_repartidor(request):
                     last_name=datos['apellido'],
                     email=datos['email'],
                 )
-                Repartidor.objects.create(user=usuario, pin=datos['pin'])
+                Repartidor.objects.create(
+                    user=usuario,
+                    pin=datos['pin'],
+                    vehiculo=datos['vehiculo'],
+                )
             messages.success(request, 'Repartidor dado de alta exitosamente.')
             return redirect('operario:repartidores')
     else:
@@ -232,7 +261,7 @@ def _crear_pedido(formulario, usuario):
 
 @login_required
 def cargar_pedido(request):
-    if not request.user.is_staff:
+    if not request.user.is_operario:
         raise PermissionDenied
 
     if request.method == 'POST':
@@ -281,7 +310,7 @@ def cargar_pedido(request):
 
 @login_required
 def pedido_registrado(request, pedido_id):
-    if not request.user.is_staff:
+    if not request.user.is_operario:
         raise PermissionDenied
 
     pedido = get_object_or_404(

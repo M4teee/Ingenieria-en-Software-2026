@@ -653,6 +653,15 @@ class FotografiasEntregaTests(TestCase):
             404,
         )
 
+        operario = User.objects.create_user(
+            username='operario_foto', is_operario=True,
+        )
+        self.client.force_login(operario)
+        self.assertEqual(
+            self.client.get(reverse('repartidor_fotografia', args=[evento.pk])).status_code,
+            200,
+        )
+
     def test_foto_invalida_no_cambia_estado_ni_crea_historial(self):
         archivo = SimpleUploadedFile(
             'no-es-imagen.png', b'contenido invalido', content_type='image/png',

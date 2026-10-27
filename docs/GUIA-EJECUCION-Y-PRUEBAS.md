@@ -86,9 +86,9 @@ La aplicación se abrió en un navegador local y se inspeccionaron visualmente l
 ### Escenarios de navegación y permisos
 
 - Persona anónima: `/` muestra la búsqueda pública y los accesos diferenciados a `/login/?next=/operario/` y `/repartidor/login-pin/`.
-- Cuenta activa `is_staff`: el login redirige al panel `/operario/`; abrir `/` desde una sesión activa también lleva al panel.
+- Cuenta activa `is_operario`: el login redirige al panel `/operario/`; abrir `/` desde una sesión activa también lleva al panel. Tener `is_staff` sin `is_operario` no concede acceso al módulo.
 - Cuenta con perfil activo de repartidor: el PIN inicia sesión y `/` lleva a `/repartidor/`.
-- Un usuario sin `is_staff` no obtiene acceso a Django Admin. Un operario autorizado mantiene el acceso sin requerir que se lo convierta en superusuario.
+- `is_operario` y `is_staff` son independientes: `is_operario` permite el módulo de operario y `is_staff` permite entrar a Django Admin (sujeto a permisos de modelo). Ninguno exige ser superusuario.
 - La navegación pública no muestra herramientas operativas; la del repartidor no ofrece seguimiento ni acciones de operario; el panel de operario mantiene una sola acción principal para cargar pedidos.
 
 ## Limitaciones conocidas
@@ -104,6 +104,7 @@ La aplicación se abrió en un navegador local y se inspeccionaron visualmente l
 - **No se puede activar el entorno en Fish:** usá `source .venv/bin/activate.fish`, no el script de Bash/Zsh `activate`.
 - **No se encuentra Django:** confirmá que el entorno `.venv` esté activo y ejecutá `python -m pip install -r requirements.txt` desde la raíz.
 - **Migraciones pendientes:** desde `Backend/`, revisá `showmigrations` y ejecutá `python manage.py migrate`. No recrees ni borres SQLite.
-- **Carga denegada:** el usuario debe tener `is_staff=True` y haber iniciado sesión.
+- **Carga denegada:** el usuario debe tener `is_operario=True` y haber iniciado sesión.
+- **Permiso operativo tras migrar:** la migración `users.0004_user_is_operario` conserva los accesos de las cuentas que ya tenían `is_staff=True`; nuevas cuentas deben recibir `is_operario=True` para abrir `/operario/`.
 - **No aparece un comercio o repartidor:** comprobá en Django Admin que el comercio esté activo y que el perfil del repartidor esté activo y disponible, y que no tenga otro pedido activo.
 - **Prueba fallida:** ejecutá el caso por separado y revisá el traceback antes de cambiar datos locales.

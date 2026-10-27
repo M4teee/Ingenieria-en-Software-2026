@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Comercios{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div class="page-heading mb-0">
+        <h1 class="h2">Comercios</h1>
+        <p>Consultá los comercios registrados y su estado.</p>
+    </div>
+    <a class="btn btn-app" href="{% url 'operario:nuevo_comercio' %}">Nuevo comercio</a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<section class="app-section" aria-labelledby="comercios-heading">
+    <div class="app-section-body">
+        <h2 id="comercios-heading" class="h5">Comercios registrados</h2>
+        {% if comercios %}
+            <div class="table-responsive">
+                <table class="table app-table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Dirección</th>
+                            <th scope="col">Contacto</th>
+                            <th scope="col">Activo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comercio in comercios %}
+                            <tr>
+                                <td>{{ comercio.nombre }}</td>
+                                <td>{{ comercio.direccion }}</td>
+                                <td>{{ comercio.contacto }}</td>
+                                <td>
+                                    {% if comercio.activo %}
+                                        <span class="badge text-bg-success">Sí</span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary">No</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-secondary mb-0">Todavía no hay comercios registrados.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

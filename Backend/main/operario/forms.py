@@ -103,6 +103,11 @@ class RepartidorForm(forms.Form):
         label='E-mail',
         widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'email'}),
     )
+    vehiculo = forms.ChoiceField(
+        choices=[('', 'Seleccioná un vehículo'), *Repartidor.VEHICULOS],
+        label='Vehículo',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
     pin = forms.CharField(
         max_length=4,
         min_length=4,
@@ -127,3 +132,31 @@ class RepartidorForm(forms.Form):
         if Repartidor.objects.filter(pin=pin).exists():
             raise ValidationError('Ese PIN ya está asignado a otro repartidor.')
         return pin
+
+
+class ComercioForm(forms.ModelForm):
+    activo = forms.TypedChoiceField(
+        choices=[
+            ('', 'Seleccioná un estado'),
+            ('true', 'Activo'),
+            ('false', 'Inactivo'),
+        ],
+        coerce=lambda valor: valor == 'true',
+        empty_value=None,
+        label='Activo',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+
+    class Meta:
+        model = Comercio
+        fields = ('nombre', 'direccion', 'contacto', 'activo')
+        labels = {
+            'nombre': 'Nombre',
+            'direccion': 'Dirección',
+            'contacto': 'Contacto',
+        }
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control'}),
+            'contacto': forms.TextInput(attrs={'class': 'form-control'}),
+        }

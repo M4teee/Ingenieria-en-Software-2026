@@ -10,19 +10,19 @@ Este recorrido explica cómo se conectan las interfaces y los datos de un pedido
 | `main.operario` | Comercios, alta de pedido, panel, detalle y asignación manual | `models.py`, `forms.py`, `views.py`, `urls.py`, `Backend/templates/operario/` |
 | `main.repartidor` | Pedido, perfil, estados, historial y evidencia fotográfica | `models.py`, `forms.py`, `views.py`, `urls.py`, `Backend/templates/repartidor/` |
 | `main.clienteFinal` | Búsqueda pública e historial de solo lectura | `views.py`, `urls.py`, `Backend/templates/clienteFinal/` |
-| `main.users` | Usuario extendido y vehículo | `Backend/main/users/models.py` |
+| `main.users` | Usuario extendido, rol de operario y vehículo | `Backend/main/users/models.py`, `Backend/main/users/migrations/` |
 | `config` | Ajustes, URLs globales y entrypoints ASGI/WSGI | `Backend/config/` |
 
 La UI se sirve con plantillas Django. `Frontend/` no contiene una app separada. Bootstrap, iconos y tipografía se cargan desde CDN.
 
 ## Recorrido funcional
 
-1. Una persona anónima abre `/` y ve el formulario público de seguimiento. La misma vista está disponible en `/clienteFinal/`; la navegación ofrece accesos separados al login Django del operario y al PIN del repartidor. Una sesión `is_staff` que abre `/` va a `/operario/`; una sesión vinculada a un perfil activo de repartidor va a `/repartidor/`.
+1. Una persona anónima abre `/` y ve el formulario público de seguimiento. La misma vista está disponible en `/clienteFinal/`; la navegación ofrece accesos separados al login Django del operario y al PIN del repartidor. Una sesión `is_operario` que abre `/` va a `/operario/`; una sesión vinculada a un perfil activo de repartidor va a `/repartidor/`.
 2. `PedidoForm` limita el selector a comercios activos y valida campos, fecha/hora y clave de idempotencia. La vista repite la validación de comercio dentro de `_crear_pedido`.
 3. La transacción crea el pedido `registrado` sin repartidor, genera un código con `secrets` y registra el evento inicial en `HistorialEstado`. Una restricción de unicidad protege el código y la clave de solicitud; las colisiones de código se reintentan.
 4. La confirmación muestra el código y permite copiarlo. El panel permite abrir el pedido y seleccionar manualmente un repartidor disponible; el servidor verifica otra vez que siga disponible y registra el cambio a `asignado` y su historial.
 5. El repartidor autenticado por su PIN ve la asignación en `/repartidor/`, dispone de cinco minutos para responder y luego puede marcar retiro, viaje, entrega o falla, dentro de las transiciones permitidas.
-6. Cada cambio de estado guarda un evento. Si se adjunta una foto permitida, la vista valida el contenido, el tipo, el tamaño y la cantidad; la escritura de evento/estado es atómica. El acceso a la evidencia requiere ser staff o el repartidor asignado.
+6. Cada cambio de estado guarda un evento. Si se adjunta una foto permitida, la vista valida el contenido, el tipo, el tamaño y la cantidad; la escritura de evento/estado es atómica. El acceso a la evidencia requiere `is_staff`, `is_operario` o ser el repartidor asignado.
 7. El cliente busca el código desde `/` o `/clienteFinal/`. La búsqueda dirige al pedido persistido en `/clienteFinal/seguimiento/<codigo>/`. HU 24/38 muestran el estado e historial existentes; la interfaz pública omite contacto, especificaciones, usuarios internos y fotos. La fecha estimada se muestra solo en `en_viaje`.
 
 La asignación manual es un puente provisional elegido para la aplicación web. Las HU 22 y 30 siguen sin implementar y no se consideran completas: el flujo no realiza asignación automática ni cálculo de cercanía.
@@ -51,9 +51,9 @@ Desde `Backend/`, ejecutá `python manage.py test` para la suite. `main.operario
 
 ## Estado del rediseño de navegación
 
-La entrada anónima `/` presenta el seguimiento público y las opciones de autenticación para operario y repartidor. Las sesiones `is_staff` y las asociadas a un perfil de repartidor activo se dirigen a sus respectivos paneles, evitando que el inicio de sesión vuelva al selector público. La navegación compartida se filtra por rol y es colapsable en pantallas estrechas.
+La entrada anónima `/` presenta el seguimiento público y las opciones de autenticación para operario y repartidor. Las sesiones `is_operario` y las asociadas a un perfil de repartidor activo se dirigen a sus respectivos paneles, evitando que el inicio de sesión vuelva al selector público. La navegación compartida se filtra por rol y es colapsable en pantallas estrechas.
 
-El operario conserva una sola acción principal de alta, el listado con estados y detalles, la asignación manual y el acceso a Django Admin. El repartidor conserva la disponibilidad, la aceptación/rechazo, las transiciones, fotografías, el historial de sus pedidos y el aislamiento por propietario. Django Admin mantiene el control estándar de Django basado en cuenta activa, `is_staff` y permisos de modelo.
+El módulo `/operario/` y sus páginas hijas requieren `is_operario=True`, incluso si la cuenta también tiene `is_staff=False`. Django Admin mantiene el control estándar de Django basado en cuenta activa, `is_staff` y permisos de modelo. Las fotografías enlazadas desde el detalle del operario permiten `is_operario`; las cuentas `is_staff` y el repartidor dueño también conservan el acceso. El repartidor conserva la disponibilidad, aceptación/rechazo, transiciones, fotografías, historial y aislamiento por propietario.
 
 La entrada pública y el panel del operario se inspeccionaron en un navegador local con viewport estrecho; no se inspeccionaron visualmente sesiones de repartidor autenticadas ni escritorio amplio. Las pruebas y límites vigentes están en [`CURRENT_STATE.md`](CURRENT_STATE.md).
 

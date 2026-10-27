@@ -5,6 +5,11 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    is_operario = models.BooleanField(
+        default=False,
+        verbose_name='operario',
+        help_text='Designa si el usuario puede acceder al módulo de operario.',
+    )
 
     @property
     def disponible(self):

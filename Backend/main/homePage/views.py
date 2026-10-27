@@ -12,7 +12,7 @@ def _es_repartidor(user):
 
 
 def rootHandler(request):
-    if request.user.is_authenticated and request.user.is_staff:
+    if request.user.is_authenticated and request.user.is_operario:
         return redirect('operario:inicio')
 
     if _es_repartidor(request.user):

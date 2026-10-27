@@ -6,14 +6,20 @@ from django.contrib.auth.admin import UserAdmin
 
 admin.site.unregister(Group)
 admin.site.site_header = 'Administración'
-admin.site.site_title = 'Pedidos Martin'
 admin.site.index_title = 'Inicio'
 admin.site.site_url = None
 
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    pass
+    fieldsets = UserAdmin.fieldsets + (
+        ('Permisos del SGR', {'fields': ('is_operario',)}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Permisos del SGR', {'fields': ('is_operario',)}),
+    )
+    list_display = UserAdmin.list_display + ('is_operario',)
+    list_filter = UserAdmin.list_filter + ('is_operario',)
 
 @admin.register(Comercio)
 class ComercioAdmin(admin.ModelAdmin):
