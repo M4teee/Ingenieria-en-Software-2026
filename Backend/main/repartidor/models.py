@@ -121,6 +121,7 @@ class HistorialEstado(models.Model):
 
     estado_anterior = models.CharField(
         max_length=20,
+        choices=Pedido.ESTADOS,
         blank=True
     )
 
