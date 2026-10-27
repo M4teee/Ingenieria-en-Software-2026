@@ -19,7 +19,7 @@ class CargarPedidoTests(TestCase):
         self.operario = User.objects.create_user(
             username='operario_test',
             password='test1234',
-            is_staff=True,
+            is_operario=True,
         )
         self.no_staff = User.objects.create_user(
             username='usuario_test',
@@ -56,12 +56,18 @@ class CargarPedidoTests(TestCase):
         self.assertEqual(respuesta.status_code, 302)
         self.assertIn('/login/', respuesta.url)
 
-    def test_usuario_autenticado_sin_is_staff_recibe_403(self):
+    def test_usuario_autenticado_sin_is_operario_recibe_403(self):
         self.client.force_login(self.no_staff)
 
         respuesta = self.client.get(self.url)
 
         self.assertEqual(respuesta.status_code, 403)
+
+        usuario_solo_staff = User.objects.create_user(
+            username='staff_sin_rol_operario', is_staff=True,
+        )
+        self.client.force_login(usuario_solo_staff)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
 
     def test_alta_crea_pedido_historial_y_muestra_codigo(self):
         datos = self._datos_formulario()
@@ -119,7 +125,7 @@ class CargarPedidoTests(TestCase):
 class PanelOperarioTests(TestCase):
     def setUp(self):
         self.operario = User.objects.create_user(
-            username='panel_operario', password='test1234', is_staff=True,
+            username='panel_operario', password='test1234', is_operario=True,
         )
         self.usuario_comun = User.objects.create_user(
             username='panel_comun', password='test1234',
@@ -152,7 +158,7 @@ class PanelOperarioTests(TestCase):
         self.assertContains(detalle, 'Historial del pedido')
         self.assertContains(detalle, 'Registrado')
 
-    def test_usuario_sin_is_staff_no_accede_al_panel_ni_detalle(self):
+    def test_usuario_sin_is_operario_no_accede_al_panel_ni_detalle(self):
         self.client.force_login(self.usuario_comun)
 
         self.assertEqual(self.client.get(reverse('operario:inicio')).status_code, 403)
@@ -160,6 +166,12 @@ class PanelOperarioTests(TestCase):
             self.client.get(reverse('operario:detalle_pedido', args=[self.pedido.pk])).status_code,
             403,
         )
+
+        usuario_solo_staff = User.objects.create_user(
+            username='panel_staff_sin_rol', is_staff=True,
+        )
+        self.client.force_login(usuario_solo_staff)
+        self.assertEqual(self.client.get(reverse('operario:inicio')).status_code, 403)
 
     def test_asignado_sin_aceptar_no_aparece_en_el_panel(self):
         repartidor_usuario = User.objects.create_user(
@@ -270,7 +282,7 @@ class PanelOperarioTests(TestCase):
 class CargarPedidoValidacionesTests(TestCase):
     def setUp(self):
         self.operario = User.objects.create_user(
-            username='operario_validaciones', password='test1234', is_staff=True,
+            username='operario_validaciones', password='test1234', is_operario=True,
         )
         self.comercio = Comercio.objects.create(
             nombre='Comercio validaciones',
@@ -366,3 +378,226 @@ class CargarPedidoValidacionesTests(TestCase):
             _crear_pedido(formulario, self.operario)
 
         self.assertFalse(Pedido.objects.exists())
+
+
+class RepartidoresOperarioTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_repartidores', password='test1234', is_operario=True,
+        )
+        self.usuario_comun = User.objects.create_user(
+            username='usuario_repartidores', password='test1234',
+        )
+        self.client.force_login(self.operario)
+
+    def test_lista_muestra_usuario_vehiculo_y_disponibilidad(self):
+        usuario = User.objects.create_user(username='repartidor_lista')
+        Repartidor.objects.create(
+            user=usuario, pin='3124', disponible=True, vehiculo='bicicleta',
+        )
+
+        respuesta = self.client.get(reverse('operario:repartidores'))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'repartidor_lista')
+        self.assertContains(respuesta, 'Bicicleta')
+        self.assertContains(respuesta, 'Disponible')
+
+    def test_alta_crea_usuario_y_perfil_de_forma_conjunta(self):
+        respuesta = self.client.post(reverse('operario:nuevo_repartidor'), {
+            'usuario': 'nuevo_repartidor',
+            'nombre': 'Ana',
+            'apellido': 'Pérez',
+            'email': 'ana@example.test',
+            'vehiculo': 'bicicleta',
+            'pin': '0123',
+        })
+
+        self.assertRedirects(respuesta, reverse('operario:repartidores'))
+        usuario = User.objects.get(username='nuevo_repartidor')
+        perfil = Repartidor.objects.get(user=usuario)
+        self.assertEqual(usuario.first_name, 'Ana')
+        self.assertEqual(usuario.last_name, 'Pérez')
+        self.assertEqual(usuario.email, 'ana@example.test')
+        self.assertFalse(usuario.has_usable_password())
+        self.assertEqual(perfil.pin, '0123')
+        self.assertEqual(perfil.vehiculo, 'bicicleta')
+        self.assertFalse(perfil.disponible)
+
+    def test_nombre_apellido_y_email_son_opcionales(self):
+        respuesta = self.client.post(reverse('operario:nuevo_repartidor'), {
+            'usuario': 'repartidor_sin_datos',
+            'vehiculo': 'moto',
+            'pin': '0007',
+        })
+
+        self.assertRedirects(respuesta, reverse('operario:repartidores'))
+        usuario = User.objects.get(username='repartidor_sin_datos')
+        self.assertEqual((usuario.first_name, usuario.last_name, usuario.email), ('', '', ''))
+
+    def test_pin_debe_tener_cuatro_digitos_y_ser_unico(self):
+        respuesta = self.client.post(reverse('operario:nuevo_repartidor'), {
+            'usuario': 'repartidor_pin_invalido',
+            'vehiculo': 'moto',
+            'pin': '12a4',
+        })
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(User.objects.filter(username='repartidor_pin_invalido').exists())
+
+        existente = User.objects.create_user(username='repartidor_pin_existente')
+        Repartidor.objects.create(user=existente, pin='4567')
+        respuesta = self.client.post(reverse('operario:nuevo_repartidor'), {
+            'usuario': 'repartidor_pin_duplicado',
+            'vehiculo': 'moto',
+            'pin': '4567',
+        })
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(User.objects.filter(username='repartidor_pin_duplicado').exists())
+
+    def test_vehiculo_es_obligatorio_y_debe_pertenecer_a_las_opciones_del_modelo(self):
+        url = reverse('operario:nuevo_repartidor')
+        for datos in (
+            {'usuario': 'sin_vehiculo', 'pin': '1001'},
+            {'usuario': 'vehiculo_invalido', 'vehiculo': 'patineta', 'pin': '1002'},
+        ):
+            with self.subTest(datos=datos):
+                respuesta = self.client.post(url, datos)
+                self.assertEqual(respuesta.status_code, 200)
+                self.assertTrue(respuesta.context['form'].has_error('vehiculo'))
+                self.assertFalse(User.objects.filter(username=datos['usuario']).exists())
+
+    def test_anonimo_y_usuario_sin_staff_no_acceden(self):
+        self.client.logout()
+        respuesta = self.client.get(reverse('operario:repartidores'))
+        self.assertEqual(respuesta.status_code, 302)
+
+        self.client.force_login(self.usuario_comun)
+        for nombre in ('operario:repartidores', 'operario:nuevo_repartidor'):
+            with self.subTest(nombre=nombre):
+                self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
+
+
+class ComerciosOperarioTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_comercios', password='test1234', is_operario=True,
+        )
+        self.usuario_comun = User.objects.create_user(
+            username='usuario_comercios', password='test1234',
+        )
+        self.client.force_login(self.operario)
+
+    def test_lista_muestra_datos_y_estado_de_comercios(self):
+        Comercio.objects.create(
+            nombre='Comercio visible',
+            direccion='Av. Central 123',
+            contacto='contacto@example.test',
+            activo=False,
+        )
+
+        respuesta = self.client.get(reverse('operario:comercios'))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'Comercio visible')
+        self.assertContains(respuesta, 'Av. Central 123')
+        self.assertContains(respuesta, 'contacto@example.test')
+        self.assertContains(respuesta, '<span class="badge text-bg-secondary">No</span>', html=True)
+
+    def test_alta_persiste_comercio_activo_o_inactivo(self):
+        for nombre, activo in (('Comercio activo nuevo', 'true'), ('Comercio inactivo nuevo', 'false')):
+            with self.subTest(activo=activo):
+                respuesta = self.client.post(reverse('operario:nuevo_comercio'), {
+                    'nombre': nombre,
+                    'direccion': 'Calle de prueba 456',
+                    'contacto': '123456789',
+                    'activo': activo,
+                })
+
+                self.assertRedirects(respuesta, reverse('operario:comercios'))
+                comercio = Comercio.objects.get(nombre=nombre)
+                self.assertEqual(comercio.direccion, 'Calle de prueba 456')
+                self.assertEqual(comercio.contacto, '123456789')
+                self.assertEqual(comercio.activo, activo == 'true')
+
+    def test_campos_y_estado_son_obligatorios_y_estado_debe_ser_valido(self):
+        url = reverse('operario:nuevo_comercio')
+        datos_incompletos = {
+            'nombre': '', 'direccion': '', 'contacto': '', 'activo': '',
+        }
+        respuesta = self.client.post(url, datos_incompletos)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.context['form'].errors)
+        self.assertFalse(Comercio.objects.exists())
+
+        datos_invalidos = {
+            'nombre': 'Comercio estado inválido',
+            'direccion': 'Calle 1',
+            'contacto': 'Contacto',
+            'activo': 'desconocido',
+        }
+        respuesta = self.client.post(url, datos_invalidos)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.context['form'].has_error('activo'))
+        self.assertFalse(Comercio.objects.exists())
+
+    def test_nombre_duplicado_es_rechazado(self):
+        Comercio.objects.create(nombre='Nombre ocupado', direccion='A', contacto='B')
+
+        respuesta = self.client.post(reverse('operario:nuevo_comercio'), {
+            'nombre': 'Nombre ocupado',
+            'direccion': 'Calle nueva',
+            'contacto': 'Contacto nuevo',
+            'activo': 'true',
+        })
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.context['form'].errors)
+        self.assertEqual(Comercio.objects.count(), 1)
+
+    def test_anonimo_y_usuario_sin_staff_no_acceden(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse('operario:comercios')).status_code, 302)
+
+        self.client.force_login(self.usuario_comun)
+        for nombre in ('operario:comercios', 'operario:nuevo_comercio'):
+            with self.subTest(nombre=nombre):
+                self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
+
+
+class OperarioRoleAuthorizationTests(TestCase):
+    def test_is_staff_solo_no_accede_a_ninguna_ruta_operativa(self):
+        usuario = User.objects.create_user(username='solo_staff', is_staff=True)
+        self.client.force_login(usuario)
+        rutas_get = (
+            ('operario:inicio', ()),
+            ('operario:comercios', ()),
+            ('operario:nuevo_comercio', ()),
+            ('operario:repartidores', ()),
+            ('operario:nuevo_repartidor', ()),
+            ('operario:estado_pedidos', ()),
+            ('operario:cargar_pedido', ()),
+            ('operario:detalle_pedido', (1,)),
+            ('operario:pedido_registrado', (1,)),
+        )
+
+        for nombre, args in rutas_get:
+            with self.subTest(nombre=nombre):
+                respuesta = self.client.get(reverse(nombre, args=args))
+                self.assertEqual(respuesta.status_code, 403)
+
+        respuesta = self.client.post(
+            reverse('operario:asignar_repartidor', args=[1]),
+            {},
+        )
+        self.assertEqual(respuesta.status_code, 403)
+
+    def test_is_operario_sin_is_staff_puede_entrar_al_modulo(self):
+        usuario = User.objects.create_user(
+            username='operario_sin_staff', is_operario=True,
+        )
+        self.client.force_login(usuario)
+
+        respuesta = self.client.get(reverse('operario:inicio'))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(usuario.is_staff)

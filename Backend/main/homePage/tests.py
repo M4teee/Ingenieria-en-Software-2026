@@ -34,7 +34,7 @@ class PortadaYAccesosTests(TestCase):
         )
 
     def test_operario_va_al_panel_y_no_al_admin(self):
-        user = User.objects.create_user(username='operario_home', is_staff=True)
+        user = User.objects.create_user(username='operario_home', is_operario=True)
         self.client.force_login(user)
 
         response = self.client.get(reverse('root'))
@@ -45,7 +45,7 @@ class PortadaYAccesosTests(TestCase):
         User.objects.create_user(
             username='operario_login',
             password='clave-prueba',
-            is_staff=True,
+            is_operario=True,
         )
 
         response = self.client.post(reverse('login'), {
@@ -65,15 +65,15 @@ class PortadaYAccesosTests(TestCase):
 
         self.assertRedirects(response, reverse('repartidor'))
 
-    def test_panel_operario_muestra_una_accion_de_carga_y_no_seguimiento(self):
-        user = User.objects.create_user(username='operario_panel', is_staff=True)
+    def test_panel_operario_muestra_una_accion_sin_acceso_a_admin_ni_seguimiento(self):
+        user = User.objects.create_user(username='operario_panel', is_operario=True)
         self.client.force_login(user)
 
         response = self.client.get(reverse('operario:inicio'))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.count(b'Cargar pedido'), 1)
-        self.assertContains(response, reverse('admin:index'))
+        self.assertNotContains(response, reverse('admin:index'))
         self.assertNotContains(response, reverse('clienteFinal'))
         self.assertNotContains(response, 'Seguimiento</a>')
 
@@ -91,15 +91,53 @@ class PortadaYAccesosTests(TestCase):
         self.assertNotContains(response, reverse('operario:inicio'))
         self.assertNotContains(response, reverse('admin:index'))
 
-    def test_django_admin_conserva_el_permiso_staff_y_rechaza_usuarios_comunes(self):
-        operario = User.objects.create_user(username='operario_admin', is_staff=True)
+    def test_django_admin_conserva_is_staff_independiente_de_is_operario(self):
+        usuario_admin = User.objects.create_user(username='admin_sin_rol_operario', is_staff=True)
         usuario = User.objects.create_user(username='usuario_admin')
 
-        self.client.force_login(operario)
-        self.assertEqual(self.client.get(reverse('admin:index')).status_code, 200)
-        self.assertFalse(operario.is_superuser)
+        self.client.force_login(usuario_admin)
+        respuesta_admin = self.client.get(reverse('admin:index'))
+        self.assertEqual(respuesta_admin.status_code, 200)
+        self.assertNotContains(
+            respuesta_admin,
+            f'class="nav-link" href="{reverse("operario:inicio")}"',
+        )
+        self.assertEqual(self.client.get(reverse('operario:inicio')).status_code, 403)
+        self.assertFalse(usuario_admin.is_superuser)
+
+        usuario_operario_admin = User.objects.create_user(
+            username='admin_y_operario', is_staff=True, is_operario=True,
+        )
+        self.client.force_login(usuario_operario_admin)
+        respuesta_admin = self.client.get(reverse('admin:index'))
+        self.assertContains(
+            respuesta_admin,
+            f'class="nav-link" href="{reverse("operario:inicio")}"',
+        )
 
         self.client.force_login(usuario)
         response = self.client.get(reverse('admin:index'))
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse('login'), response.url)
+
+    def test_is_operario_no_otorga_acceso_a_django_admin(self):
+        usuario = User.objects.create_user(
+            username='operario_sin_admin', is_operario=True,
+        )
+        self.client.force_login(usuario)
+
+        response = self.client.get(reverse('admin:index'))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('login'), response.url)
+
+    def test_admin_permite_asignar_el_rol_is_operario(self):
+        administrador = User.objects.create_superuser(
+            username='admin_roles', password='clave-prueba',
+        )
+        self.client.force_login(administrador)
+
+        response = self.client.get(reverse('admin:users_user_add'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="is_operario"')

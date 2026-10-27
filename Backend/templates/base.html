@@ -30,10 +30,10 @@
 
             <div class="collapse navbar-collapse" id="navigation-content">
                 <div class="navbar-nav ms-auto me-auto align-items-lg-center gap-lg-3 py-3 py-lg-0">
-                    {% if user.is_authenticated and user.is_staff %}
+                    {% if user.is_authenticated and user.is_operario %}
                         <a class="nav-link" href="{% url 'operario:inicio' %}">Pedidos</a>
-                        <a class="nav-link" href="{% url 'admin:operario_comercio_changelist' %}">Comercios</a>
-                        <a class="nav-link" href="{% url 'admin:repartidor_repartidor_changelist' %}">Repartidores</a>
+                        <a class="nav-link" href="{% url 'operario:comercios' %}">Comercios</a>
+                        <a class="nav-link" href="{% url 'operario:repartidores' %}">Repartidores</a>
                     {% elif user.is_authenticated and user.repartidor %}
                         <a class="nav-link" href="{% url 'repartidor' %}">Panel repartidor</a>
                     {% elif not user.is_authenticated %}

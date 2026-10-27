@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Repartidores{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div class="page-heading mb-0">
+        <h1 class="h2">Repartidores</h1>
+        <p>Consultá los usuarios, vehículos y disponibilidad de los repartidores.</p>
+    </div>
+    <a class="btn btn-app" href="{% url 'operario:nuevo_repartidor' %}">Nuevo repartidor</a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<section class="app-section" aria-labelledby="repartidores-heading">
+    <div class="app-section-body">
+        <h2 id="repartidores-heading" class="h5">Personal de reparto</h2>
+        {% if repartidores %}
+            <div class="table-responsive">
+                <table class="table app-table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Vehículo</th>
+                            <th scope="col">Disponible</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for perfil in repartidores %}
+                            <tr>
+                                <td>{{ perfil.user.username }}</td>
+                                <td>{{ perfil.get_vehiculo_display }}</td>
+                                <td>
+                                    {% if perfil.disponible %}
+                                        <span class="badge text-bg-success">Disponible</span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary">No disponible</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-secondary mb-0">Todavía no hay repartidores registrados.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

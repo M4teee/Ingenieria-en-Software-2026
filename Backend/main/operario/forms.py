@@ -1,8 +1,10 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 from main.operario.models import Comercio
 from main.repartidor.models import Pedido, Repartidor
+from main.users.models import User
 
 
 MENSAJE_COMERCIO_INACTIVO = (
@@ -76,3 +78,85 @@ class AsignarPedidoForm(forms.Form):
             .exclude(user_id__in=activos)
             .order_by('user__username')
         )
+
+
+class RepartidorForm(forms.Form):
+    usuario = forms.CharField(
+        max_length=150,
+        label='Usuario',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'username'}),
+    )
+    nombre = forms.CharField(
+        max_length=150,
+        required=False,
+        label='Nombre',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'given-name'}),
+    )
+    apellido = forms.CharField(
+        max_length=150,
+        required=False,
+        label='Apellido',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'family-name'}),
+    )
+    email = forms.EmailField(
+        required=False,
+        label='E-mail',
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'email'}),
+    )
+    vehiculo = forms.ChoiceField(
+        choices=[('', 'Seleccioná un vehículo'), *Repartidor.VEHICULOS],
+        label='Vehículo',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    pin = forms.CharField(
+        max_length=4,
+        min_length=4,
+        label='PIN de 4 dígitos',
+        validators=[RegexValidator(
+            regex=r'^\d{4}$',
+            message='El PIN debe contener exactamente 4 dígitos numéricos.',
+        )],
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control', 'inputmode': 'numeric', 'autocomplete': 'new-password'},
+        ),
+    )
+
+    def clean_usuario(self):
+        usuario = self.cleaned_data['usuario']
+        if User.objects.filter(username__iexact=usuario).exists():
+            raise ValidationError('Ya existe un usuario con ese nombre.')
+        return usuario
+
+    def clean_pin(self):
+        pin = self.cleaned_data['pin']
+        if Repartidor.objects.filter(pin=pin).exists():
+            raise ValidationError('Ese PIN ya está asignado a otro repartidor.')
+        return pin
+
+
+class ComercioForm(forms.ModelForm):
+    activo = forms.TypedChoiceField(
+        choices=[
+            ('', 'Seleccioná un estado'),
+            ('true', 'Activo'),
+            ('false', 'Inactivo'),
+        ],
+        coerce=lambda valor: valor == 'true',
+        empty_value=None,
+        label='Activo',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+
+    class Meta:
+        model = Comercio
+        fields = ('nombre', 'direccion', 'contacto', 'activo')
+        labels = {
+            'nombre': 'Nombre',
+            'direccion': 'Dirección',
+            'contacto': 'Contacto',
+        }
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control'}),
+            'contacto': forms.TextInput(attrs={'class': 'form-control'}),
+        }

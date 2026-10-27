@@ -12,8 +12,15 @@ from django.views.decorators.http import require_POST
 
 from main.operario.models import Comercio
 from main.repartidor.models import HistorialEstado, Pedido, Repartidor
+from main.users.models import User
 
-from .forms import AsignarPedidoForm, MENSAJE_COMERCIO_INACTIVO, PedidoForm
+from .forms import (
+    AsignarPedidoForm,
+    ComercioForm,
+    MENSAJE_COMERCIO_INACTIVO,
+    PedidoForm,
+    RepartidorForm,
+)
 
 
 MAX_INTENTOS_CODIGO = Pedido.INTENTOS_CODIGO
@@ -28,7 +35,7 @@ class NoSePudoGenerarCodigoError(Exception):
 
 
 def _exigir_operario(request):
-    if not request.user.is_staff:
+    if not request.user.is_operario:
         raise PermissionDenied
 
 
@@ -48,6 +55,66 @@ def inicio(request):
     _exigir_operario(request)
     pedidos = _pedidos_en_curso()
     return render(request, 'operario/inicio.html', {'pedidos': pedidos})
+
+
+@login_required
+def comercios(request):
+    _exigir_operario(request)
+    return render(request, 'operario/comercios.html', {
+        'comercios': Comercio.objects.all(),
+    })
+
+
+@login_required
+def nuevo_comercio(request):
+    _exigir_operario(request)
+
+    if request.method == 'POST':
+        formulario = ComercioForm(request.POST)
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, 'Comercio dado de alta exitosamente.')
+            return redirect('operario:comercios')
+    else:
+        formulario = ComercioForm()
+
+    return render(request, 'operario/nuevo_comercio.html', {'form': formulario})
+
+
+@login_required
+def repartidores(request):
+    _exigir_operario(request)
+    perfiles = Repartidor.objects.select_related('user').order_by('user__username')
+    return render(request, 'operario/repartidores.html', {'repartidores': perfiles})
+
+
+@login_required
+def nuevo_repartidor(request):
+    _exigir_operario(request)
+
+    if request.method == 'POST':
+        formulario = RepartidorForm(request.POST)
+        if formulario.is_valid():
+            datos = formulario.cleaned_data
+            with transaction.atomic():
+                usuario = User.objects.create_user(
+                    username=datos['usuario'],
+                    password=None,
+                    first_name=datos['nombre'],
+                    last_name=datos['apellido'],
+                    email=datos['email'],
+                )
+                Repartidor.objects.create(
+                    user=usuario,
+                    pin=datos['pin'],
+                    vehiculo=datos['vehiculo'],
+                )
+            messages.success(request, 'Repartidor dado de alta exitosamente.')
+            return redirect('operario:repartidores')
+    else:
+        formulario = RepartidorForm()
+
+    return render(request, 'operario/nuevo_repartidor.html', {'form': formulario})
 
 
 @login_required
@@ -194,7 +261,7 @@ def _crear_pedido(formulario, usuario):
 
 @login_required
 def cargar_pedido(request):
-    if not request.user.is_staff:
+    if not request.user.is_operario:
         raise PermissionDenied
 
     if request.method == 'POST':
@@ -243,7 +310,7 @@ def cargar_pedido(request):
 
 @login_required
 def pedido_registrado(request, pedido_id):
-    if not request.user.is_staff:
+    if not request.user.is_operario:
         raise PermissionDenied
 
     pedido = get_object_or_404(

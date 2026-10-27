@@ -186,7 +186,11 @@ def ver_fotografia(req, historial_id):
         HistorialEstado.objects.select_related('pedido'),
         pk=historial_id,
     )
-    if not req.user.is_staff and evento.pedido.repartidor_id != req.user.pk:
+    if (
+        not req.user.is_staff
+        and not req.user.is_operario
+        and evento.pedido.repartidor_id != req.user.pk
+    ):
         raise Http404
     if not evento.fotografia:
         raise Http404
