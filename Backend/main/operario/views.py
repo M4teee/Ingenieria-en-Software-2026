@@ -96,21 +96,25 @@ def nuevo_repartidor(request):
         formulario = RepartidorForm(request.POST)
         if formulario.is_valid():
             datos = formulario.cleaned_data
-            with transaction.atomic():
-                usuario = User.objects.create_user(
-                    username=datos['usuario'],
-                    password=None,
-                    first_name=datos['nombre'],
-                    last_name=datos['apellido'],
-                    email=datos['email'],
-                )
-                Repartidor.objects.create(
-                    user=usuario,
-                    pin=datos['pin'],
-                    vehiculo=datos['vehiculo'],
-                )
-            messages.success(request, 'Repartidor dado de alta exitosamente.')
-            return redirect('operario:repartidores')
+            try:
+                with transaction.atomic():
+                    usuario = User.objects.create_user(
+                        username=datos['usuario'],
+                        password=None,
+                        first_name=datos['nombre'],
+                        last_name=datos['apellido'],
+                        email=datos['email'],
+                    )
+                    Repartidor.objects.create(
+                        user=usuario,
+                        pin=datos['pin'],
+                        dni=datos['dni'],
+                        vehiculo=datos['vehiculo'],
+                    )
+                messages.success(request, 'Repartidor dado de alta exitosamente.')
+                return redirect('operario:repartidores')
+            except IntegrityError:
+                formulario.add_error('dni', 'El DNI ingresado ya se encuentra registrado en el sistema.')
     else:
         formulario = RepartidorForm()
 

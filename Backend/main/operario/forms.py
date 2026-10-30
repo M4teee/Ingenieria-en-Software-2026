@@ -103,6 +103,18 @@ class RepartidorForm(forms.Form):
         label='E-mail',
         widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'email'}),
     )
+    dni = forms.CharField(
+        max_length=8,
+        min_length=8,
+        label='DNI',
+        validators=[RegexValidator(
+            regex=r'^\d{8}$',
+            message='El DNI debe contener 8 dígitos numéricos.',
+        )],
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'inputmode': 'numeric', 'autocomplete': 'off'},
+        ),
+    )
     vehiculo = forms.ChoiceField(
         choices=[('', 'Seleccioná un vehículo'), *Repartidor.VEHICULOS],
         label='Vehículo',
@@ -127,6 +139,12 @@ class RepartidorForm(forms.Form):
             raise ValidationError('Ya existe un usuario con ese nombre.')
         return usuario
 
+    def clean_dni(self):
+        dni = self.cleaned_data['dni']
+        if Repartidor.objects.filter(dni=dni).exists():
+            raise ValidationError('El DNI ingresado ya se encuentra registrado en el sistema.')
+        return dni
+    
     def clean_pin(self):
         pin = self.cleaned_data['pin']
         if Repartidor.objects.filter(pin=pin).exists():

@@ -182,6 +182,18 @@ class Repartidor(models.Model):
         ]
     )
     disponible = models.BooleanField(default=False)
+    dni = models.CharField(
+        max_length=8,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\d{8}$',
+                message='El DNI debe contener 8 dígitos numéricos.'
+            )
+        ]
+    )
     vehiculo = models.CharField(
         max_length=20,
         choices=VEHICULOS,
