@@ -1,7 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
-
+from django.utils import timezone
+from datetime import timedelta
 from main.operario.models import Comercio
 from main.repartidor.models import Pedido, Repartidor
 from main.users.models import User
@@ -11,6 +12,7 @@ MENSAJE_COMERCIO_INACTIVO = (
     'El comercio seleccionado se encuentra inhabilitado para nuevos pedidos'
 )
 
+MARGEN_FECHA_ENTREGA = timedelta(minutes=10)
 
 class ComercioActivoField(forms.ModelChoiceField):
     def to_python(self, value):
@@ -56,7 +58,19 @@ class PedidoForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['comercio'].widget.attrs['class'] = 'form-select'
+        # El navegador no sugiere fechas/horas anteriores al momento actual
+        ahora = timezone.localtime(timezone.now())
+        self.fields['fecha_hora_estimada_entrega'].widget.attrs['min'] = (
+            ahora.strftime('%Y-%m-%dT%H:%M')
+        )
 
+    def clean_fecha_hora_estimada_entrega(self):
+        fecha_hora = self.cleaned_data['fecha_hora_estimada_entrega']
+        if fecha_hora < timezone.now() - MARGEN_FECHA_ENTREGA:
+            raise ValidationError(
+                'La fecha y hora estimadas de entrega no pueden ser anteriores al momento actual.'
+            )
+        return fecha_hora
 
 class AsignarPedidoForm(forms.Form):
     repartidor = forms.ModelChoiceField(
