@@ -1023,7 +1023,8 @@
         "user": 2,
         "pin": "1111",
         "disponible": true,
-        "vehiculo": "moto"
+        "vehiculo": "moto",
+        "dni": "50111111"
     }
 },
 {
@@ -1033,7 +1034,8 @@
         "user": 3,
         "pin": "2222",
         "disponible": true,
-        "vehiculo": "moto"
+        "vehiculo": "moto",
+        "dni": "50222222"
     }
 },
 {
@@ -1042,8 +1044,9 @@
     "fields": {
         "user": 6,
         "pin": "3333",
-        "disponible": false,
-        "vehiculo": "moto"
+        "disponible": true,
+        "vehiculo": "moto",
+        "dni": "50333333"
     }
 },
 {
@@ -1053,7 +1056,8 @@
         "user": 8,
         "pin": "4444",
         "disponible": false,
-        "vehiculo": "auto"
+        "vehiculo": "auto",
+        "dni": "50444444"
     }
 },
 {
