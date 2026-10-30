@@ -3,6 +3,21 @@
 {% block title %}Panel repartidor{% endblock %}
 
 {% block content %}
+{% if not pedido_activo %}
+<script>
+  // Auto-refresh solo cuando el panel no tiene pedido activo: en ese estado
+  // no hay formularios ni file inputs, así que es imposible interrumpir una
+  // subida de foto o un motivo de fallo. Con pedido activo no hay refresh.
+  setInterval(function () {
+    var active = document.activeElement;
+    var isEditing = active && active.matches && active.matches('input, textarea, select');
+    if (!isEditing && document.visibilityState === 'visible') {
+      location.reload();
+    }
+  }, 15000);
+</script>
+{% endif %}
+
 <header class="page-heading">
     <p class="eyebrow">Mi jornada</p>
     <h1>Panel del repartidor</h1>
