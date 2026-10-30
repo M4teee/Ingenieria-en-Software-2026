@@ -1,0 +1,1173 @@
+[
+{
+    "model": "admin.logentry",
+    "pk": 2,
+    "fields": {
+        "action_time": "2026-10-26T19:43:44.779Z",
+        "user": 5,
+        "content_type": 6,
+        "object_id": "2",
+        "object_repr": "Comercio 1",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 3,
+    "fields": {
+        "action_time": "2026-10-26T19:44:17.575Z",
+        "user": 5,
+        "content_type": 6,
+        "object_id": "3",
+        "object_repr": "Comercio 2",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 4,
+    "fields": {
+        "action_time": "2026-10-26T19:44:55.186Z",
+        "user": 5,
+        "content_type": 6,
+        "object_id": "4",
+        "object_repr": "Comercio 3",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 5,
+    "fields": {
+        "action_time": "2026-10-26T20:52:25.835Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "7",
+        "object_repr": "admin",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 6,
+    "fields": {
+        "action_time": "2026-10-26T20:53:33.380Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "7",
+        "object_repr": "admin",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Staff status\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 7,
+    "fields": {
+        "action_time": "2026-10-27T03:59:13.430Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "7",
+        "object_repr": "admin",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Staff status\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 8,
+    "fields": {
+        "action_time": "2026-10-27T03:59:48.362Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "4",
+        "object_repr": "cristinalibre",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Staff status\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 9,
+    "fields": {
+        "action_time": "2026-10-27T04:00:01.063Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "1",
+        "object_repr": "operario",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Staff status\", \"Superuser status\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 10,
+    "fields": {
+        "action_time": "2026-10-27T04:00:23.179Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "4",
+        "object_repr": "cristinalibre",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Superuser status\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 11,
+    "fields": {
+        "action_time": "2026-10-27T04:17:13.756Z",
+        "user": 5,
+        "content_type": 6,
+        "object_id": "1",
+        "object_repr": "CarnicerÝa The new hope",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 12,
+    "fields": {
+        "action_time": "2026-10-27T04:57:42.190Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "4",
+        "object_repr": "cristinalibre",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 13,
+    "fields": {
+        "action_time": "2026-10-27T04:57:42.190Z",
+        "user": 5,
+        "content_type": 10,
+        "object_id": "1",
+        "object_repr": "operario",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 1,
+    "fields": {
+        "name": "Can add log entry",
+        "content_type": 1,
+        "codename": "add_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 2,
+    "fields": {
+        "name": "Can change log entry",
+        "content_type": 1,
+        "codename": "change_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 3,
+    "fields": {
+        "name": "Can delete log entry",
+        "content_type": 1,
+        "codename": "delete_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 4,
+    "fields": {
+        "name": "Can view log entry",
+        "content_type": 1,
+        "codename": "view_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 5,
+    "fields": {
+        "name": "Can add permission",
+        "content_type": 3,
+        "codename": "add_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 6,
+    "fields": {
+        "name": "Can change permission",
+        "content_type": 3,
+        "codename": "change_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 7,
+    "fields": {
+        "name": "Can delete permission",
+        "content_type": 3,
+        "codename": "delete_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 8,
+    "fields": {
+        "name": "Can view permission",
+        "content_type": 3,
+        "codename": "view_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 9,
+    "fields": {
+        "name": "Can add group",
+        "content_type": 2,
+        "codename": "add_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 10,
+    "fields": {
+        "name": "Can change group",
+        "content_type": 2,
+        "codename": "change_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 11,
+    "fields": {
+        "name": "Can delete group",
+        "content_type": 2,
+        "codename": "delete_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 12,
+    "fields": {
+        "name": "Can view group",
+        "content_type": 2,
+        "codename": "view_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 13,
+    "fields": {
+        "name": "Can add content type",
+        "content_type": 4,
+        "codename": "add_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 14,
+    "fields": {
+        "name": "Can change content type",
+        "content_type": 4,
+        "codename": "change_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 15,
+    "fields": {
+        "name": "Can delete content type",
+        "content_type": 4,
+        "codename": "delete_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 16,
+    "fields": {
+        "name": "Can view content type",
+        "content_type": 4,
+        "codename": "view_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 17,
+    "fields": {
+        "name": "Can add session",
+        "content_type": 5,
+        "codename": "add_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 18,
+    "fields": {
+        "name": "Can change session",
+        "content_type": 5,
+        "codename": "change_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 19,
+    "fields": {
+        "name": "Can delete session",
+        "content_type": 5,
+        "codename": "delete_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 20,
+    "fields": {
+        "name": "Can view session",
+        "content_type": 5,
+        "codename": "view_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 21,
+    "fields": {
+        "name": "Can add Comercio",
+        "content_type": 6,
+        "codename": "add_comercio"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 22,
+    "fields": {
+        "name": "Can change Comercio",
+        "content_type": 6,
+        "codename": "change_comercio"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 23,
+    "fields": {
+        "name": "Can delete Comercio",
+        "content_type": 6,
+        "codename": "delete_comercio"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 24,
+    "fields": {
+        "name": "Can view Comercio",
+        "content_type": 6,
+        "codename": "view_comercio"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+        "name": "Can add Pedido",
+        "content_type": 8,
+        "codename": "add_pedido"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+        "name": "Can change Pedido",
+        "content_type": 8,
+        "codename": "change_pedido"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+        "name": "Can delete Pedido",
+        "content_type": 8,
+        "codename": "delete_pedido"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+        "name": "Can view Pedido",
+        "content_type": 8,
+        "codename": "view_pedido"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 29,
+    "fields": {
+        "name": "Can add Historial de estado",
+        "content_type": 7,
+        "codename": "add_historialestado"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 30,
+    "fields": {
+        "name": "Can change Historial de estado",
+        "content_type": 7,
+        "codename": "change_historialestado"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 31,
+    "fields": {
+        "name": "Can delete Historial de estado",
+        "content_type": 7,
+        "codename": "delete_historialestado"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 32,
+    "fields": {
+        "name": "Can view Historial de estado",
+        "content_type": 7,
+        "codename": "view_historialestado"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 33,
+    "fields": {
+        "name": "Can add Repartidor",
+        "content_type": 9,
+        "codename": "add_repartidor"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 34,
+    "fields": {
+        "name": "Can change Repartidor",
+        "content_type": 9,
+        "codename": "change_repartidor"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 35,
+    "fields": {
+        "name": "Can delete Repartidor",
+        "content_type": 9,
+        "codename": "delete_repartidor"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 36,
+    "fields": {
+        "name": "Can view Repartidor",
+        "content_type": 9,
+        "codename": "view_repartidor"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 37,
+    "fields": {
+        "name": "Can add vehiculo",
+        "content_type": 11,
+        "codename": "add_vehiculo"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 38,
+    "fields": {
+        "name": "Can change vehiculo",
+        "content_type": 11,
+        "codename": "change_vehiculo"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 39,
+    "fields": {
+        "name": "Can delete vehiculo",
+        "content_type": 11,
+        "codename": "delete_vehiculo"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 40,
+    "fields": {
+        "name": "Can view vehiculo",
+        "content_type": 11,
+        "codename": "view_vehiculo"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 41,
+    "fields": {
+        "name": "Can add Usuario",
+        "content_type": 10,
+        "codename": "add_user"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 42,
+    "fields": {
+        "name": "Can change Usuario",
+        "content_type": 10,
+        "codename": "change_user"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 43,
+    "fields": {
+        "name": "Can delete Usuario",
+        "content_type": 10,
+        "codename": "delete_user"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 44,
+    "fields": {
+        "name": "Can view Usuario",
+        "content_type": 10,
+        "codename": "view_user"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 1,
+    "fields": {
+        "app_label": "admin",
+        "model": "logentry"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 2,
+    "fields": {
+        "app_label": "auth",
+        "model": "group"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 3,
+    "fields": {
+        "app_label": "auth",
+        "model": "permission"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 4,
+    "fields": {
+        "app_label": "contenttypes",
+        "model": "contenttype"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 5,
+    "fields": {
+        "app_label": "sessions",
+        "model": "session"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 6,
+    "fields": {
+        "app_label": "operario",
+        "model": "comercio"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 7,
+    "fields": {
+        "app_label": "repartidor",
+        "model": "historialestado"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 8,
+    "fields": {
+        "app_label": "repartidor",
+        "model": "pedido"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 9,
+    "fields": {
+        "app_label": "repartidor",
+        "model": "repartidor"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 10,
+    "fields": {
+        "app_label": "users",
+        "model": "user"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 11,
+    "fields": {
+        "app_label": "users",
+        "model": "vehiculo"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "jlko10ny6zo3umwon6fx2q78xl0ntxpo",
+    "fields": {
+        "session_data": ".eJxVjLsOwjAMAP_FM4qaOM2jIzvfUDm2SwqolfqYEP-OKnWA9e50b-hp32q_r7r0o0AHHi6_rBA_dTqEPGi6z4bnaVvGYo7EnHY1t1n0dT3bv0GltUIHNhT1IWImjRGlTcWz50w4OA5DW7LDpslWHfmIPidkajGJKFPM0Vr4fAHZQTeC:1xIvC2:fdT9uG5QoYANbl1iaC1vc4nNEw5IAFC53N4sdSNYQss",
+        "expire_date": "2026-11-02T21:46:54.147Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "jw3oobbi7a6snctu14ex3z6jm1abq7i8",
+    "fields": {
+        "session_data": ".eJxVjDEOgzAMAP_iuYpMEpqEsTtvQHZsCm0VJAJT1b9XSAztene6Nwy0b9OwV12HWaADB5dfxpSfWg4hDyr3xeSlbOvM5kjMaavpF9HX7Wz_BhPVCTpoeGRGtMrJhiAuNdi0gUOWHEePTsRHnynHFFvnwzWwqJL1UdET2hE-X-h6N_0:1xKlQb:1Mx14ycjSuRfc69IPCI6wvE4obejfR9h0ZPE1pBCvOo",
+        "expire_date": "2026-11-07T23:45:33.869Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "n75b3kibqb6z89wse7s1l4y7ny3xp9tb",
+    "fields": {
+        "session_data": ".eJxVjLsOgzAMAP_FcxVhh-LA2J1viJLYLrQVSDymqv9eITG0693p3hDTvg1xX3WJo0AHDJdfllN56nQIeaTpPrsyT9syZnck7rSr62fR1-1s_wZDWgfoACtTDirecmChinyLouQDsTZcrhwKtbUKo1WMdVs8FmuoJjNUQ4PPF9wqN7k:1xLYMg:9lBjVpKgR4JovwzGtIbDl5FIVem95ou9yLX2mQtjVoY",
+        "expire_date": "2026-11-10T04:00:46.835Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "sckgp9ixlbxgywc55th8hnn86e86gj60",
+    "fields": {
+        "session_data": ".eJxVjEEOwiAQAP-yZ0Na2sWlR-99A1lgkaqBpLQn499Nkx70OjOZNzjet-z2JqtbIkyAcPllnsNTyiHig8u9qlDLti5eHYk6bVNzjfK6ne3fIHPLMAF7PSRjA2mLPpo-pCGJcEAyHDUiYT-QhNGIT1ojoU2WZdSd8FWIOvh8Af41OE4:1xLZF7:xGG13RIzVVr1kCEC-72oYhtojbMs0ArZRtnzmw-Nw7M",
+        "expire_date": "2026-11-10T04:57:01.048Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "wn15c3xhk8rmyf0jfhbfbrk1gw7th4u3",
+    "fields": {
+        "session_data": ".eJxVjEEOwiAQAP-yZ0Na2sWlR-99A1lgkaqBpLQn499Nkx70OjOZNzjet-z2JqtbIkyAcPllnsNTyiHig8u9qlDLti5eHYk6bVNzjfK6ne3fIHPLMAF7PSRjA2mLPpo-pCGJcEAyHDUiYT-QhNGIT1ojoU2WZdSd8FWIOvh8Af41OE4:1xJjl3:VkiD1SyAA__roTkKIBs8EyuhrTrUWU_e1QhRch9NWnQ",
+        "expire_date": "2026-11-05T03:46:25.015Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "yppa2xz2pv0p4lry922me3s59gky68eh",
+    "fields": {
+        "session_data": ".eJxVjDEKwzAMAP-iuZjEwpaTsXvfYCTLrtOWBOJkKv17CWRo17vj3hB532rcW17jpDCChcsvE07PPB9CHzzfF5OWeVsnMUdiTtvMbdH8up7t36ByqzACucSSsnLXD0qihSQQS8E-OCQvjjx6QT94Di5RsYyhyxYxJPViC3y-ApI4Pw:1xKlOH:0oOfpTKa592jf0f3X2GltCb7fOhBrqFd3imucx8G6UI",
+        "expire_date": "2026-11-07T23:43:09.176Z"
+    }
+},
+{
+    "model": "operario.comercio",
+    "pk": 2,
+    "fields": {
+        "nombre": "Comercio 1",
+        "direccion": "Avenida 1 N░1111",
+        "contacto": "221 111-1111",
+        "activo": true,
+        "fecha_creacion": "2026-10-26T19:43:44.596Z"
+    }
+},
+{
+    "model": "operario.comercio",
+    "pk": 3,
+    "fields": {
+        "nombre": "Comercio 2",
+        "direccion": "Avenida 2 N░2222",
+        "contacto": "221 222-2222",
+        "activo": true,
+        "fecha_creacion": "2026-10-26T19:44:17.402Z"
+    }
+},
+{
+    "model": "operario.comercio",
+    "pk": 4,
+    "fields": {
+        "nombre": "Comercio 3",
+        "direccion": "Avenida 3 N░3333",
+        "contacto": "221 333-3333",
+        "activo": false,
+        "fecha_creacion": "2026-10-26T19:44:54.981Z"
+    }
+},
+{
+    "model": "operario.comercio",
+    "pk": 5,
+    "fields": {
+        "nombre": "Comercio 4",
+        "direccion": "Avenida 4 N░4444",
+        "contacto": "221 444-4444",
+        "activo": true,
+        "fecha_creacion": "2026-10-26T21:09:44.596Z"
+    }
+},
+{
+    "model": "repartidor.pedido",
+    "pk": 3,
+    "fields": {
+        "codigo": "83SNYZCO6HQ479I6LPJX",
+        "clave_idempotencia": "67ab227c-0218-48ea-a97e-0adc0f69212e",
+        "comercio": 2,
+        "direccion_destino": "Calle 111 N░1000",
+        "especificaciones_traslado": "Piso 1, dpto. B",
+        "fecha_hora_estimada_entrega": "2026-10-27T06:18:00Z",
+        "fecha_hora_asignacion": null,
+        "fecha_hora_aceptacion": "2026-10-27T04:20:12.671Z",
+        "estado": "entregado",
+        "repartidor": 3,
+        "fecha_creacion": "2026-10-27T04:18:38.417Z"
+    }
+},
+{
+    "model": "repartidor.pedido",
+    "pk": 4,
+    "fields": {
+        "codigo": "HO1GZT93R89M8OE9K664",
+        "clave_idempotencia": "b0deba38-742c-4a48-bf56-ee6e58502f70",
+        "comercio": 5,
+        "direccion_destino": "Calle 444 N░4000",
+        "especificaciones_traslado": "-",
+        "fecha_hora_estimada_entrega": "2026-10-27T09:23:00Z",
+        "fecha_hora_asignacion": null,
+        "fecha_hora_aceptacion": "2026-10-27T04:50:07.349Z",
+        "estado": "entregado",
+        "repartidor": 2,
+        "fecha_creacion": "2026-10-27T04:23:23.238Z"
+    }
+},
+{
+    "model": "repartidor.pedido",
+    "pk": 5,
+    "fields": {
+        "codigo": "1NEUR4IG6UO0OFCXHA8B",
+        "clave_idempotencia": "8b0c7067-2b25-412b-a37d-c6514cdd7ba1",
+        "comercio": 3,
+        "direccion_destino": "Calle 222 N░2000",
+        "especificaciones_traslado": "-",
+        "fecha_hora_estimada_entrega": "2026-10-27T09:51:00Z",
+        "fecha_hora_asignacion": null,
+        "fecha_hora_aceptacion": "2026-10-27T04:52:39.414Z",
+        "estado": "fallido",
+        "repartidor": 3,
+        "fecha_creacion": "2026-10-27T04:51:37.642Z"
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 10,
+    "fields": {
+        "pedido": 3,
+        "estado_anterior": "",
+        "estado_nuevo": "registrado",
+        "usuario": 7,
+        "fecha": "2026-10-27T04:18:38.627Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 11,
+    "fields": {
+        "pedido": 3,
+        "estado_anterior": "registrado",
+        "estado_nuevo": "asignado",
+        "usuario": 7,
+        "fecha": "2026-10-27T04:19:09.465Z",
+        "fotografia": "",
+        "incidencia": "Asignado por operario a repartidor2"
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 12,
+    "fields": {
+        "pedido": 3,
+        "estado_anterior": "asignado",
+        "estado_nuevo": "asignado",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:20:12.874Z",
+        "fotografia": "",
+        "incidencia": "Aceptado por repartidor repartidor2"
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 13,
+    "fields": {
+        "pedido": 3,
+        "estado_anterior": "asignado",
+        "estado_nuevo": "retirado",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:22:12.689Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 14,
+    "fields": {
+        "pedido": 4,
+        "estado_anterior": "",
+        "estado_nuevo": "registrado",
+        "usuario": 7,
+        "fecha": "2026-10-27T04:23:23.444Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 15,
+    "fields": {
+        "pedido": 3,
+        "estado_anterior": "retirado",
+        "estado_nuevo": "en_viaje",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:23:49.043Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 16,
+    "fields": {
+        "pedido": 3,
+        "estado_anterior": "en_viaje",
+        "estado_nuevo": "entregado",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:32:15.056Z",
+        "fotografia": "entregas/cardboard-parcel-box-near-door-on-floor-online-shopping-boxes-delivered-to-your_HAbHI4M.jpg",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 17,
+    "fields": {
+        "pedido": 4,
+        "estado_anterior": "registrado",
+        "estado_nuevo": "asignado",
+        "usuario": 7,
+        "fecha": "2026-10-27T04:49:01.813Z",
+        "fotografia": "",
+        "incidencia": "Asignado por operario a repartidor1"
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 18,
+    "fields": {
+        "pedido": 4,
+        "estado_anterior": "asignado",
+        "estado_nuevo": "asignado",
+        "usuario": 2,
+        "fecha": "2026-10-27T04:50:07.524Z",
+        "fotografia": "",
+        "incidencia": "Aceptado por repartidor repartidor1"
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 19,
+    "fields": {
+        "pedido": 4,
+        "estado_anterior": "asignado",
+        "estado_nuevo": "retirado",
+        "usuario": 2,
+        "fecha": "2026-10-27T04:50:18.920Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 20,
+    "fields": {
+        "pedido": 4,
+        "estado_anterior": "retirado",
+        "estado_nuevo": "en_viaje",
+        "usuario": 2,
+        "fecha": "2026-10-27T04:50:30.695Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 21,
+    "fields": {
+        "pedido": 4,
+        "estado_anterior": "en_viaje",
+        "estado_nuevo": "entregado",
+        "usuario": 2,
+        "fecha": "2026-10-27T04:50:43.497Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 22,
+    "fields": {
+        "pedido": 5,
+        "estado_anterior": "",
+        "estado_nuevo": "registrado",
+        "usuario": 7,
+        "fecha": "2026-10-27T04:51:38.047Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 23,
+    "fields": {
+        "pedido": 5,
+        "estado_anterior": "registrado",
+        "estado_nuevo": "asignado",
+        "usuario": 7,
+        "fecha": "2026-10-27T04:52:09.206Z",
+        "fotografia": "",
+        "incidencia": "Asignado por operario a repartidor2"
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 24,
+    "fields": {
+        "pedido": 5,
+        "estado_anterior": "asignado",
+        "estado_nuevo": "asignado",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:52:39.621Z",
+        "fotografia": "",
+        "incidencia": "Aceptado por repartidor repartidor2"
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 25,
+    "fields": {
+        "pedido": 5,
+        "estado_anterior": "asignado",
+        "estado_nuevo": "retirado",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:52:48.528Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 26,
+    "fields": {
+        "pedido": 5,
+        "estado_anterior": "retirado",
+        "estado_nuevo": "en_viaje",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:52:57.028Z",
+        "fotografia": "",
+        "incidencia": ""
+    }
+},
+{
+    "model": "repartidor.historialestado",
+    "pk": 27,
+    "fields": {
+        "pedido": 5,
+        "estado_anterior": "en_viaje",
+        "estado_nuevo": "fallido",
+        "usuario": 3,
+        "fecha": "2026-10-27T04:53:31.332Z",
+        "fotografia": "",
+        "incidencia": "No habÝa nadie en el domicilio de destino."
+    }
+},
+{
+    "model": "repartidor.repartidor",
+    "pk": 1,
+    "fields": {
+        "user": 2,
+        "pin": "1111",
+        "disponible": true,
+        "vehiculo": "moto"
+    }
+},
+{
+    "model": "repartidor.repartidor",
+    "pk": 2,
+    "fields": {
+        "user": 3,
+        "pin": "2222",
+        "disponible": true,
+        "vehiculo": "moto"
+    }
+},
+{
+    "model": "repartidor.repartidor",
+    "pk": 3,
+    "fields": {
+        "user": 6,
+        "pin": "3333",
+        "disponible": false,
+        "vehiculo": "moto"
+    }
+},
+{
+    "model": "repartidor.repartidor",
+    "pk": 4,
+    "fields": {
+        "user": 8,
+        "pin": "4444",
+        "disponible": false,
+        "vehiculo": "auto"
+    }
+},
+{
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+        "password": "!zvCdN1utIvfxXdxh5yak4eTN6rMDIqupUNZqyYIM",
+        "last_login": "2026-10-27T04:48:32.218Z",
+        "is_superuser": false,
+        "username": "repartidor1",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-10-19T21:23:54.478Z",
+        "is_operario": false,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+        "password": "!4j9hd6P9FEK9R1t56W5zjJvoLgu9gGKSz1BQwTk1",
+        "last_login": "2026-10-27T04:52:25.795Z",
+        "is_superuser": false,
+        "username": "repartidor2",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-10-19T21:23:56.059Z",
+        "is_operario": false,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 5,
+    "fields": {
+        "password": "pbkdf2_sha256$1500000$MYecLwetSCbfYL98bkzG1Y$5BOk3hlAE3OuigbdvNOdDRGiBtG/KDF2AcpPl848gh0=",
+        "last_login": "2026-10-27T04:57:00.781Z",
+        "is_superuser": true,
+        "username": "lucio",
+        "first_name": "",
+        "last_name": "",
+        "email": "l@gmail.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2026-10-22T03:46:14.891Z",
+        "is_operario": true,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 6,
+    "fields": {
+        "password": "!I4oZpBDmF8oUsjGWic4njZoO2VR6sbyqHgwpJ0yl",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "repartidor3",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-10-26T20:39:12.431Z",
+        "is_operario": false,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 7,
+    "fields": {
+        "password": "pbkdf2_sha256$1500000$AeiCPyXd5DlXTlcJfGGMQh$mtIM7lLurUGLce5RD1MUEwrtRjkk0wXZvUkmdmZsz3w=",
+        "last_login": "2026-10-27T04:00:46.599Z",
+        "is_superuser": false,
+        "username": "admin",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-10-26T20:52:23Z",
+        "is_operario": true,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 8,
+    "fields": {
+        "password": "!xE1WOeWGdCOYKSf9pNfXjDtM79HtU70mEVtKKTvu",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "repartidor4",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-10-26T20:55:00.778Z",
+        "is_operario": false,
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]
