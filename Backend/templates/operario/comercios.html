@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Comercios{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'css/comercios.css' %}">
+{% endblock extrastyle %}
 
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
@@ -19,7 +24,14 @@
 
 <section class="app-section" aria-labelledby="comercios-heading">
     <div class="app-section-body">
-        <h2 id="comercios-heading" class="h5">Comercios registrados</h2>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+            <h2 id="comercios-heading" class="h5 mb-0">Comercios registrados</h2>
+            {% if comercios %}
+                <div class="w-100" style="max-width: 24rem;">
+                    <input type="search" id="buscar-comercio" class="form-control" placeholder="Buscar por nombre" autocomplete="off">
+                </div>
+            {% endif %}
+        </div>
         {% if comercios %}
             <div class="table-responsive">
                 <table class="table app-table align-middle">
@@ -28,20 +40,20 @@
                             <th scope="col">Nombre</th>
                             <th scope="col">Dirección</th>
                             <th scope="col">Contacto</th>
-                            <th scope="col">Activo</th>
+                            <th scope="col">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for comercio in comercios %}
-                            <tr>
-                                <td>{{ comercio.nombre }}</td>
-                                <td>{{ comercio.direccion }}</td>
-                                <td>{{ comercio.contacto }}</td>
-                                <td>
+                            <tr{% if not comercio.activo %} class="inactivo" {% endif %}>
+                                <td class="comercio-nombre">{{ comercio.nombre }}</td>
+                                <td class="comercio-direccion">{{ comercio.direccion }}</td>
+                                <td class="comercio-contacto">{{ comercio.contacto }}</td>
+                                <td class="comercio-estado">
                                     {% if comercio.activo %}
-                                        <span class="badge text-bg-success">Sí</span>
+                                        <span class="badge text-bg-success">Activo</span>
                                     {% else %}
-                                        <span class="badge text-bg-secondary">No</span>
+                                        <span class="badge text-bg-secondary">Inactivo</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -49,9 +61,43 @@
                     </tbody>
                 </table>
             </div>
+            <p id="sin-resultados-comercios" class="text-secondary m-2 mt-4 text-center" role="status" hidden>No se encontraron comercios con ese nombre.</p>
         {% else %}
             <p class="text-secondary mb-0">Todavía no hay comercios registrados.</p>
         {% endif %}
     </div>
 </section>
 {% endblock %}
+
+{% block extrascript %}
+    {{ block.super }}
+    {% if comercios %}
+        <script>
+            const campoBusqueda = document.getElementById("buscar-comercio");
+            const filasComercios = document.querySelectorAll(".app-table tbody tr");
+            const mensajeSinResultados = document.getElementById("sin-resultados-comercios");
+
+            campoBusqueda.addEventListener("input", () => {
+                const busqueda = campoBusqueda.value
+                    .trim()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toLocaleLowerCase();
+                let cantidadVisibles = 0;
+
+                filasComercios.forEach((fila) => {
+                    const nombre = fila.cells[0].textContent
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .toLocaleLowerCase();
+                    const coincide = nombre.includes(busqueda);
+
+                    fila.hidden = !coincide;
+                    if (coincide) cantidadVisibles += 1;
+                });
+
+                mensajeSinResultados.hidden = cantidadVisibles > 0;
+            });
+        </script>
+    {% endif %}
+{% endblock extrascript %}
