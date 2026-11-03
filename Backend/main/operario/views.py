@@ -66,6 +66,25 @@ def comercios(request):
 
 
 @login_required
+@require_POST
+def cambiar_estado_comercio(request):
+    _exigir_operario(request)
+
+    nombre = request.POST.get('nombre', '').strip()
+    activo = request.POST.get('activo')
+    if not nombre or activo not in ('true', 'false'):
+        return JsonResponse(
+            {'error': 'Se requiere el nombre del comercio y un estado booleano válido.'},
+            status=400,
+        )
+
+    comercio = get_object_or_404(Comercio, nombre=nombre)
+    comercio.activo = activo == 'true'
+    comercio.save(update_fields=['activo'])
+    return JsonResponse({'nombre': comercio.nombre, 'activo': comercio.activo})
+
+
+@login_required
 def nuevo_comercio(request):
     _exigir_operario(request)
 

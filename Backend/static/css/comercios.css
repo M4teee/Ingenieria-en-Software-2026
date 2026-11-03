@@ -1,3 +1,60 @@
-tr.inactivo > td.comercio-nombre, tr.inactivo > td.comercio-direccion, tr.inactivo > td.comercio-contacto {
+tr:not(.activo) > td.comercio-nombre, tr:not(.activo) > td.comercio-direccion, tr:not(.activo) > td.comercio-contacto {
     opacity: 0.7;
+}
+
+td {
+    transition: all ease-in-out 0.3s;
+}
+
+.form-check-input {
+    border-color: var(--app-green);
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--app-green);
+    border-color: var(--app-green);
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 1%29'/%3e%3c/svg%3e");
+}
+
+.form-switch .form-check-input:focus:checked {
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 1%29'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:focus {
+    border-color: var(--app-muted);
+    outline: 0;
+    box-shadow: 0 0 0 .25rem var(--app-toggle-shadow);
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%2847, 93, 63, 0.5%29'/%3e%3c/svg%3e");
+    
+}
+
+.comercio-estado .toggle-container{
+    display: flex;
+    align-items: center;
+}
+
+/* Loading spinner */
+.loader {
+    margin-left: 4px;
+  width: 15px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--app-green);
+  animation:
+    l20-1 0.8s infinite linear alternate,
+    l20-2 1.6s infinite linear;
+}
+@keyframes l20-1{
+   0%    {clip-path: polygon(50% 50%,0       0,  50%   0%,  50%    0%, 50%    0%, 50%    0%, 50%    0% )}
+   12.5% {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100%   0%, 100%   0%, 100%   0% )}
+   25%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 100% 100%, 100% 100% )}
+   50%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   62.5% {clip-path: polygon(50% 50%,100%    0, 100%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   75%   {clip-path: polygon(50% 50%,100% 100%, 100% 100%,  100% 100%, 100% 100%, 50%  100%, 0%   100% )}
+   100%  {clip-path: polygon(50% 50%,50%  100%,  50% 100%,   50% 100%,  50% 100%, 50%  100%, 0%   100% )}
+}
+@keyframes l20-2{ 
+  0%    {transform:scaleY(1)  rotate(0deg)}
+  49.99%{transform:scaleY(1)  rotate(135deg)}
+  50%   {transform:scaleY(-1) rotate(0deg)}
+  100%  {transform:scaleY(-1) rotate(-135deg)}
 }

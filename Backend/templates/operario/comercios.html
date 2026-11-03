@@ -33,6 +33,7 @@
             {% endif %}
         </div>
         {% if comercios %}
+            <form id="csrf-form" hidden>{% csrf_token %}</form>
             <div class="table-responsive">
                 <table class="table app-table align-middle">
                     <thead>
@@ -40,21 +41,21 @@
                             <th scope="col">Nombre</th>
                             <th scope="col">Dirección</th>
                             <th scope="col">Contacto</th>
-                            <th scope="col">Estado</th>
+                            <th scope="col">Activo</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for comercio in comercios %}
-                            <tr{% if not comercio.activo %} class="inactivo" {% endif %}>
-                                <td class="comercio-nombre">{{ comercio.nombre }}</td>
+                            <tr{% if comercio.activo %} class="activo" {% endif %}>
+                                <td class="comercio-nombre"><a href="./editar/{{ comercio.pk }}">{{ comercio.nombre }}</a></td>
                                 <td class="comercio-direccion">{{ comercio.direccion }}</td>
                                 <td class="comercio-contacto">{{ comercio.contacto }}</td>
-                                <td class="comercio-estado">
-                                    {% if comercio.activo %}
-                                        <span class="badge text-bg-success">Activo</span>
-                                    {% else %}
-                                        <span class="badge text-bg-secondary">Inactivo</span>
-                                    {% endif %}
+                                <td class="comercio-estado">                                    
+                                    <div class="toggle-container">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" data-nombre="{{ comercio.nombre }}" aria-label="Activar o desactivar {{ comercio.nombre }}"{% if comercio.activo %} checked{% endif %}>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -72,32 +73,6 @@
 {% block extrascript %}
     {{ block.super }}
     {% if comercios %}
-        <script>
-            const campoBusqueda = document.getElementById("buscar-comercio");
-            const filasComercios = document.querySelectorAll(".app-table tbody tr");
-            const mensajeSinResultados = document.getElementById("sin-resultados-comercios");
-
-            campoBusqueda.addEventListener("input", () => {
-                const busqueda = campoBusqueda.value
-                    .trim()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .toLocaleLowerCase();
-                let cantidadVisibles = 0;
-
-                filasComercios.forEach((fila) => {
-                    const nombre = fila.cells[0].textContent
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .toLocaleLowerCase();
-                    const coincide = nombre.includes(busqueda);
-
-                    fila.hidden = !coincide;
-                    if (coincide) cantidadVisibles += 1;
-                });
-
-                mensajeSinResultados.hidden = cantidadVisibles > 0;
-            });
-        </script>
+        <script src="{% static 'js/comercios.js' %}" data-endpoint="{% url 'operario:cambiar_estado_comercio' %}"></script>
     {% endif %}
 {% endblock extrascript %}

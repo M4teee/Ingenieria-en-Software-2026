@@ -501,7 +501,10 @@ class ComerciosOperarioTests(TestCase):
         self.assertContains(respuesta, 'Comercio visible')
         self.assertContains(respuesta, 'Av. Central 123')
         self.assertContains(respuesta, 'contacto@example.test')
-        self.assertContains(respuesta, '<span class="badge text-bg-secondary">No</span>', html=True)
+        self.assertContains(
+            respuesta,
+            'type="checkbox" role="switch" data-nombre="Comercio visible"',
+        )
 
     def test_alta_persiste_comercio_activo_o_inactivo(self):
         for nombre, activo in (('Comercio activo nuevo', 'true'), ('Comercio inactivo nuevo', 'false')):
@@ -518,6 +521,43 @@ class ComerciosOperarioTests(TestCase):
                 self.assertEqual(comercio.direccion, 'Calle de prueba 456')
                 self.assertEqual(comercio.contacto, '123456789')
                 self.assertEqual(comercio.activo, activo == 'true')
+
+    def test_cambiar_estado_comercio_por_nombre(self):
+        comercio = Comercio.objects.create(
+            nombre='Comercio estado', direccion='Calle 1', contacto='Contacto',
+        )
+        url = reverse('operario:cambiar_estado_comercio')
+
+        respuesta = self.client.post(url, {'nombre': comercio.nombre, 'activo': 'false'})
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.json(), {'nombre': comercio.nombre, 'activo': False})
+        comercio.refresh_from_db()
+        self.assertFalse(comercio.activo)
+
+    def test_cambiar_estado_rechaza_datos_invalidos_o_comercio_inexistente(self):
+        url = reverse('operario:cambiar_estado_comercio')
+
+        for datos, estado in (
+            ({'nombre': '', 'activo': 'true'}, 400),
+            ({'nombre': 'No existe', 'activo': 'true'}, 404),
+            ({'nombre': 'No importa', 'activo': '1'}, 400),
+        ):
+            with self.subTest(datos=datos):
+                self.assertEqual(self.client.post(url, datos).status_code, estado)
+
+    def test_cambiar_estado_requiere_metodo_post_y_rol_operario(self):
+        url = reverse('operario:cambiar_estado_comercio')
+        self.assertEqual(self.client.get(url).status_code, 405)
+
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(
+            self.client.post(url, {'nombre': 'Comercio', 'activo': 'true'}).status_code,
+            403,
+        )
+
+        self.client.logout()
+        self.assertEqual(self.client.post(url, {}).status_code, 302)
 
     def test_campos_y_estado_son_obligatorios_y_estado_debe_ser_valido(self):
         url = reverse('operario:nuevo_comercio')
