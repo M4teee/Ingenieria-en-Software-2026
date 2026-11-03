@@ -7,6 +7,7 @@ app_name = 'operario'
 urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('comercios/', views.comercios, name='comercios'),
+    path('comercios/estado/', views.cambiar_estado_comercio, name='cambiar_estado_comercio'),
     path('comercios/nuevo/', views.nuevo_comercio, name='nuevo_comercio'),
     path('repartidores/', views.repartidores, name='repartidores'),
     path('repartidores/nuevo/', views.nuevo_repartidor, name='nuevo_repartidor'),
