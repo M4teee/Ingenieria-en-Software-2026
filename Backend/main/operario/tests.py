@@ -402,6 +402,10 @@ class RepartidoresOperarioTests(TestCase):
         self.assertContains(respuesta, 'repartidor_lista')
         self.assertContains(respuesta, 'Bicicleta')
         self.assertContains(respuesta, 'Disponible')
+        self.assertContains(
+            respuesta,
+            'type="checkbox" role="switch" data-username="repartidor_lista"',
+        )
 
     def test_alta_crea_usuario_y_perfil_de_forma_conjunta(self):
         respuesta = self.client.post(reverse('operario:nuevo_repartidor'), {
@@ -475,6 +479,109 @@ class RepartidoresOperarioTests(TestCase):
         for nombre in ('operario:repartidores', 'operario:nuevo_repartidor'):
             with self.subTest(nombre=nombre):
                 self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
+
+
+class CambiarEstadoRepartidorTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_estado_repartidor', password='test1234', is_operario=True,
+        )
+        self.usuario_comun = User.objects.create_user(
+            username='usuario_estado_repartidor', password='test1234',
+        )
+        self.usuario_repartidor = User.objects.create_user(username='repartidor_estado')
+        self.perfil = Repartidor.objects.create(
+            user=self.usuario_repartidor, pin='9911', disponible=True,
+        )
+        self.url = reverse('operario:cambiar_estado_repartidor')
+        self.client.force_login(self.operario)
+
+    def test_deshabilita_repartidor_sin_pedidos_activos(self):
+        respuesta = self.client.post(
+            self.url, {'username': self.usuario_repartidor.username, 'activo': 'false'}
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(
+            respuesta.json(),
+            {'username': self.usuario_repartidor.username, 'activo': False},
+        )
+        self.usuario_repartidor.refresh_from_db()
+        self.assertFalse(self.usuario_repartidor.is_active)
+
+    def test_repartidor_deshabilitado_no_puede_iniciar_sesion_por_pin(self):
+        self.client.post(
+            self.url, {'username': self.usuario_repartidor.username, 'activo': 'false'}
+        )
+        self.client.logout()
+
+        respuesta = self.client.post(reverse('repartidor_login_pin'), {'pin': '9911'})
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(
+            self.client.session.get('_auth_user_id')
+        )
+
+    def test_rechaza_deshabilitar_con_pedido_en_curso(self):
+        for indice, estado in enumerate(('asignado', 'retirado', 'en_viaje')):
+            with self.subTest(estado=estado):
+                Pedido.objects.create(
+                    codigo=f'ESTADO-{indice}',
+                    repartidor=self.usuario_repartidor,
+                    estado=estado,
+                )
+
+                respuesta = self.client.post(
+                    self.url,
+                    {'username': self.usuario_repartidor.username, 'activo': 'false'},
+                )
+
+                self.assertEqual(respuesta.status_code, 400)
+                self.assertEqual(
+                    respuesta.json(), {'error': 'El repartidor tiene pedidos en curso'}
+                )
+                self.usuario_repartidor.refresh_from_db()
+                self.assertTrue(self.usuario_repartidor.is_active)
+
+    def test_reactivar_no_exige_ausencia_de_pedidos_en_curso(self):
+        self.usuario_repartidor.is_active = False
+        self.usuario_repartidor.save(update_fields=['is_active'])
+        Pedido.objects.create(
+            codigo='ESTADO-REACTIVAR',
+            repartidor=self.usuario_repartidor,
+            estado='en_viaje',
+        )
+
+        respuesta = self.client.post(
+            self.url, {'username': self.usuario_repartidor.username, 'activo': 'true'}
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.usuario_repartidor.refresh_from_db()
+        self.assertTrue(self.usuario_repartidor.is_active)
+
+    def test_rechaza_datos_invalidos_o_repartidor_inexistente(self):
+        for datos, estado in (
+            ({'username': '', 'activo': 'true'}, 400),
+            ({'username': 'no_existe', 'activo': 'true'}, 404),
+            ({'username': self.usuario_repartidor.username, 'activo': '1'}, 400),
+        ):
+            with self.subTest(datos=datos):
+                self.assertEqual(self.client.post(self.url, datos).status_code, estado)
+
+    def test_requiere_metodo_post_y_rol_operario(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(
+            self.client.post(
+                self.url, {'username': self.usuario_repartidor.username, 'activo': 'false'}
+            ).status_code,
+            403,
+        )
+
+        self.client.logout()
+        self.assertEqual(self.client.post(self.url, {}).status_code, 302)
 
 
 class ComerciosOperarioTests(TestCase):

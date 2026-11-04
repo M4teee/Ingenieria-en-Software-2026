@@ -108,6 +108,39 @@ def repartidores(request):
 
 
 @login_required
+@require_POST
+def cambiar_estado_repartidor(request):
+    _exigir_operario(request)
+
+    username = request.POST.get('username', '').strip()
+    activo = request.POST.get('activo')
+    if not username or activo not in ('true', 'false'):
+        return JsonResponse(
+            {'error': 'Se requiere el usuario del repartidor y un estado booleano válido.'},
+            status=400,
+        )
+
+    perfil = get_object_or_404(
+        Repartidor.objects.select_related('user'), user__username=username
+    )
+
+    if activo == 'false':
+        tiene_pedido_activo = Pedido.objects.filter(
+            repartidor=perfil.user,
+            estado__in=('asignado', 'retirado', 'en_viaje'),
+        ).exists()
+        if tiene_pedido_activo:
+            return JsonResponse(
+                {'error': 'El repartidor tiene pedidos en curso'},
+                status=400,
+            )
+
+    perfil.user.is_active = activo == 'true'
+    perfil.user.save(update_fields=['is_active'])
+    return JsonResponse({'username': perfil.user.username, 'activo': perfil.user.is_active})
+
+
+@login_required
 def nuevo_repartidor(request):
     _exigir_operario(request)
 
