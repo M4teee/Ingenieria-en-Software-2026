@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 
 from main.operario.models import Comercio
 from main.repartidor.models import HistorialEstado, Pedido, Repartidor
@@ -18,6 +19,7 @@ from .forms import (
     AsignarPedidoForm,
     ComercioForm,
     MENSAJE_COMERCIO_INACTIVO,
+    MENSAJE_COMERCIO_DUPLICADO,
     PedidoForm,
     RepartidorForm,
 )
@@ -341,3 +343,29 @@ def pedido_registrado(request, pedido_id):
         pk=pedido_id,
     )
     return render(request, 'operario/pedido_registrado.html', {'pedido': pedido})
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def editar_comercio(request, comercio_id):
+    _exigir_operario(request)
+    comercio = get_object_or_404(Comercio, pk=comercio_id)
+    
+    nombre_original = comercio.nombre
+    if request.method == 'POST':
+        formulario = ComercioForm(request.POST, instance=comercio)
+        if formulario.is_valid():
+            try:
+                with transaction.atomic():
+                    formulario.save()
+            except IntegrityError:
+                formulario.add_error('nombre', MENSAJE_COMERCIO_DUPLICADO)
+            else:
+                messages.success(request, 'Datos del comercio actualizados')
+                return redirect('operario:editar_comercio', comercio_id=comercio.pk)
+    else:
+        formulario = ComercioForm(instance=comercio)
+        
+    return render(request, 'operario/editar_comercio.html', {
+        'form': formulario,
+        'nombre_original': nombre_original,
+    })
