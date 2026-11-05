@@ -42,14 +42,13 @@ Actualizado: 2026-11-05. Contrasta el código de la rama actual con la configura
 
 ## Verificaciones de esta revisión
 
-Verificación HU33 del 2026-11-05, con base de prueba SQLite:
+Verificación del entorno del 2026-11-05:
 
-- 92 pruebas de `main.operario.tests`, `main.repartidor.tests` y `main.clienteFinal.tests`: aprobadas. Django reportó el chequeo del sistema sin problemas.
-- Suite completa: 103 pruebas descubiertas; el resto pasó, pero `main.users.tests` no se pudo importar porque intenta importar `Vehiculo` desde `main.users.models`, donde ese modelo no existe.
-- `python manage.py check`: aprobado.
-- `makemigrations --check --dry-run`: no propuso cambios nuevos para `repartidor`; sí detectó una migración pendiente para eliminar el modelo legado `users.Vehiculo`. Esa discrepancia es ajena a HU33 y no se agregó aquí.
-- `git diff --check`: aprobado.
-- El entorno no tiene `.env`, `DATABASE_URL` ni variables `NEON_*`/`PG*` disponibles, y faltan `dj-database-url`, `python-dotenv` y `psycopg`. No se pudo abrir una conexión real a Neon. Las pruebas usaron SQLite con shims en memoria para las importaciones de configuración ausentes; no se modificó la configuración de conexión.
+- Se instalaron en el entorno local `.venv` las dependencias fijadas que faltaban. No se creó ni compartió configuración con credenciales.
+- `../.venv/bin/python manage.py test --settings=config.settings_test`: 104 pruebas aprobadas; chequeo del sistema sin problemas. La configuración de pruebas fuerza SQLite en memoria y evita conexiones a Neon.
+- `manage.py check --settings=config.settings_test`: aprobado; `makemigrations --check --dry-run`: sin cambios pendientes; `pip check`: sin dependencias incompatibles.
+- `python3 scripts/check_docs.py .`: 42 enlaces locales verificados; `git diff --check`: aprobado.
+- No se verificó una conexión real a Neon porque no hay `.env` ni `DATABASE_URL` configurada en este entorno. La configuración normal de la aplicación no se modificó.
 
 Verificaciones anteriores registradas en revisiones previas, con Python 3.14 y el entorno que se documentó en cada ocasión:
 

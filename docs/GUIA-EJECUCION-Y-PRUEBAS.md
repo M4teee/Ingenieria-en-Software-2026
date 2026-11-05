@@ -7,10 +7,12 @@ Esta guía prepara el backend Django para desarrollo local y reúne los comandos
 - Python 3.14 y `pip`; la serie está fijada en `.python-version`.
 - Git y una terminal.
 - SQLite, incluida con Python. No se requiere un servicio de base de datos ni variables de entorno.
-- Dependencias fijadas en `requirements.txt`: Django 6.1.2, asgiref, sqlparse, django-crispy-forms, crispy-bootstrap5 y Pillow.
+- Dependencias fijadas en `requirements.txt`: Django 6.1.2, asgiref, sqlparse, django-crispy-forms, crispy-bootstrap5, Pillow, `dj-database-url`, `python-dotenv` y Psycopg 3 con su binario.
 - Conexión a Internet para descargar dependencias y para cargar Bootstrap, iconos y tipografías desde CDN durante la navegación.
 
 `Backend/config/settings.py` usa `DEBUG=True`, una clave de desarrollo y SQLite. Esta configuración es exclusivamente local y no debe utilizarse en producción.
+
+La suite automatizada usa `Backend/config/settings_test.py`, que fuerza SQLite en memoria aunque exista un `DATABASE_URL` local. No hace falta configurar Neon ni copiar credenciales para ejecutar pruebas.
 
 ## Preparación desde cero
 
@@ -56,19 +58,18 @@ Los pasos de instalación se basan en la configuración real. En esta revisión,
 Con el entorno virtual activo y desde `Backend/`:
 
 ```sh
-python manage.py test
-python manage.py test main.operario
-python manage.py test main.repartidor
-python manage.py test main.clienteFinal
-python manage.py test main.operario.tests.PanelOperarioTests
-python manage.py test main.repartidor.tests.ActualizarEstadoTests.test_fallido_registra_incidencia
-python manage.py check
+python manage.py test --settings=config.settings_test
+python manage.py test main.operario --settings=config.settings_test
+python manage.py test main.repartidor --settings=config.settings_test
+python manage.py test main.clienteFinal --settings=config.settings_test
+python manage.py test main.operario.tests.PanelOperarioTests --settings=config.settings_test
+python manage.py test main.repartidor.tests.ActualizarEstadoTests.test_fallido_registra_incidencia --settings=config.settings_test
+python manage.py check --settings=config.settings_test
 python manage.py makemigrations --check --dry-run
-python manage.py migrate --check
 python -m pip check
 ```
 
-La primera línea ejecuta la suite completa; las siguientes permiten acotar por aplicación, clase o caso. `check` revisa la configuración Django; `makemigrations --check --dry-run` informa si los modelos requieren una migración nueva; `migrate --check` detecta migraciones pendientes; `pip check` revisa dependencias instaladas incompatibles. No hay una herramienta de lint o formato declarada.
+La primera línea ejecuta la suite completa; las siguientes permiten acotar por aplicación, clase o caso. El módulo `settings_test` mantiene la base de pruebas aislada en SQLite en memoria y evita conectarse por accidente a Neon. `check` revisa la configuración Django; `makemigrations --check --dry-run` informa si los modelos requieren una migración nueva; `pip check` revisa dependencias instaladas incompatibles. Para comprobar migraciones pendientes en una base de desarrollo configurada, ejecutá `python manage.py migrate --check` con la configuración apropiada. No hay una herramienta de lint o formato declarada.
 
 Desde la raíz, comprobá enlaces y rutas relativas de documentación con:
 
@@ -79,7 +80,7 @@ git diff --check
 
 ### Resultados de esta revisión
 
-Con Python 3.14.8 y las dependencias de `requirements.txt`, desde `Backend/` se ejecutaron en la revisión del rediseño: `../.venv/bin/python manage.py check` (aprobado) y `../.venv/bin/python manage.py test` (70 pruebas aprobadas). Desde la raíz, `python3 scripts/check_docs.py .` verificó 42 enlaces y `git diff --check` pasó. La revisión previa había aprobado además `makemigrations --check --dry-run`, `migrate --check` y `pip check`. La suite usa una base temporal y no borra la base local.
+Con Python 3.14.8 y las dependencias de `requirements.txt`, desde `Backend/` se ejecutó `../.venv/bin/python manage.py test --settings=config.settings_test`: 104 pruebas aprobadas. `check` pasó, `makemigrations --check --dry-run` no detectó cambios pendientes y `pip check` no encontró dependencias incompatibles. Desde la raíz, `python3 scripts/check_docs.py .` verificó 42 enlaces y `git diff --check` pasó. La suite usa SQLite en memoria y no conecta a Neon ni borra la base local.
 
 La aplicación se abrió en un navegador local y se inspeccionaron visualmente la entrada pública y el panel de operario en un viewport estrecho, sin escribir datos. No se realizó una inspección visual autenticada del módulo del repartidor ni de escritorio amplio. El Django Test Client comprobó el acceso a la raíz, las redirecciones por rol, la navegación sin enlaces cruzados, el acceso protegido a Django Admin y las pruebas existentes de propiedad de pedidos y operaciones. Windows no se probó.
 
