@@ -18,8 +18,8 @@ La UI se sirve con plantillas Django. `Frontend/` no contiene una app separada. 
 ## Recorrido funcional
 
 1. Una persona anónima abre `/` y ve el formulario público de seguimiento. La misma vista está disponible en `/clienteFinal/`; la navegación ofrece accesos separados al login Django del operario y al PIN del repartidor. Una sesión `is_operario` que abre `/` va a `/operario/`; una sesión vinculada a un perfil activo de repartidor va a `/repartidor/`.
-2. `PedidoForm` limita el selector a comercios activos y valida campos, fecha/hora y clave de idempotencia. La vista repite la validación de comercio dentro de `_crear_pedido`.
-3. La transacción crea el pedido `registrado` sin repartidor, genera un código con `secrets` y registra el evento inicial en `HistorialEstado`. Una restricción de unicidad protege el código y la clave de solicitud; las colisiones de código se reintentan.
+2. `PedidoForm` limita el selector a comercios activos y valida dirección, datos del destinatario, tamaño del paquete, vehículo requerido, especificaciones, fecha/hora y clave de idempotencia. Los tres datos agregados para HU33 se capturan como texto libre. La vista repite la validación de comercio dentro de `_crear_pedido`.
+3. La transacción crea el pedido `registrado` sin repartidor, persiste los datos capturados, genera un código con `secrets` y registra el evento inicial en `HistorialEstado`. Una restricción de unicidad protege el código y la clave de solicitud; las colisiones de código se reintentan.
 4. La confirmación muestra el código y permite copiarlo. El panel permite abrir el pedido y seleccionar manualmente un repartidor disponible; el servidor verifica otra vez que siga disponible y registra el cambio a `asignado` y su historial.
 5. El repartidor autenticado por su PIN ve la asignación en `/repartidor/`, dispone de cinco minutos para responder y luego puede marcar retiro, viaje, entrega o falla, dentro de las transiciones permitidas.
 6. Cada cambio de estado guarda un evento. Si se adjunta una foto permitida, la vista valida el contenido, el tipo, el tamaño y la cantidad; la escritura de evento/estado es atómica. El acceso a la evidencia requiere `is_staff`, `is_operario` o ser el repartidor asignado.
@@ -29,7 +29,7 @@ La asignación manual es un puente provisional elegido para la aplicación web. 
 
 ## Recorrido por archivos
 
-- **Panel y detalle del operario:** `Backend/main/operario/urls.py` resuelve a `inicio`, `detalle_pedido` y `asignar_repartidor` en `views.py`. `forms.py` filtra perfiles disponibles. `templates/operario/inicio.html` lista el trabajo actual y consulta un endpoint JSON cada 15 segundos; `detalle_pedido.html` muestra datos, historial y asignación.
+- **Panel y detalle del operario:** `Backend/main/operario/urls.py` resuelve a `inicio`, `detalle_pedido` y `asignar_repartidor` en `views.py`. `forms.py` filtra perfiles disponibles. `templates/operario/inicio.html` lista el trabajo actual y consulta un endpoint JSON cada 5 segundos; `detalle_pedido.html` muestra datos, historial, asignación y los datos de HU33. El control visual de cancelación permanece deshabilitado hasta integrar HU13.
 - **Alta:** `PedidoForm` y `ComercioActivoField` viven en `main/operario/forms.py`; `cargar_pedido`, `_crear_pedido` y confirmación están en `views.py`; las plantillas `cargar_pedido.html` y `pedido_registrado.html` construyen el formulario y el resultado.
 - **Operación del repartidor:** las URLs de `main/repartidor/urls.py` conectan el PIN, la página, el detalle, la evidencia y los cambios de estado. `ActualizarEstadoForm` en `forms.py` valida fotos. Las vistas limitan las consultas al usuario asociado al perfil y al pedido asignado.
 - **Seguimiento:** `main/clienteFinal/views.py` consulta Pedido e HistorialEstado por el código y renderiza `templates/clienteFinal/seguimiento.html`.

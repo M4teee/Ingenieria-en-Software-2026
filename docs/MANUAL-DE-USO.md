@@ -23,7 +23,7 @@ El rol administrativo mantiene los datos de configuración. Para operar pedidos,
 
 1. En `/`, elegí **Iniciar sesión como operario** e ingresá con una cuenta activa `is_operario`. Al completar el acceso, se abre `/operario/`. También podés navegar directamente a esa ruta.
 2. El panel lista pedidos registrados, asignados, retirados y en viaje, con estado actualizado periódicamente. Usá **Cargar pedido** o `/operario/pedidos/nuevo/`.
-3. Seleccioná un comercio activo y completá dirección de destino, especificaciones de traslado y fecha/hora estimadas. Los campos requeridos se validan en el servidor.
+3. Seleccioná un comercio activo y completá dirección de destino, datos del destinatario, tamaño del paquete, vehículo requerido, especificaciones de traslado y fecha/hora estimadas. Los campos de destinatario, tamaño y vehículo requerido son textos libres; ingresá la información que proporcione el comercio sin asumir categorías o unidades que no haya indicado. El servidor valida los campos requeridos.
 4. Presioná **Registrar Pedido**. La pantalla de confirmación presenta el mensaje de éxito y el código de seguimiento, que se puede copiar. El pedido nace como `Registrado`, sin repartidor, y su historial recibe el evento inicial.
 5. En el detalle del pedido, elegí un repartidor activo y disponible y presioná **Asignar pedido**. El sistema comprueba nuevamente la disponibilidad y registra el evento de asignación. El pedido queda `Asignado` y el repartidor tiene cinco minutos para aceptar o rechazarlo desde su panel.
 6. Si el comercio se inactiva antes de enviar el formulario, el servidor rechaza el alta con el mensaje exigido por HU 12. Si un repartidor ya no está disponible, no se realiza la asignación.
