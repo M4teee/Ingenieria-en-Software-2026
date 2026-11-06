@@ -44,7 +44,6 @@ def _pedidos_en_curso():
         Pedido.objects.filter(
             estado__in=('registrado', 'asignado', 'retirado', 'en_viaje')
         )
-        .exclude(estado='asignado', fecha_hora_aceptacion__isnull=True)
         .select_related('comercio', 'repartidor')
         .order_by('fecha_creacion', 'pk')
     )

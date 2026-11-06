@@ -268,7 +268,7 @@ class PanelOperarioTests(TestCase):
         self.client.force_login(usuario_solo_staff)
         self.assertEqual(self.client.get(reverse('operario:inicio')).status_code, 403)
 
-    def test_asignado_sin_aceptar_no_aparece_en_el_panel(self):
+    def test_asignado_sin_aceptar_aparece_en_el_panel(self):
         repartidor_usuario = User.objects.create_user(
             username='panel_repartidor_pendiente', password='test1234',
         )
@@ -282,8 +282,9 @@ class PanelOperarioTests(TestCase):
         lista = self.client.get(reverse('operario:inicio'))
         estado = self.client.get(reverse('operario:estado_pedidos'))
 
-        self.assertNotContains(lista, 'PANEL-001')
-        self.assertEqual(estado.json()['pedidos'], [])
+        self.assertContains(lista, 'PANEL-001')
+        self.assertEqual(len(estado.json()['pedidos']), 1)
+        self.assertEqual(estado.json()['pedidos'][0]['codigo'], 'PANEL-001')
 
     def test_asignado_y_aceptado_aparece_en_el_panel(self):
         repartidor_usuario = User.objects.create_user(
