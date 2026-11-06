@@ -46,7 +46,6 @@ def _pedidos_en_curso():
         Pedido.objects.filter(
             estado__in=('registrado', 'asignado', 'retirado', 'en_viaje')
         )
-        # .exclude(estado='asignado', fecha_hora_aceptacion__isnull=True)
         .select_related('comercio', 'repartidor')
         .order_by('fecha_creacion', 'pk')
     )
@@ -252,6 +251,9 @@ def _crear_pedido(formulario, usuario):
                             clave_idempotencia=clave,
                             comercio=comercio,
                             direccion_destino=datos['direccion_destino'],
+                            datos_destinatario=datos['datos_destinatario'],
+                            tamano_paquete=datos['tamano_paquete'],
+                            vehiculo_requerido=datos['vehiculo_requerido'],
                             especificaciones_traslado=(
                                 datos['especificaciones_traslado']
                             ),

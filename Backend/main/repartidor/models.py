@@ -56,6 +56,21 @@ class Pedido(models.Model):
         default=''
     )
 
+    datos_destinatario = models.TextField(
+        blank=True,
+        default='',
+    )
+
+    tamano_paquete = models.TextField(
+        blank=True,
+        default='',
+    )
+
+    vehiculo_requerido = models.TextField(
+        blank=True,
+        default='',
+    )
+
     especificaciones_traslado = models.TextField(
         blank=True,
         default=''

@@ -1,18 +1,20 @@
 # Estado actual
 
-Actualizado: 2026-11-03. Contrasta el código de la rama actual con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
+Actualizado: 2026-11-05. Contrasta el código de la rama actual con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
 
 ## Implementación observada
 
 - `Backend/` contiene el backend Django en Python 3.14; `requirements.txt` fija Django 6.1.2 y las dependencias de formularios e imágenes. SQLite es la base predeterminada, reemplazada si `.env` define `DATABASE_URL`. `Frontend/` es un marcador, no una aplicación frontend aparte.
 - `main.homePage` deriva las visitas anónimas de `/` al formulario público de seguimiento; `/clienteFinal/` mantiene la misma consulta. Las sesiones `is_operario` se dirigen a `/operario/` y las sesiones con perfil activo de repartidor a `/repartidor/`. La navegación compartida muestra accesos de login por rol cuando no hay sesión y opciones del propio rol cuando la hay.
 - `main.operario` mantiene comercios y gestiona pedidos desde plantillas Django. El operario registra pedidos asociados a comercios activos; la vista vuelve a validar el comercio durante la escritura. El alta es idempotente por clave de solicitud, genera un código seguro y registra `Registrado` en el historial dentro de una transacción.
+- El formulario de pedidos también captura como texto libre los datos del destinatario, el tamaño del paquete y el vehículo requerido para HU33. Los valores se persisten en `Pedido` y se muestran en el detalle; pedidos históricos sin esos datos conservan el campo vacío y se presentan como “No informado”. El formulario requiere esos tres textos para pedidos nuevos; no define atributos del destinatario, categorías, unidades ni catálogos de vehículos.
 - Todas las páginas de `/operario/` requieren sesión activa con `is_operario=True`; `is_staff` ya no autoriza el módulo. `is_operario` es un campo del usuario editable desde Django Admin. La migración inicial copia a ese campo el `is_staff` existente para preservar el acceso previo; ambos atributos luego se administran por separado.
 - `main.operario` permite listar los comercios en `/operario/comercios/` y darlos de alta en `/operario/comercios/nuevo/`; ambas páginas requieren `is_operario`. El formulario exige nombre único, dirección, contacto y una selección explícita de estado activo o inactivo.
 - La lista de comercios permite filtrar localmente por nombre mientras se escribe, sin volver a consultar el servidor; la búsqueda ignora mayúsculas y tildes y muestra un aviso si no hay coincidencias.
 - La lista de comercios puede cambiar el campo `activo` mediante `POST /operario/comercios/estado/`, enviando `nombre` y `activo` (`true`/`false`); la vista exige sesión y `is_operario=True` y responde JSON.
 - `main.operario` ofrece `/operario/repartidores/`, una lista protegida para `is_operario` con usuario, vehículo y disponibilidad; y `/operario/repartidores/nuevo/`, que crea en una transacción un usuario sin contraseña utilizable y su perfil con PIN ingresado de cuatro dígitos. Nombre, apellido y correo son opcionales; el vehículo es obligatorio y se elige entre las opciones del modelo. Los perfiles nuevos empiezan no disponibles.
-- El panel de operario en `/operario/` lista los pedidos no finalizados (`registrado`, `asignado`, `retirado`, `en_viaje`) ordenados por antigüedad, con comercio, destino, estado y repartidor asignado; permite abrir el detalle y asignar manualmente un repartidor disponible a un pedido registrado sin asignar. Un pedido `asignado` que todavía espera la aceptación del repartidor (sin `fecha_hora_aceptacion`) no se incluye en esa lista; aparece recién cuando el repartidor confirma. Estado, asignación e historial se guardan juntos. Una respuesta JSON con el mismo filtro actualiza la lista cada 15 segundos mientras el panel permanece abierto.
+- El panel de operario en `/operario/` lista los pedidos no finalizados (`registrado`, `asignado`, `retirado`, `en_viaje`) ordenados por antigüedad, con comercio, destino, estado y repartidor asignado; incluye los pedidos `asignado` que todavía esperan la aceptación del repartidor. Permite abrir el detalle y asignar manualmente un repartidor disponible a un pedido registrado sin asignar. Estado, asignación e historial se guardan juntos. Una respuesta JSON actualiza la lista cada 5 segundos mientras el panel permanece abierto.
+- El detalle del operario muestra los datos del comercio, los campos de HU33, estado, código, repartidor o “Sin asignar”, y el timeline. La acción de cancelar aparece deshabilitada en `registrado` y `asignado`; HU13 debe conectarla a la operación que cambia el estado, libera/notifica al repartidor y registra el evento. No existe una ruta funcional de cancelación.
 - `main.repartidor` conserva el perfil con PIN de cuatro dígitos, disponibilidad, respuesta a la asignación en cinco minutos y transiciones del pedido. El repartidor autenticado ve los pedidos que le pertenecen, consulta detalles e historial, y puede adjuntar una fotografía opcional al retirar, entregar o registrar una falla. Las imágenes se limitan a JPEG, PNG o WebP, máximo 10 MB y una por transición. El acceso a evidencia está restringido a `is_staff`, `is_operario` o al repartidor dueño del pedido.
 - `main.repartidor` incluye el historial de entregas del repartidor en `/repartidor/historial/` (`historial_entregas`): lista de solo lectura, filtrada al repartidor de la sesión, con los pedidos en estado `entregado`, `fallido` o `cancelado`, ordenados del más reciente primero según la fecha del evento de cierre del historial (con `fecha_creacion` como respaldo), usando `select_related('comercio')` y una subconsulta anotada para la fecha de cierre. Muestra código, comercio, destino, estado final y fecha/hora de cierre; sin entregas muestra "Aún no tienes entregas registradas en tu historial". El índice del repartidor enlaza a esta sección y la vista exige sesión y perfil activo de repartidor (redirección al login por PIN; 403 sin perfil).
 - `main.clienteFinal` ofrece búsqueda pública de solo lectura por código en `/clienteFinal/` y consulta en `/clienteFinal/seguimiento/<codigo>/`. Lee el pedido y el historial persistidos. La página pública no presenta datos de contacto, especificaciones, usuarios internos ni fotografías.
@@ -22,7 +24,7 @@ Actualizado: 2026-11-03. Contrasta el código de la rama actual con la configura
 
 ## Requisitos, acuerdos y discrepancias
 
-- **Requisito de HU 12:** comercio activo, estado inicial Registrado, código no predecible, destino, especificaciones y estimación. La implementación actual los satisface en el flujo web; las pruebas cubren alta, repetición, invalidación del comercio, colisión y permisos.
+- **Requisito de HU 12:** comercio activo, estado inicial Registrado, código no predecible, destino, especificaciones y estimación. La implementación conserva esos criterios; la captura de datos del destinatario, tamaño y vehículo requerido se integró para que HU33 pueda consultar esos valores.
 - **Discrepancia preexistente (2026-10-18):** `makemigrations --check` detecta un cambio pendiente en `Repartidor.vehiculo`: la migración `0006_repartidor_vehiculo.py` registra `default='registrado'` pero el modelo declara `default='moto'`. Es anterior a la HU del historial de entregas; se conserva sin tocar y queda pendiente de decisión del equipo.
 - **Acuerdo del equipo (2026-10-16):** el operario elige manualmente un repartidor disponible desde la web como solución provisional entre los pedidos registrados y el módulo del repartidor.
 - **HU 22/30 no implementadas:** sus criterios originales de asignación automática —incluida la cercanía donde corresponde— siguen pendientes. El flujo manual provisional no satisface ni completa esas historias. El modelo tampoco registra ubicación suficiente para calcular cercanía.
@@ -33,13 +35,22 @@ Actualizado: 2026-11-03. Contrasta el código de la rama actual con la configura
 ## Datos y compatibilidad
 
 - Los pedidos nuevos se relacionan con `Comercio`; `Pedido.repartidor` es opcional para que un pedido pueda existir antes de su asignación. `HistorialEstado` conserva estado anterior/nuevo, usuario, fecha, incidencia y archivo fotográfico.
+- `Pedido.datos_destinatario`, `Pedido.tamano_paquete` y `Pedido.vehiculo_requerido` son campos de texto con valor vacío predeterminado para mantener compatibles los pedidos anteriores. La migración `repartidor.0010` los agrega sin inferir valores históricos.
 - La migración `users.0004_user_is_operario` agrega el campo de rol, preserva el acceso operativo existente copiando `is_staff=True` a `is_operario=True` y deja ambos atributos independientes después de migrar. Las pruebas usaron una base temporal SQLite; no alteraron la base local configurada.
 - La base local contiene datos de desarrollo preexistentes. No se alteraron ni usaron como evidencia funcional; la inspección del panel fue de solo lectura. La compatibilidad con una base productiva poblada no se validó.
 - `DEBUG=True`, clave de desarrollo, almacenamiento local y servicio `runserver` hacen que esta configuración sea solo de desarrollo.
 
 ## Verificaciones de esta revisión
 
-En esta tarea, con Python 3.14.8 y las dependencias de `requirements.txt` desde `Backend/`:
+Verificación del entorno del 2026-11-05:
+
+- Se instalaron en el entorno local `.venv` las dependencias fijadas que faltaban. No se creó ni compartió configuración con credenciales.
+- `../.venv/bin/python manage.py test --settings=config.settings_test`: 104 pruebas aprobadas; chequeo del sistema sin problemas. La configuración de pruebas fuerza SQLite en memoria y evita conexiones a Neon.
+- `manage.py check --settings=config.settings_test`: aprobado; `makemigrations --check --dry-run`: sin cambios pendientes; `pip check`: sin dependencias incompatibles.
+- `python3 scripts/check_docs.py .`: 42 enlaces locales verificados; `git diff --check`: aprobado.
+- No se verificó una conexión real a Neon porque no hay `.env` ni `DATABASE_URL` configurada en este entorno. La configuración normal de la aplicación no se modificó.
+
+Verificaciones anteriores registradas en revisiones previas, con Python 3.14 y el entorno que se documentó en cada ocasión:
 
 - `python manage.py makemigrations --check --dry-run` desde `Backend/`, con `DATABASE_URL` vacío: no se detectaron cambios de modelo pendientes.
 - `python manage.py check` desde `Backend/`, con `DATABASE_URL` vacío: aprobado.

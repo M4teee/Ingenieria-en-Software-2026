@@ -44,6 +44,18 @@ class PedidoForm(forms.Form):
         label='Dirección de destino',
         widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'street-address'}),
     )
+    datos_destinatario = forms.CharField(
+        label='Datos del destinatario',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+    )
+    tamano_paquete = forms.CharField(
+        label='Tamaño del paquete',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+    )
+    vehiculo_requerido = forms.CharField(
+        label='Vehículo requerido',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+    )
     especificaciones_traslado = forms.CharField(
         label='Especificaciones de traslado',
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
