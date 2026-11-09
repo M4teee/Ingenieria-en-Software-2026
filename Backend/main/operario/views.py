@@ -57,6 +57,27 @@ def inicio(request):
     pedidos = _pedidos_en_curso()
     return render(request, 'operario/inicio.html', {'pedidos': pedidos})
 
+@login_required
+def buscar_pedido(request):
+    _exigir_operario(request)
+
+    busqueda = request.GET.get('q', '').strip()
+
+    if not busqueda:
+        messages.error(request, 'Ingresá un código o identificador de pedido.')
+        return redirect('operario:inicio')
+
+    pedido = Pedido.objects.filter(codigo__iexact=busqueda).first()
+
+    if pedido is None and busqueda.isdigit():
+        pedido = Pedido.objects.filter(pk=int(busqueda)).first()
+
+    if pedido is None:
+        messages.error(request, 'No se encontró ningún pedido con ese código o identificador.')
+        return redirect('operario:inicio')
+
+    return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
+
 
 @login_required
 def comercios(request):

@@ -17,6 +17,31 @@
     {% endfor %}
 {% endif %}
 
+<section class="app-section mb-4" aria-labelledby="buscar-pedido-heading">
+    <div class="app-section-body">
+        <h2 id="buscar-pedido-heading" class="h5">Buscar pedido</h2>
+        <p class="text-secondary">
+            Buscá un pedido por su código de seguimiento o identificador para consultar su historial.
+        </p>
+
+        <form method="get" action="{% url 'operario:buscar_pedido' %}">
+            <div class="input-group">
+                <input
+                    type="text"
+                    name="q"
+                    class="form-control"
+                    placeholder="Código o identificador del pedido"
+                    aria-label="Código o identificador del pedido"
+                    required
+                >
+                <button class="btn btn-app" type="submit">
+                    Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
 <section class="app-section mb-4" aria-labelledby="pedidos-heading">
     <div class="app-section-body">
         <h2 id="pedidos-heading" class="h5">Pedidos registrados y en reparto</h2>
