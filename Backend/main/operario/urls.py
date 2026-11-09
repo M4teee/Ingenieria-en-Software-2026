@@ -7,8 +7,19 @@ app_name = 'operario'
 urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('comercios/', views.comercios, name='comercios'),
+    path(
+    'comercios/<int:comercio_id>/editar/',
+    views.editar_comercio,
+    name='editar_comercio'
+    ),
+    path('comercios/estado/', views.cambiar_estado_comercio, name='cambiar_estado_comercio'),
     path('comercios/nuevo/', views.nuevo_comercio, name='nuevo_comercio'),
     path('repartidores/', views.repartidores, name='repartidores'),
+    path(
+        'repartidores/estado/',
+        views.cambiar_estado_repartidor,
+        name='cambiar_estado_repartidor',
+    ),
     path('repartidores/nuevo/', views.nuevo_repartidor, name='nuevo_repartidor'),
     path('pedidos/estado/', views.estado_pedidos, name='estado_pedidos'),
     path('pedidos/buscar/', views.buscar_pedido, name='buscar_pedido'),
@@ -24,4 +35,5 @@ urlpatterns = [
         views.pedido_registrado,
         name='pedido_registrado',
     ),
+    
 ]

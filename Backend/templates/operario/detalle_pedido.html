@@ -22,8 +22,14 @@
                 <h2 id="datos-heading" class="h5">Datos del pedido</h2>
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Comercio</dt><dd class="col-sm-8">{{ pedido.comercio.nombre|default:"Sin comercio" }}</dd>
-                    {% if pedido.comercio %}<dt class="col-sm-4">Contacto del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.contacto }}</dd>{% endif %}
+                    {% if pedido.comercio %}
+                        <dt class="col-sm-4">Dirección del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.direccion|default:"Sin dirección" }}</dd>
+                        <dt class="col-sm-4">Contacto del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.contacto }}</dd>
+                    {% endif %}
+                    <dt class="col-sm-4">Destinatario</dt><dd class="col-sm-8">{{ pedido.datos_destinatario|default:"No informado"|linebreaksbr }}</dd>
                     <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido.direccion_destino|default:"Sin destino" }}</dd>
+                    <dt class="col-sm-4">Tamaño del paquete</dt><dd class="col-sm-8">{{ pedido.tamano_paquete|default:"No informado"|linebreaksbr }}</dd>
+                    <dt class="col-sm-4">Vehículo requerido</dt><dd class="col-sm-8">{{ pedido.vehiculo_requerido|default:"No informado"|linebreaksbr }}</dd>
                     <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
                     <dt class="col-sm-4">Entrega estimada</dt><dd class="col-sm-8">{% if pedido.fecha_hora_estimada_entrega %}{{ pedido.fecha_hora_estimada_entrega|date:"d/m/Y H:i" }}{% else %}Sin estimación{% endif %}</dd>
                     <dt class="col-sm-4">Repartidor</dt><dd class="col-sm-8">{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}Sin asignar{% endif %}</dd>
@@ -50,6 +56,18 @@
                     {% else %}
                         <p class="alert alert-warning mb-0">No hay repartidores activos y disponibles sin otro pedido en curso.</p>
                     {% endif %}
+                </div>
+            </section>
+        {% endif %}
+        {% if pedido.estado == 'registrado' or pedido.estado == 'asignado' %}
+            <section class="card shadow-sm mt-4" aria-labelledby="cancelacion-heading">
+                <div class="card-body">
+                    <h2 id="cancelacion-heading" class="h5">Cancelar pedido</h2>
+                    {# TODO HU13: habilitar y conectar cuando exista la operación real de cancelación. Debe cambiar estado, liberar/notificar al repartidor y registrar el evento. #}
+                    <button class="btn btn-outline-danger" type="button" disabled aria-describedby="cancelacion-pendiente">
+                        Cancelar pedido
+                    </button>
+                    <p id="cancelacion-pendiente" class="text-secondary mt-2 mb-0">Acción pendiente de integración.</p>
                 </div>
             </section>
         {% endif %}

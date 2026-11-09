@@ -42,8 +42,13 @@ class CargarPedidoTests(TestCase):
             ),
             'comercio': str(self.comercio.pk),
             'direccion_destino': 'Calle Destino 456',
+            'datos_destinatario': 'Destinatario de prueba',
+            'tamano_paquete': 'Tamaño indicado por comercio',
+            'vehiculo_requerido': 'Vehículo solicitado por comercio',
             'especificaciones_traslado': 'Manipular con cuidado',
-            'fecha_hora_estimada_entrega': '2026-10-16T15:45',
+            'fecha_hora_estimada_entrega': timezone.localtime(
+                timezone.now() + timedelta(days=1)
+            ).strftime('%Y-%m-%dT%H:%M'),
         }
         datos.update(cambios)
         return datos
@@ -84,12 +89,18 @@ class CargarPedidoTests(TestCase):
         self.assertIsNone(pedido.repartidor)
         self.assertEqual(pedido.comercio, self.comercio)
         self.assertEqual(pedido.direccion_destino, 'Calle Destino 456')
+        self.assertEqual(pedido.datos_destinatario, 'Destinatario de prueba')
+        self.assertEqual(pedido.tamano_paquete, 'Tamaño indicado por comercio')
+        self.assertEqual(
+            pedido.vehiculo_requerido,
+            'Vehículo solicitado por comercio',
+        )
         self.assertEqual(pedido.especificaciones_traslado, 'Manipular con cuidado')
         self.assertEqual(
             timezone.localtime(
                 pedido.fecha_hora_estimada_entrega
             ).strftime('%Y-%m-%dT%H:%M'),
-            '2026-10-16T15:45',
+            datos['fecha_hora_estimada_entrega'],
         )
         self.assertRegex(pedido.codigo, r'^[A-Z0-9]{20}$')
         self.assertEqual(UUID(datos['clave_idempotencia']), pedido.clave_idempotencia)
@@ -104,6 +115,13 @@ class CargarPedidoTests(TestCase):
         self.assertContains(confirmacion, 'Pedido registrado con éxito')
         self.assertContains(confirmacion, pedido.codigo)
         self.assertContains(confirmacion, 'navigator.clipboard')
+
+        detalle = self.client.get(reverse(
+            'operario:detalle_pedido', args=[pedido.pk]
+        ))
+        self.assertContains(detalle, 'Destinatario de prueba')
+        self.assertContains(detalle, 'Tamaño indicado por comercio')
+        self.assertContains(detalle, 'Vehículo solicitado por comercio')
 
     def test_comercio_inactivo_rechaza_alta_con_mensaje_de_historia(self):
         self.comercio.activo = False
@@ -140,7 +158,7 @@ class PanelOperarioTests(TestCase):
         )
         self.client.force_login(self.operario)
 
-    def test_panel_lista_pedido_y_detalle_muestra_historial(self):
+    def test_panel_y_detalle_muestran_pedido_comercio_e_historial(self):
         HistorialEstado.objects.create(
             pedido=self.pedido,
             estado_nuevo='registrado',
@@ -156,8 +174,85 @@ class PanelOperarioTests(TestCase):
         self.assertContains(lista, 'PANEL-001')
         self.assertContains(lista, 'Sin asignar')
         self.assertEqual(detalle.status_code, 200)
+        self.assertContains(detalle, 'Panel Comercio')
+        self.assertContains(detalle, 'Calle 10')
+        self.assertContains(detalle, '111')
+        self.assertContains(detalle, 'Destinatario')
+        self.assertContains(detalle, 'Tamaño del paquete')
+        self.assertContains(detalle, 'Vehículo requerido')
+        self.assertContains(detalle, 'No informado')
+        self.assertContains(
+            detalle,
+            '<dd class="col-sm-8">Sin asignar</dd>',
+            html=True,
+        )
         self.assertContains(detalle, 'Historial del pedido')
         self.assertContains(detalle, 'Registrado')
+
+    def test_detalle_muestra_repartidor_asignado_y_no_indica_sin_asignar(self):
+        repartidor = User.objects.create_user(
+            username='repartidor_detalle', first_name='Rosa', last_name='Pérez',
+        )
+        self.pedido.repartidor = repartidor
+        self.pedido.estado = 'asignado'
+        self.pedido.save(update_fields=['repartidor', 'estado'])
+
+        detalle = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.pedido.pk])
+        )
+
+        self.assertEqual(detalle.status_code, 200)
+        self.assertContains(detalle, 'Rosa Pérez')
+        self.assertNotContains(detalle, 'Sin asignar')
+
+    def test_detalle_maneja_comercio_ausente_y_direccion_vacia(self):
+        self.pedido.comercio = None
+        self.pedido.save(update_fields=['comercio'])
+
+        detalle_sin_comercio = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.pedido.pk])
+        )
+
+        self.assertContains(detalle_sin_comercio, 'Sin comercio')
+
+        comercio_sin_direccion = Comercio.objects.create(
+            nombre='Comercio sin dirección', direccion='', contacto='Contacto',
+        )
+        self.pedido.comercio = comercio_sin_direccion
+        self.pedido.save(update_fields=['comercio'])
+
+        detalle_sin_direccion = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.pedido.pk])
+        )
+
+        self.assertContains(detalle_sin_direccion, 'Sin dirección')
+
+    def test_cancelacion_visual_pendiente_solo_aparece_en_estados_permitidos(self):
+        for estado in ('registrado', 'asignado'):
+            with self.subTest(estado=estado):
+                self.pedido.estado = estado
+                self.pedido.save(update_fields=['estado'])
+
+                detalle = self.client.get(
+                    reverse('operario:detalle_pedido', args=[self.pedido.pk])
+                )
+
+                self.assertContains(
+                    detalle,
+                    '<button class="btn btn-outline-danger" type="button" disabled aria-describedby="cancelacion-pendiente">',
+                )
+                self.assertContains(detalle, 'Cancelar pedido')
+
+        for estado in ('retirado', 'en_viaje', 'entregado', 'fallido', 'cancelado'):
+            with self.subTest(estado=estado):
+                self.pedido.estado = estado
+                self.pedido.save(update_fields=['estado'])
+
+                detalle = self.client.get(
+                    reverse('operario:detalle_pedido', args=[self.pedido.pk])
+                )
+
+                self.assertNotContains(detalle, 'cancelacion-pendiente')
 
     def test_usuario_sin_is_operario_no_accede_al_panel_ni_detalle(self):
         self.client.force_login(self.usuario_comun)
@@ -174,7 +269,7 @@ class PanelOperarioTests(TestCase):
         self.client.force_login(usuario_solo_staff)
         self.assertEqual(self.client.get(reverse('operario:inicio')).status_code, 403)
 
-    def test_asignado_sin_aceptar_no_aparece_en_el_panel(self):
+    def test_asignado_sin_aceptar_aparece_en_el_panel(self):
         repartidor_usuario = User.objects.create_user(
             username='panel_repartidor_pendiente', password='test1234',
         )
@@ -188,8 +283,9 @@ class PanelOperarioTests(TestCase):
         lista = self.client.get(reverse('operario:inicio'))
         estado = self.client.get(reverse('operario:estado_pedidos'))
 
-        self.assertNotContains(lista, 'PANEL-001')
-        self.assertEqual(estado.json()['pedidos'], [])
+        self.assertContains(lista, 'PANEL-001')
+        self.assertEqual(len(estado.json()['pedidos']), 1)
+        self.assertEqual(estado.json()['pedidos'][0]['codigo'], 'PANEL-001')
 
     def test_buscar_pedido_por_codigo_redirige_al_detalle(self):
         response = self.client.get(
@@ -390,14 +486,22 @@ class CargarPedidoValidacionesTests(TestCase):
             ),
             'comercio': str(self.comercio.pk),
             'direccion_destino': 'Calle Destino 456',
+            'datos_destinatario': 'Destinatario de prueba',
+            'tamano_paquete': 'Tamaño indicado por comercio',
+            'vehiculo_requerido': 'Vehículo solicitado por comercio',
             'especificaciones_traslado': 'Manipular con cuidado',
-            'fecha_hora_estimada_entrega': '2026-10-16T15:45',
+            'fecha_hora_estimada_entrega': timezone.localtime(
+                timezone.now() + timedelta(days=1)
+            ).strftime('%Y-%m-%dT%H:%M'),
             **cambios,
         }
 
     def test_campos_obligatorios_y_fecha_invalida_no_crean_pedido(self):
         datos = self._datos_formulario(
             direccion_destino='',
+            datos_destinatario='',
+            tamano_paquete='',
+            vehiculo_requerido='',
             especificaciones_traslado='',
             fecha_hora_estimada_entrega='fecha-invalida',
         )
@@ -406,6 +510,9 @@ class CargarPedidoValidacionesTests(TestCase):
 
         self.assertEqual(respuesta.status_code, 200)
         self.assertTrue(respuesta.context['form'].errors)
+        self.assertTrue(respuesta.context['form'].has_error('datos_destinatario'))
+        self.assertTrue(respuesta.context['form'].has_error('tamano_paquete'))
+        self.assertTrue(respuesta.context['form'].has_error('vehiculo_requerido'))
         self.assertFalse(Pedido.objects.exists())
 
     def test_reenvio_con_misma_clave_es_idempotente(self):
@@ -456,8 +563,13 @@ class CargarPedidoValidacionesTests(TestCase):
             'clave_idempotencia': 'd8f1acb1-8ad0-4e6c-9089-eec0ce74c041',
             'comercio': str(self.comercio.pk),
             'direccion_destino': 'Calle Destino 456',
+            'datos_destinatario': 'Destinatario de prueba',
+            'tamano_paquete': 'Tamaño indicado por comercio',
+            'vehiculo_requerido': 'Vehículo solicitado por comercio',
             'especificaciones_traslado': 'Manipular con cuidado',
-            'fecha_hora_estimada_entrega': '2026-10-16T15:45',
+            'fecha_hora_estimada_entrega': timezone.localtime(
+                timezone.now() + timedelta(days=1)
+            ).strftime('%Y-%m-%dT%H:%M'),
         }
         formulario = PedidoForm(data=datos)
         self.assertTrue(formulario.is_valid(), formulario.errors)
@@ -492,6 +604,10 @@ class RepartidoresOperarioTests(TestCase):
         self.assertContains(respuesta, 'repartidor_lista')
         self.assertContains(respuesta, 'Bicicleta')
         self.assertContains(respuesta, 'Disponible')
+        self.assertContains(
+            respuesta,
+            'type="checkbox" role="switch" data-username="repartidor_lista"',
+        )
 
     def test_alta_crea_usuario_y_perfil_de_forma_conjunta(self):
         respuesta = self.client.post(reverse('operario:nuevo_repartidor'), {
@@ -499,6 +615,7 @@ class RepartidoresOperarioTests(TestCase):
             'nombre': 'Ana',
             'apellido': 'Pérez',
             'email': 'ana@example.test',
+            'dni': '12345678',
             'vehiculo': 'bicicleta',
             'pin': '0123',
         })
@@ -517,6 +634,7 @@ class RepartidoresOperarioTests(TestCase):
     def test_nombre_apellido_y_email_son_opcionales(self):
         respuesta = self.client.post(reverse('operario:nuevo_repartidor'), {
             'usuario': 'repartidor_sin_datos',
+            'dni': '87654321',
             'vehiculo': 'moto',
             'pin': '0007',
         })
@@ -567,6 +685,109 @@ class RepartidoresOperarioTests(TestCase):
                 self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
 
 
+class CambiarEstadoRepartidorTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_estado_repartidor', password='test1234', is_operario=True,
+        )
+        self.usuario_comun = User.objects.create_user(
+            username='usuario_estado_repartidor', password='test1234',
+        )
+        self.usuario_repartidor = User.objects.create_user(username='repartidor_estado')
+        self.perfil = Repartidor.objects.create(
+            user=self.usuario_repartidor, pin='9911', disponible=True,
+        )
+        self.url = reverse('operario:cambiar_estado_repartidor')
+        self.client.force_login(self.operario)
+
+    def test_deshabilita_repartidor_sin_pedidos_activos(self):
+        respuesta = self.client.post(
+            self.url, {'username': self.usuario_repartidor.username, 'activo': 'false'}
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(
+            respuesta.json(),
+            {'username': self.usuario_repartidor.username, 'activo': False},
+        )
+        self.usuario_repartidor.refresh_from_db()
+        self.assertFalse(self.usuario_repartidor.is_active)
+
+    def test_repartidor_deshabilitado_no_puede_iniciar_sesion_por_pin(self):
+        self.client.post(
+            self.url, {'username': self.usuario_repartidor.username, 'activo': 'false'}
+        )
+        self.client.logout()
+
+        respuesta = self.client.post(reverse('repartidor_login_pin'), {'pin': '9911'})
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(
+            self.client.session.get('_auth_user_id')
+        )
+
+    def test_rechaza_deshabilitar_con_pedido_en_curso(self):
+        for indice, estado in enumerate(('asignado', 'retirado', 'en_viaje')):
+            with self.subTest(estado=estado):
+                Pedido.objects.create(
+                    codigo=f'ESTADO-{indice}',
+                    repartidor=self.usuario_repartidor,
+                    estado=estado,
+                )
+
+                respuesta = self.client.post(
+                    self.url,
+                    {'username': self.usuario_repartidor.username, 'activo': 'false'},
+                )
+
+                self.assertEqual(respuesta.status_code, 400)
+                self.assertEqual(
+                    respuesta.json(), {'error': 'El repartidor tiene pedidos en curso'}
+                )
+                self.usuario_repartidor.refresh_from_db()
+                self.assertTrue(self.usuario_repartidor.is_active)
+
+    def test_reactivar_no_exige_ausencia_de_pedidos_en_curso(self):
+        self.usuario_repartidor.is_active = False
+        self.usuario_repartidor.save(update_fields=['is_active'])
+        Pedido.objects.create(
+            codigo='ESTADO-REACTIVAR',
+            repartidor=self.usuario_repartidor,
+            estado='en_viaje',
+        )
+
+        respuesta = self.client.post(
+            self.url, {'username': self.usuario_repartidor.username, 'activo': 'true'}
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.usuario_repartidor.refresh_from_db()
+        self.assertTrue(self.usuario_repartidor.is_active)
+
+    def test_rechaza_datos_invalidos_o_repartidor_inexistente(self):
+        for datos, estado in (
+            ({'username': '', 'activo': 'true'}, 400),
+            ({'username': 'no_existe', 'activo': 'true'}, 404),
+            ({'username': self.usuario_repartidor.username, 'activo': '1'}, 400),
+        ):
+            with self.subTest(datos=datos):
+                self.assertEqual(self.client.post(self.url, datos).status_code, estado)
+
+    def test_requiere_metodo_post_y_rol_operario(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(
+            self.client.post(
+                self.url, {'username': self.usuario_repartidor.username, 'activo': 'false'}
+            ).status_code,
+            403,
+        )
+
+        self.client.logout()
+        self.assertEqual(self.client.post(self.url, {}).status_code, 302)
+
+
 class ComerciosOperarioTests(TestCase):
     def setUp(self):
         self.operario = User.objects.create_user(
@@ -591,7 +812,10 @@ class ComerciosOperarioTests(TestCase):
         self.assertContains(respuesta, 'Comercio visible')
         self.assertContains(respuesta, 'Av. Central 123')
         self.assertContains(respuesta, 'contacto@example.test')
-        self.assertContains(respuesta, '<span class="badge text-bg-secondary">No</span>', html=True)
+        self.assertContains(
+            respuesta,
+            'type="checkbox" role="switch" data-nombre="Comercio visible"',
+        )
 
     def test_alta_persiste_comercio_activo_o_inactivo(self):
         for nombre, activo in (('Comercio activo nuevo', 'true'), ('Comercio inactivo nuevo', 'false')):
@@ -608,6 +832,43 @@ class ComerciosOperarioTests(TestCase):
                 self.assertEqual(comercio.direccion, 'Calle de prueba 456')
                 self.assertEqual(comercio.contacto, '123456789')
                 self.assertEqual(comercio.activo, activo == 'true')
+
+    def test_cambiar_estado_comercio_por_nombre(self):
+        comercio = Comercio.objects.create(
+            nombre='Comercio estado', direccion='Calle 1', contacto='Contacto',
+        )
+        url = reverse('operario:cambiar_estado_comercio')
+
+        respuesta = self.client.post(url, {'nombre': comercio.nombre, 'activo': 'false'})
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.json(), {'nombre': comercio.nombre, 'activo': False})
+        comercio.refresh_from_db()
+        self.assertFalse(comercio.activo)
+
+    def test_cambiar_estado_rechaza_datos_invalidos_o_comercio_inexistente(self):
+        url = reverse('operario:cambiar_estado_comercio')
+
+        for datos, estado in (
+            ({'nombre': '', 'activo': 'true'}, 400),
+            ({'nombre': 'No existe', 'activo': 'true'}, 404),
+            ({'nombre': 'No importa', 'activo': '1'}, 400),
+        ):
+            with self.subTest(datos=datos):
+                self.assertEqual(self.client.post(url, datos).status_code, estado)
+
+    def test_cambiar_estado_requiere_metodo_post_y_rol_operario(self):
+        url = reverse('operario:cambiar_estado_comercio')
+        self.assertEqual(self.client.get(url).status_code, 405)
+
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(
+            self.client.post(url, {'nombre': 'Comercio', 'activo': 'true'}).status_code,
+            403,
+        )
+
+        self.client.logout()
+        self.assertEqual(self.client.post(url, {}).status_code, 302)
 
     def test_campos_y_estado_son_obligatorios_y_estado_debe_ser_valido(self):
         url = reverse('operario:nuevo_comercio')

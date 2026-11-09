@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 
 from main.operario.models import Comercio
 from main.repartidor.models import HistorialEstado, Pedido, Repartidor
@@ -18,6 +19,7 @@ from .forms import (
     AsignarPedidoForm,
     ComercioForm,
     MENSAJE_COMERCIO_INACTIVO,
+    MENSAJE_COMERCIO_DUPLICADO,
     PedidoForm,
     RepartidorForm,
 )
@@ -44,7 +46,6 @@ def _pedidos_en_curso():
         Pedido.objects.filter(
             estado__in=('registrado', 'asignado', 'retirado', 'en_viaje')
         )
-        # .exclude(estado='asignado', fecha_hora_aceptacion__isnull=True)
         .select_related('comercio', 'repartidor')
         .order_by('fecha_creacion', 'pk')
     )
@@ -87,6 +88,25 @@ def comercios(request):
 
 
 @login_required
+@require_POST
+def cambiar_estado_comercio(request):
+    _exigir_operario(request)
+
+    nombre = request.POST.get('nombre', '').strip()
+    activo = request.POST.get('activo')
+    if not nombre or activo not in ('true', 'false'):
+        return JsonResponse(
+            {'error': 'Se requiere el nombre del comercio y un estado booleano válido.'},
+            status=400,
+        )
+
+    comercio = get_object_or_404(Comercio, nombre=nombre)
+    comercio.activo = activo == 'true'
+    comercio.save(update_fields=['activo'])
+    return JsonResponse({'nombre': comercio.nombre, 'activo': comercio.activo})
+
+
+@login_required
 def nuevo_comercio(request):
     _exigir_operario(request)
 
@@ -107,6 +127,39 @@ def repartidores(request):
     _exigir_operario(request)
     perfiles = Repartidor.objects.select_related('user').order_by('user__username')
     return render(request, 'operario/repartidores.html', {'repartidores': perfiles})
+
+
+@login_required
+@require_POST
+def cambiar_estado_repartidor(request):
+    _exigir_operario(request)
+
+    username = request.POST.get('username', '').strip()
+    activo = request.POST.get('activo')
+    if not username or activo not in ('true', 'false'):
+        return JsonResponse(
+            {'error': 'Se requiere el usuario del repartidor y un estado booleano válido.'},
+            status=400,
+        )
+
+    perfil = get_object_or_404(
+        Repartidor.objects.select_related('user'), user__username=username
+    )
+
+    if activo == 'false':
+        tiene_pedido_activo = Pedido.objects.filter(
+            repartidor=perfil.user,
+            estado__in=('asignado', 'retirado', 'en_viaje'),
+        ).exists()
+        if tiene_pedido_activo:
+            return JsonResponse(
+                {'error': 'El repartidor tiene pedidos en curso'},
+                status=400,
+            )
+
+    perfil.user.is_active = activo == 'true'
+    perfil.user.save(update_fields=['is_active'])
+    return JsonResponse({'username': perfil.user.username, 'activo': perfil.user.is_active})
 
 
 @login_required
@@ -252,6 +305,9 @@ def _crear_pedido(formulario, usuario):
                             clave_idempotencia=clave,
                             comercio=comercio,
                             direccion_destino=datos['direccion_destino'],
+                            datos_destinatario=datos['datos_destinatario'],
+                            tamano_paquete=datos['tamano_paquete'],
+                            vehiculo_requerido=datos['vehiculo_requerido'],
                             especificaciones_traslado=(
                                 datos['especificaciones_traslado']
                             ),
@@ -343,3 +399,29 @@ def pedido_registrado(request, pedido_id):
         pk=pedido_id,
     )
     return render(request, 'operario/pedido_registrado.html', {'pedido': pedido})
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def editar_comercio(request, comercio_id):
+    _exigir_operario(request)
+    comercio = get_object_or_404(Comercio, pk=comercio_id)
+    
+    nombre_original = comercio.nombre
+    if request.method == 'POST':
+        formulario = ComercioForm(request.POST, instance=comercio)
+        if formulario.is_valid():
+            try:
+                with transaction.atomic():
+                    formulario.save()
+            except IntegrityError:
+                formulario.add_error('nombre', MENSAJE_COMERCIO_DUPLICADO)
+            else:
+                messages.success(request, 'Datos del comercio actualizados')
+                return redirect('operario:editar_comercio', comercio_id=comercio.pk)
+    else:
+        formulario = ComercioForm(instance=comercio)
+        
+    return render(request, 'operario/editar_comercio.html', {
+        'form': formulario,
+        'nombre_original': nombre_original,
+    })

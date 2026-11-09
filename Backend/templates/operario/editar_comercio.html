@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Editar comercio{% endblock %}
+
+{% block content %}
+    <div class="auth-card">
+        <h1 class="h3 mb-1">Editar comercio</h1>
+        <p class="text-secondary mb-4">{{ nombre_original }}</p>
+
+        {% for mensaje in messages %}
+            <div class="alert alert-{% if mensaje.level_tag == 'error' %}danger{% else %}{{ mensaje.level_tag }}{% endif %}" role="status">{{ mensaje }}</div>
+        {% endfor %}
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-app w-100 mt-2">Guardar cambios</button>
+            <a href="{% url 'operario:comercios' %}" class="btn btn-app-outline w-100 mt-2">Cancelar</a>
+        </form>
+    </div>
+{% endblock %}
