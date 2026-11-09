@@ -731,3 +731,46 @@ class FotografiasEntregaTests(TestCase):
         self.assertFalse(any(
             ruta.is_file() for ruta in Path(self.directorio_media).rglob('*')
         ))
+
+
+class HistorialInmutabilidadAdminTests(TestCase):
+
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser(
+            username='admin_historial_test',
+            password='test1234',
+            email='admin@test.com',
+        )
+
+        self.pedido = Pedido.objects.create(
+            codigo='HIST-001',
+            estado='registrado',
+        )
+
+        self.evento = HistorialEstado.objects.create(
+            pedido=self.pedido,
+            estado_nuevo='registrado',
+            usuario=self.admin_user,
+        )
+
+        self.client.force_login(self.admin_user)
+
+    def test_no_se_puede_editar_historial_desde_admin(self):
+        url = reverse(
+            'admin:repartidor_historialestado_change',
+            args=[self.evento.pk],
+        )
+
+        response = self.client.post(
+            url,
+            {
+                'estado_nuevo': 'entregado',
+                'incidencia': 'Modificación no autorizada',
+            },
+        )
+
+        self.evento.refresh_from_db()
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(self.evento.estado_nuevo, 'registrado')
+        self.assertEqual(self.evento.incidencia, '')

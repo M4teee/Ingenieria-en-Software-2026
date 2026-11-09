@@ -189,6 +189,29 @@ class PanelOperarioTests(TestCase):
         self.assertContains(detalle, 'Historial del pedido')
         self.assertContains(detalle, 'Registrado')
 
+    def test_historial_muestra_miniatura_ampliable(self):
+        evento = HistorialEstado.objects.create(
+            pedido=self.pedido,
+            estado_nuevo='retirado',
+            usuario=self.operario,
+            fotografia='entregas/evidencia_prueba.jpg',
+        )
+
+        response = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.pedido.pk])
+        )
+
+        url_fotografia = reverse(
+            'repartidor_fotografia',
+            args=[evento.pk],
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="img-thumbnail"')
+        self.assertContains(response, f'src="{url_fotografia}"')
+        self.assertContains(response, f'href="{url_fotografia}"')
+        self.assertContains(response, 'target="_blank"')
+
     def test_detalle_muestra_repartidor_asignado_y_no_indica_sin_asignar(self):
         repartidor = User.objects.create_user(
             username='repartidor_detalle', first_name='Rosa', last_name='Pérez',
