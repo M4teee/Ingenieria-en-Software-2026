@@ -12,6 +12,8 @@ MENSAJE_COMERCIO_INACTIVO = (
     'El comercio seleccionado se encuentra inhabilitado para nuevos pedidos'
 )
 
+MENSAJE_COMERCIO_DUPLICADO = 'Ya existe un comercio registrado con ese nombre'
+
 MARGEN_FECHA_ENTREGA = timedelta(minutes=10)
 
 class ComercioActivoField(forms.ModelChoiceField):
@@ -41,6 +43,18 @@ class PedidoForm(forms.Form):
         max_length=255,
         label='Dirección de destino',
         widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'street-address'}),
+    )
+    datos_destinatario = forms.CharField(
+        label='Datos del destinatario',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+    )
+    tamano_paquete = forms.CharField(
+        label='Tamaño del paquete',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+    )
+    vehiculo_requerido = forms.CharField(
+        label='Vehículo requerido',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
     )
     especificaciones_traslado = forms.CharField(
         label='Especificaciones de traslado',
@@ -185,10 +199,22 @@ class ComercioForm(forms.ModelForm):
         labels = {
             'nombre': 'Nombre',
             'direccion': 'Dirección',
-            'contacto': 'Contacto',
+            'contacto': 'Teléfono de contacto', # Actualizado según la HU
         }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'direccion': forms.TextInput(attrs={'class': 'form-control'}),
             'contacto': forms.TextInput(attrs={'class': 'form-control'}),
         }
+        error_messages = {
+            'nombre': {'unique': MENSAJE_COMERCIO_DUPLICADO},
+        }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data['nombre']
+        duplicados = Comercio.objects.filter(nombre__iexact=nombre)
+        if self.instance.pk:
+            duplicados = duplicados.exclude(pk=self.instance.pk)
+        if duplicados.exists():
+            raise ValidationError(MENSAJE_COMERCIO_DUPLICADO, code='unique')
+        return nombre

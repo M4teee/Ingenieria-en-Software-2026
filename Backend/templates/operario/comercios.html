@@ -47,7 +47,11 @@
                     <tbody>
                         {% for comercio in comercios %}
                             <tr{% if comercio.activo %} class="activo" {% endif %}>
-                                <td class="comercio-nombre"><a href="./editar/{{ comercio.pk }}">{{ comercio.nombre }}</a></td>
+                                <td class="comercio-nombre">
+                                    <a href="{% url 'operario:editar_comercio' comercio_id=comercio.pk %}">
+                                        {{ comercio.nombre }}
+                                    </a>
+                                </td>
                                 <td class="comercio-direccion">{{ comercio.direccion }}</td>
                                 <td class="comercio-contacto">{{ comercio.contacto }}</td>
                                 <td class="comercio-estado">                                    
