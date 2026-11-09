@@ -59,26 +59,73 @@
 <section class="card shadow-sm mt-4" aria-labelledby="historial-heading">
     <div class="card-body">
         <h2 id="historial-heading" class="h5">Historial del pedido</h2>
+
         {% if historial %}
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
-                    <thead><tr><th scope="col">Fecha y hora</th><th scope="col">Cambio</th><th scope="col">Responsable</th><th scope="col">Incidencia</th><th scope="col">Evidencia</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha y hora</th>
+                            <th scope="col">Cambio</th>
+                            <th scope="col">Responsable</th>
+                            <th scope="col">Incidencia</th>
+                            <th scope="col">Evidencia</th>
+                        </tr>
+                    </thead>
+
                     <tbody>
                         {% for evento in historial %}
                             <tr>
-                                <td>{{ evento.fecha|date:"d/m/Y H:i:s" }}</td>
-                                <td>{% if evento.estado_anterior %}{{ evento.get_estado_anterior_display|default:evento.estado_anterior }} → {% endif %}{{ evento.get_estado_nuevo_display|default:evento.estado_nuevo }}</td>
-                                <td>{{ evento.usuario.get_full_name|default:evento.usuario.username }}</td>
-                                <td>{{ evento.incidencia|default:"—" }}</td>
-                                <td>{% if evento.fotografia %}<a href="{% url 'repartidor_fotografia' evento.pk %}" target="_blank" rel="noopener">Ver fotografía</a>{% else %}—{% endif %}</td>
+                                <td>
+                                    {{ evento.fecha|date:"d/m/Y H:i:s" }}
+                                </td>
+
+                                <td>
+                                    {% if evento.estado_anterior %}
+                                        {{ evento.get_estado_anterior_display|default:evento.estado_anterior }} →
+                                    {% endif %}
+                                    {{ evento.get_estado_nuevo_display|default:evento.estado_nuevo }}
+                                </td>
+
+                                <td>
+                                    {{ evento.usuario.get_full_name|default:evento.usuario.username }}
+                                </td>
+
+                                <td>
+                                    {{ evento.incidencia|default:"—" }}
+                                </td>
+
+                                <td>
+                                    {% if evento.fotografia %}
+                                        <a
+                                            href="{% url 'repartidor_fotografia' evento.pk %}"
+                                            target="_blank"
+                                            rel="noopener"
+                                            aria-label="Ampliar fotografía del historial"
+                                        >
+                                            <img
+                                                src="{% url 'repartidor_fotografia' evento.pk %}"
+                                                alt="Fotografía de evidencia del pedido"
+                                                class="img-thumbnail"
+                                                style="width: 80px; height: 80px; object-fit: cover;"
+                                                loading="lazy"
+                                            >
+                                        </a>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="text-secondary mb-0">No hay eventos registrados.</p>
+            <p class="text-secondary mb-0">
+                No hay eventos registrados.
+            </p>
         {% endif %}
     </div>
 </section>
-{% endblock %}
+
+ {% endblock %}

@@ -56,6 +56,7 @@ class CargarPedidoTests(TestCase):
         self.assertEqual(respuesta.status_code, 302)
         self.assertIn('/login/', respuesta.url)
 
+
     def test_usuario_autenticado_sin_is_operario_recibe_403(self):
         self.client.force_login(self.no_staff)
 
@@ -189,6 +190,95 @@ class PanelOperarioTests(TestCase):
 
         self.assertNotContains(lista, 'PANEL-001')
         self.assertEqual(estado.json()['pedidos'], [])
+
+    def test_buscar_pedido_por_codigo_redirige_al_detalle(self):
+        response = self.client.get(
+            reverse('operario:buscar_pedido'),
+            {'q': 'PANEL-001'},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('operario:detalle_pedido', args=[self.pedido.pk]),
+        )
+
+    def test_buscar_pedido_por_id_redirige_al_detalle(self):
+        response = self.client.get(
+            reverse('operario:buscar_pedido'),
+            {'q': str(self.pedido.pk)},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('operario:detalle_pedido', args=[self.pedido.pk]),
+        )
+
+    def test_buscar_pedido_inexistente_vuelve_al_panel(self):
+        response = self.client.get(
+            reverse('operario:buscar_pedido'),
+            {'q': 'PEDIDO-QUE-NO-EXISTE'},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse('operario:inicio'))
+        self.assertContains(
+            response,
+            'No se encontró ningún pedido con ese código o identificador.',
+        )
+
+    def test_usuario_sin_is_operario_no_puede_buscar_pedidos(self):
+        self.client.force_login(self.usuario_comun)
+
+        response = self.client.get(
+            reverse('operario:buscar_pedido'),
+            {'q': 'PANEL-001'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_historial_se_muestra_en_orden_cronologico_con_responsable(self):
+        repartidor = User.objects.create_user(
+            username='repartidor_historial',
+            first_name='Juan',
+            last_name='Perez',
+            password='test1234',
+        )
+
+        evento_registrado = HistorialEstado.objects.create(
+            pedido=self.pedido,
+            estado_nuevo='registrado',
+            usuario=self.operario,
+        )
+
+        evento_retirado = HistorialEstado.objects.create(
+            pedido=self.pedido,
+            estado_anterior='asignado',
+            estado_nuevo='retirado',
+            usuario=repartidor,
+        )
+
+        detalle = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.pedido.pk])
+        )
+
+        historial = list(detalle.context['historial'])
+
+        self.assertEqual(detalle.status_code, 200)
+        self.assertEqual(
+            historial,
+            [evento_registrado, evento_retirado],
+        )
+        self.assertContains(detalle, 'panel_operario')
+        self.assertContains(detalle, 'Juan Perez')
+        self.assertContains(
+            detalle,
+            timezone.localtime(evento_registrado.fecha).strftime('%d/%m/%Y %H:%M:%S'),
+        )
+        self.assertContains(
+            detalle,
+            timezone.localtime(evento_retirado.fecha).strftime('%d/%m/%Y %H:%M:%S'),
+        )
 
     def test_asignado_y_aceptado_aparece_en_el_panel(self):
         repartidor_usuario = User.objects.create_user(
