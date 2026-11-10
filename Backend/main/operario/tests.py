@@ -708,6 +708,51 @@ class RepartidoresOperarioTests(TestCase):
                 self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
 
 
+class EstadoRepartidoresTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_estado_lista', password='test1234', is_operario=True,
+        )
+        self.usuario_comun = User.objects.create_user(
+            username='usuario_estado_lista', password='test1234',
+        )
+        self.usuario_repartidor = User.objects.create_user(username='repartidor_estado_lista')
+        self.perfil = Repartidor.objects.create(
+            user=self.usuario_repartidor, pin='4321', disponible=False,
+        )
+        self.url = reverse('operario:estado_repartidores')
+        self.client.force_login(self.operario)
+
+    def test_devuelve_disponibilidad_actual_de_cada_repartidor(self):
+        respuesta = self.client.get(self.url)
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(
+            respuesta.json(),
+            {'repartidores': [
+                {'username': self.usuario_repartidor.username, 'disponible': False},
+            ]},
+        )
+
+    def test_refleja_el_cambio_de_disponibilidad_hecho_por_el_repartidor(self):
+        self.perfil.disponible = True
+        self.perfil.save(update_fields=['disponible'])
+
+        respuesta = self.client.get(self.url)
+
+        self.assertEqual(
+            respuesta.json()['repartidores'][0],
+            {'username': self.usuario_repartidor.username, 'disponible': True},
+        )
+
+    def test_anonimo_y_usuario_sin_staff_no_acceden(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 302)
+
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+
 class CambiarEstadoRepartidorTests(TestCase):
     def setUp(self):
         self.operario = User.objects.create_user(
@@ -948,6 +993,7 @@ class OperarioRoleAuthorizationTests(TestCase):
             ('operario:nuevo_comercio', ()),
             ('operario:repartidores', ()),
             ('operario:nuevo_repartidor', ()),
+            ('operario:estado_repartidores', ()),
             ('operario:estado_pedidos', ()),
             ('operario:cargar_pedido', ()),
             ('operario:detalle_pedido', (1,)),
