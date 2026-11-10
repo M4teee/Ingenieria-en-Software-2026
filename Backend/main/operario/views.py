@@ -130,6 +130,18 @@ def repartidores(request):
 
 
 @login_required
+def estado_repartidores(request):
+    _exigir_operario(request)
+    perfiles = Repartidor.objects.select_related('user').order_by('user__username')
+    return JsonResponse({
+        'repartidores': [{
+            'username': perfil.user.username,
+            'disponible': perfil.disponible,
+        } for perfil in perfiles],
+    })
+
+
+@login_required
 @require_POST
 def cambiar_estado_repartidor(request):
     _exigir_operario(request)

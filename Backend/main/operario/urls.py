@@ -20,6 +20,11 @@ urlpatterns = [
         views.cambiar_estado_repartidor,
         name='cambiar_estado_repartidor',
     ),
+    path(
+        'repartidores/estado-disponibilidad/',
+        views.estado_repartidores,
+        name='estado_repartidores',
+    ),
     path('repartidores/nuevo/', views.nuevo_repartidor, name='nuevo_repartidor'),
     path('pedidos/estado/', views.estado_pedidos, name='estado_pedidos'),
     path('pedidos/buscar/', views.buscar_pedido, name='buscar_pedido'),

@@ -28,7 +28,7 @@
         {% if repartidores %}
             <form id="csrf-form" hidden>{% csrf_token %}</form>
             <div class="table-responsive">
-                <table class="table app-table align-middle">
+                <table class="table app-table align-middle" data-disponibilidad-url="{% url 'operario:estado_repartidores' %}">
                     <thead>
                         <tr>
                             <th scope="col">Usuario</th>
@@ -42,7 +42,7 @@
                             <tr{% if perfil.user.is_active %} class="activo"{% endif %}>
                                 <td class="repartidor-usuario">{{ perfil.user.username }}</td>
                                 <td class="repartidor-vehiculo">{{ perfil.get_vehiculo_display }}</td>
-                                <td class="repartidor-disponible">
+                                <td class="repartidor-disponible" data-username="{{ perfil.user.username }}">
                                     {% if perfil.disponible %}
                                         <span class="badge text-bg-success">Disponible</span>
                                     {% else %}
@@ -72,5 +72,38 @@
     {{ block.super }}
     {% if repartidores %}
         <script src="{% static 'js/repartidores.js' %}" data-endpoint="{% url 'operario:cambiar_estado_repartidor' %}"></script>
+        <script>
+        (() => {
+            const tabla = document.querySelector('[data-disponibilidad-url]');
+            if (!tabla) return;
+
+            const actualizar = async () => {
+                try {
+                    const respuesta = await fetch(tabla.dataset.disponibilidadUrl, {
+                        headers: {'Accept': 'application/json'},
+                        credentials: 'same-origin',
+                    });
+                    if (!respuesta.ok) return;
+                    const datos = await respuesta.json();
+                    for (const repartidor of datos.repartidores) {
+                        const celda = tabla.querySelector(
+                            `.repartidor-disponible[data-username="${repartidor.username}"]`
+                        );
+                        if (!celda) continue;
+                        const etiqueta = document.createElement('span');
+                        etiqueta.className = repartidor.disponible
+                            ? 'badge text-bg-success'
+                            : 'badge text-bg-secondary';
+                        etiqueta.textContent = repartidor.disponible ? 'Disponible' : 'No disponible';
+                        celda.replaceChildren(etiqueta);
+                    }
+                } catch (_) {
+                    // Si la conexión falla, se conserva el último estado mostrado.
+                }
+            };
+
+            window.setInterval(actualizar, 5000);
+        })();
+        </script>
     {% endif %}
 {% endblock extrascript %}
