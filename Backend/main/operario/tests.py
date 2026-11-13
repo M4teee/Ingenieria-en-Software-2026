@@ -250,7 +250,7 @@ class PanelOperarioTests(TestCase):
 
         self.assertContains(detalle_sin_direccion, 'Sin dirección')
 
-    def test_cancelacion_visual_pendiente_solo_aparece_en_estados_permitidos(self):
+    def test_cancelacion_activa_solo_aparece_en_estados_permitidos(self):
         for estado in ('registrado', 'asignado'):
             with self.subTest(estado=estado):
                 self.pedido.estado = estado
@@ -260,11 +260,9 @@ class PanelOperarioTests(TestCase):
                     reverse('operario:detalle_pedido', args=[self.pedido.pk])
                 )
 
-                self.assertContains(
-                    detalle,
-                    '<button class="btn btn-outline-danger" type="button" disabled aria-describedby="cancelacion-pendiente">',
-                )
                 self.assertContains(detalle, 'Cancelar pedido')
+                self.assertContains(detalle, 'method="post"')
+                self.assertContains(detalle, 'onsubmit="return confirm(')
 
         for estado in ('retirado', 'en_viaje', 'entregado', 'fallido', 'cancelado'):
             with self.subTest(estado=estado):
@@ -485,6 +483,110 @@ class PanelOperarioTests(TestCase):
 
         self.assertEqual(respuesta.status_code, 405)
         self.assertFalse(HistorialEstado.objects.exists())
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class CancelarPedidoTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_cancelacion', is_operario=True,
+        )
+        self.usuario_comun = User.objects.create_user(username='usuario_cancelacion')
+        self.repartidor = User.objects.create_user(username='repartidor_cancelacion')
+        self.perfil = Repartidor.objects.create(
+            user=self.repartidor, pin='6712', disponible=False,
+        )
+        self.pedido = Pedido.objects.create(
+            codigo='CANCELAR-001', estado='registrado',
+        )
+        self.url = reverse('operario:cancelar_pedido', args=[self.pedido.pk])
+        self.client.force_login(self.operario)
+
+    def test_cancela_pedido_registrado_y_registra_historial(self):
+        response = self.client.post(self.url)
+
+        self.pedido.refresh_from_db()
+        evento = HistorialEstado.objects.get(pedido=self.pedido)
+        self.assertRedirects(
+            response, reverse('operario:detalle_pedido', args=[self.pedido.pk]),
+        )
+        self.assertEqual(self.pedido.estado, 'cancelado')
+        self.assertEqual(evento.estado_anterior, 'registrado')
+        self.assertEqual(evento.estado_nuevo, 'cancelado')
+        self.assertEqual(evento.usuario, self.operario)
+        self.assertIn('Cancelación solicitada por operario', evento.incidencia)
+
+    def test_cancela_asignado_libera_repartidor_y_limpia_aceptacion(self):
+        self.pedido.estado = 'asignado'
+        self.pedido.repartidor = self.repartidor
+        self.pedido.fecha_hora_asignacion = timezone.now()
+        self.pedido.fecha_hora_aceptacion = timezone.now()
+        self.pedido.save()
+
+        response = self.client.post(self.url)
+
+        self.pedido.refresh_from_db()
+        self.perfil.refresh_from_db()
+        evento = HistorialEstado.objects.get(pedido=self.pedido)
+        self.client.force_login(self.repartidor)
+        panel = self.client.get(reverse('repartidor'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.url, reverse('operario:detalle_pedido', args=[self.pedido.pk]),
+        )
+        self.assertEqual(self.pedido.estado, 'cancelado')
+        self.assertEqual(self.pedido.repartidor, self.repartidor)
+        self.assertIsNone(self.pedido.fecha_hora_aceptacion)
+        self.assertTrue(self.perfil.disponible)
+        self.assertEqual(evento.estado_anterior, 'asignado')
+        self.assertEqual(evento.estado_nuevo, 'cancelado')
+        self.assertIn(self.repartidor.username, evento.incidencia)
+        self.assertIsNone(panel.context['pedido_activo'])
+
+    def test_rechaza_estados_que_no_se_pueden_cancelar(self):
+        for estado in ('retirado', 'en_viaje', 'entregado', 'fallido', 'cancelado'):
+            with self.subTest(estado=estado):
+                self.pedido.estado = estado
+                self.pedido.save(update_fields=['estado'])
+                response = self.client.post(self.url)
+
+                self.assertEqual(response.status_code, 400)
+                self.pedido.refresh_from_db()
+                self.assertEqual(self.pedido.estado, estado)
+                self.assertFalse(
+                    HistorialEstado.objects.filter(pedido=self.pedido).exists()
+                )
+
+    def test_boton_solo_se_muestra_para_registrado_o_asignado(self):
+        for estado in ('registrado', 'asignado'):
+            with self.subTest(estado=estado):
+                self.pedido.estado = estado
+                self.pedido.save(update_fields=['estado'])
+                response = self.client.get(
+                    reverse('operario:detalle_pedido', args=[self.pedido.pk])
+                )
+                self.assertContains(response, 'Cancelar pedido')
+                self.assertContains(response, 'onsubmit="return confirm(')
+
+        for estado in ('retirado', 'en_viaje', 'entregado', 'fallido', 'cancelado'):
+            with self.subTest(estado=estado):
+                self.pedido.estado = estado
+                self.pedido.save(update_fields=['estado'])
+                response = self.client.get(
+                    reverse('operario:detalle_pedido', args=[self.pedido.pk])
+                )
+                self.assertNotContains(response, 'Cancelar pedido')
+
+    def test_cancelacion_requiere_post_y_rol_operario(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(self.client.post(self.url).status_code, 403)
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.estado, 'registrado')
+
+        self.client.logout()
+        self.assertEqual(self.client.post(self.url).status_code, 302)
 
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])

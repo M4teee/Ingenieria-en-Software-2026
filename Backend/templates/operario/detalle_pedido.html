@@ -63,11 +63,12 @@
             <section class="card shadow-sm mt-4" aria-labelledby="cancelacion-heading">
                 <div class="card-body">
                     <h2 id="cancelacion-heading" class="h5">Cancelar pedido</h2>
-                    {# TODO HU13: habilitar y conectar cuando exista la operación real de cancelación. Debe cambiar estado, liberar/notificar al repartidor y registrar el evento. #}
-                    <button class="btn btn-outline-danger" type="button" disabled aria-describedby="cancelacion-pendiente">
-                        Cancelar pedido
-                    </button>
-                    <p id="cancelacion-pendiente" class="text-secondary mt-2 mb-0">Acción pendiente de integración.</p>
+                    <form method="post" action="{% url 'operario:cancelar_pedido' pedido.pk %}" onsubmit="return confirm('¿Confirmás cancelar este pedido?');">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-danger" type="submit">
+                            Cancelar pedido
+                        </button>
+                    </form>
                 </div>
             </section>
         {% endif %}
