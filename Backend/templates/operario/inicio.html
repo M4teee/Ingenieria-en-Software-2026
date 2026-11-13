@@ -65,10 +65,25 @@
                                 <td>{{ pedido.codigo }}</td>
                                 <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
                                 <td>{{ pedido.direccion_destino|default:"Sin destino" }}</td>
-                                <td><span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></td>
+                                <td>
+                                    <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+                                    {% if pedido.estado == 'registrado' and not pedido.repartidor %}
+                                        <div class="small text-danger fw-semibold">Pedido sin repartidor disponible</div>
+                                    {% endif %}
+                                </td>
                                 <td>{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}Sin asignar{% endif %}</td>
                                 <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
-                                <td><a class="btn btn-sm btn-app-outline" href="{% url 'operario:detalle_pedido' pedido.pk %}">Ver detalle</a></td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a class="btn btn-sm btn-app-outline" href="{% url 'operario:detalle_pedido' pedido.pk %}">Ver detalle</a>
+                                        {% if pedido.estado == 'registrado' and not pedido.repartidor %}
+                                            <form method="post" action="{% url 'operario:reintentar_asignacion' pedido.pk %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-warning">Reintentar asignación</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -79,6 +94,20 @@
         {% endif %}
     </div>
 </section>
+
+<div id="alerta-sin-repartidor" class="position-fixed top-0 end-0 m-3 card border-warning shadow" style="z-index: 1050; max-width: 22rem;" role="alert" {% if not pedidos_sin_repartidor %}hidden{% endif %}>
+    <div class="card-body py-3">
+        <div class="fw-semibold">
+            <i class="bi bi-exclamation-triangle text-warning" aria-hidden="true"></i>
+            Pedido sin repartidor disponible
+        </div>
+        <ul id="alerta-sin-repartidor-lista" class="small mb-0 mt-1">
+            {% for pedido in pedidos_sin_repartidor %}
+                <li><a href="{% url 'operario:detalle_pedido' pedido.pk %}">{{ pedido.codigo }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -96,6 +125,35 @@
         return elemento;
     };
 
+    const tokenCsrf = () => {
+        const coincidencia = document.cookie
+            .split('; ')
+            .find((fragmento) => fragmento.startsWith('csrftoken='));
+        return coincidencia ? coincidencia.split('=')[1] : '';
+    };
+
+    const alerta = document.getElementById('alerta-sin-repartidor');
+    const listaAlerta = document.getElementById('alerta-sin-repartidor-lista');
+
+    const actualizarAlerta = (pedidos) => {
+        const afectados = pedidos.filter((pedido) => pedido.sin_repartidor);
+        if (!alerta || !listaAlerta) return;
+        if (afectados.length === 0) {
+            alerta.hidden = true;
+            return;
+        }
+        listaAlerta.replaceChildren();
+        for (const pedido of afectados) {
+            const item = document.createElement('li');
+            const enlace = document.createElement('a');
+            enlace.href = pedido.url;
+            enlace.textContent = pedido.codigo;
+            item.appendChild(enlace);
+            listaAlerta.appendChild(item);
+        }
+        alerta.hidden = false;
+    };
+
     const actualizar = async () => {
         try {
             const respuesta = await fetch(tabla.dataset.statusUrl, {
@@ -104,6 +162,7 @@
             });
             if (!respuesta.ok) return;
             const datos = await respuesta.json();
+            actualizarAlerta(datos.pedidos);
             cuerpo.replaceChildren();
             if (datos.pedidos.length === 0) {
                 const fila = document.createElement('tr');
@@ -122,6 +181,12 @@
                 etiquetaEstado.className = `status-badge status-${pedido.estado_id}`;
                 etiquetaEstado.textContent = pedido.estado;
                 estado.appendChild(etiquetaEstado);
+                if (pedido.sin_repartidor) {
+                    const aviso = document.createElement('div');
+                    aviso.className = 'small text-danger fw-semibold';
+                    aviso.textContent = 'Pedido sin repartidor disponible';
+                    estado.appendChild(aviso);
+                }
                 celda(fila, pedido.repartidor);
                 celda(fila, pedido.creado);
                 const accion = celda(fila, '');
@@ -130,6 +195,22 @@
                 enlace.href = pedido.url;
                 enlace.textContent = 'Ver detalle';
                 accion.appendChild(enlace);
+                if (pedido.sin_repartidor) {
+                    const formulario = document.createElement('form');
+                    formulario.method = 'post';
+                    formulario.action = pedido.url_reintentar;
+                    const campoCsrf = document.createElement('input');
+                    campoCsrf.type = 'hidden';
+                    campoCsrf.name = 'csrfmiddlewaretoken';
+                    campoCsrf.value = tokenCsrf();
+                    formulario.appendChild(campoCsrf);
+                    const boton = document.createElement('button');
+                    boton.type = 'submit';
+                    boton.className = 'btn btn-sm btn-warning';
+                    boton.textContent = 'Reintentar asignación';
+                    formulario.appendChild(boton);
+                    accion.appendChild(formulario);
+                }
                 cuerpo.appendChild(fila);
             }
         } catch (_) {
@@ -137,6 +218,7 @@
         }
     };
 
+    actualizar();
     window.setInterval(actualizar, 5000);
 })();
 </script>

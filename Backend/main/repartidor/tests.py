@@ -335,6 +335,57 @@ class AsignacionConRespuestaTests(TestCase):
         self.assertEqual(pedido.estado, 'asignado')
         self.assertEqual(pedido.repartidor, self.user)
 
+    def _crear_repartidor_alternativo(self):
+        usuario = User.objects.create_user(
+            username='repartidor_alternativo', password='test1234',
+        )
+        return Repartidor.objects.create(
+            user=usuario, pin='8765', disponible=True, vehiculo='moto',
+        )
+
+    def test_rechazo_reasigna_automaticamente_al_siguiente_candidato(self):
+        pedido = self.crear_pedido_asignado()
+        pedido.vehiculo_requerido = 'moto'
+        pedido.save(update_fields=['vehiculo_requerido'])
+        alternativo = self._crear_repartidor_alternativo()
+
+        self.client.post(reverse('repartidor_rechazar', args=[pedido.pk]))
+
+        pedido.refresh_from_db()
+        self.perfil.refresh_from_db()
+        self.assertEqual(pedido.estado, 'asignado')
+        self.assertEqual(pedido.repartidor, alternativo.user)
+        self.assertFalse(self.perfil.disponible)
+        self.assertEqual(
+            [
+                evento.estado_nuevo
+                for evento in pedido.historial.order_by('pk')
+            ],
+            ['registrado', 'asignado'],
+        )
+
+    def test_expiracion_reasigna_automaticamente_al_siguiente_candidato(self):
+        pedido = self.crear_pedido_asignado(segundos=301)
+        pedido.vehiculo_requerido = 'moto'
+        pedido.save(update_fields=['vehiculo_requerido'])
+        alternativo = self._crear_repartidor_alternativo()
+
+        response = self.client.get(reverse('repartidor'))
+
+        pedido.refresh_from_db()
+        self.perfil.refresh_from_db()
+        self.assertContains(response, 'El tiempo de espera se agotó')
+        self.assertEqual(pedido.estado, 'asignado')
+        self.assertEqual(pedido.repartidor, alternativo.user)
+        self.assertFalse(self.perfil.disponible)
+        self.assertEqual(
+            [
+                evento.estado_nuevo
+                for evento in pedido.historial.order_by('pk')
+            ],
+            ['registrado', 'asignado'],
+        )
+
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class DisponibilidadRepartidorTests(TestCase):

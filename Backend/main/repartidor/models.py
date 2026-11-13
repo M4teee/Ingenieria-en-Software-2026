@@ -4,6 +4,15 @@ import string
 from django.conf import settings
 from django.db import models
 from django.core.validators import RegexValidator
+from django.utils import timezone
+
+
+VEHICULOS_REPARTIDOR = [
+    ("bicicleta", "Bicicleta"),
+    ("moto", "Moto"),
+    ("auto", "Auto"),
+    ("camion", "Camión")
+]
 
 
 class Pedido(models.Model):
@@ -66,7 +75,9 @@ class Pedido(models.Model):
         default='',
     )
 
-    vehiculo_requerido = models.TextField(
+    vehiculo_requerido = models.CharField(
+        max_length=20,
+        choices=VEHICULOS_REPARTIDOR,
         blank=True,
         default='',
     )
@@ -175,12 +186,7 @@ class HistorialEstado(models.Model):
 
 
 class Repartidor(models.Model):
-    VEHICULOS = [
-        ("bicicleta", "Bicicleta"),
-        ("moto","Moto"),
-        ("auto","Auto"),
-        ("camion","Camión")
-    ]
+    VEHICULOS = VEHICULOS_REPARTIDOR
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -197,6 +203,7 @@ class Repartidor(models.Model):
         ]
     )
     disponible = models.BooleanField(default=False)
+    disponible_desde = models.DateTimeField(null=True, blank=True)
     dni = models.CharField(
         max_length=8,
         unique=True,
@@ -218,6 +225,14 @@ class Repartidor(models.Model):
     class Meta:
         verbose_name = 'Repartidor'
         verbose_name_plural = 'Repartidores'
+
+    def save(self, *args, **kwargs):
+        if self.disponible:
+            if self.disponible_desde is None:
+                self.disponible_desde = timezone.now()
+        else:
+            self.disponible_desde = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.user.get_username()

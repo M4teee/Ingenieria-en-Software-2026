@@ -44,7 +44,7 @@ class CargarPedidoTests(TestCase):
             'direccion_destino': 'Calle Destino 456',
             'datos_destinatario': 'Destinatario de prueba',
             'tamano_paquete': 'Tamaño indicado por comercio',
-            'vehiculo_requerido': 'Vehículo solicitado por comercio',
+            'vehiculo_requerido': 'moto',
             'especificaciones_traslado': 'Manipular con cuidado',
             'fecha_hora_estimada_entrega': timezone.localtime(
                 timezone.now() + timedelta(days=1)
@@ -93,7 +93,7 @@ class CargarPedidoTests(TestCase):
         self.assertEqual(pedido.tamano_paquete, 'Tamaño indicado por comercio')
         self.assertEqual(
             pedido.vehiculo_requerido,
-            'Vehículo solicitado por comercio',
+            'moto',
         )
         self.assertEqual(pedido.especificaciones_traslado, 'Manipular con cuidado')
         self.assertEqual(
@@ -121,7 +121,7 @@ class CargarPedidoTests(TestCase):
         ))
         self.assertContains(detalle, 'Destinatario de prueba')
         self.assertContains(detalle, 'Tamaño indicado por comercio')
-        self.assertContains(detalle, 'Vehículo solicitado por comercio')
+        self.assertContains(detalle, 'Moto')
 
     def test_comercio_inactivo_rechaza_alta_con_mensaje_de_historia(self):
         self.comercio.activo = False
@@ -613,7 +613,7 @@ class CargarPedidoValidacionesTests(TestCase):
             'direccion_destino': 'Calle Destino 456',
             'datos_destinatario': 'Destinatario de prueba',
             'tamano_paquete': 'Tamaño indicado por comercio',
-            'vehiculo_requerido': 'Vehículo solicitado por comercio',
+            'vehiculo_requerido': 'moto',
             'especificaciones_traslado': 'Manipular con cuidado',
             'fecha_hora_estimada_entrega': timezone.localtime(
                 timezone.now() + timedelta(days=1)
@@ -637,6 +637,15 @@ class CargarPedidoValidacionesTests(TestCase):
         self.assertTrue(respuesta.context['form'].errors)
         self.assertTrue(respuesta.context['form'].has_error('datos_destinatario'))
         self.assertTrue(respuesta.context['form'].has_error('tamano_paquete'))
+        self.assertTrue(respuesta.context['form'].has_error('vehiculo_requerido'))
+        self.assertFalse(Pedido.objects.exists())
+
+    def test_vehiculo_requerido_solo_acepta_opciones_validas(self):
+        datos = self._datos_formulario(vehiculo_requerido='patineta')
+
+        respuesta = self.client.post(self.url, datos)
+
+        self.assertEqual(respuesta.status_code, 200)
         self.assertTrue(respuesta.context['form'].has_error('vehiculo_requerido'))
         self.assertFalse(Pedido.objects.exists())
 
@@ -690,7 +699,7 @@ class CargarPedidoValidacionesTests(TestCase):
             'direccion_destino': 'Calle Destino 456',
             'datos_destinatario': 'Destinatario de prueba',
             'tamano_paquete': 'Tamaño indicado por comercio',
-            'vehiculo_requerido': 'Vehículo solicitado por comercio',
+            'vehiculo_requerido': 'moto',
             'especificaciones_traslado': 'Manipular con cuidado',
             'fecha_hora_estimada_entrega': timezone.localtime(
                 timezone.now() + timedelta(days=1)
@@ -1113,6 +1122,12 @@ class OperarioRoleAuthorizationTests(TestCase):
         )
         self.assertEqual(respuesta.status_code, 403)
 
+        respuesta = self.client.post(
+            reverse('operario:reintentar_asignacion', args=[1]),
+            {},
+        )
+        self.assertEqual(respuesta.status_code, 403)
+
     def test_is_operario_sin_is_staff_puede_entrar_al_modulo(self):
         usuario = User.objects.create_user(
             username='operario_sin_staff', is_operario=True,
@@ -1123,3 +1138,548 @@ class OperarioRoleAuthorizationTests(TestCase):
 
         self.assertEqual(respuesta.status_code, 200)
         self.assertFalse(usuario.is_staff)
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class DespachoAutomaticoTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_despacho', password='test1234', is_operario=True,
+        )
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio despacho',
+            direccion='Av. Siempre Viva 123',
+            contacto='comercio@example.test',
+        )
+        self.url = reverse('operario:cargar_pedido')
+        self.client.force_login(self.operario)
+
+    def _datos(self, **cambios):
+        respuesta = self.client.get(self.url)
+        datos = {
+            'clave_idempotencia': str(
+                respuesta.context['form']['clave_idempotencia'].value()
+            ),
+            'comercio': str(self.comercio.pk),
+            'direccion_destino': 'Calle Destino 456',
+            'datos_destinatario': 'Destinatario de prueba',
+            'tamano_paquete': 'Tamaño indicado por comercio',
+            'vehiculo_requerido': 'moto',
+            'especificaciones_traslado': 'Manipular con cuidado',
+            'fecha_hora_estimada_entrega': timezone.localtime(
+                timezone.now() + timedelta(days=1)
+            ).strftime('%Y-%m-%dT%H:%M'),
+            **cambios,
+        }
+        return datos
+
+    def test_asignacion_automatica_al_crear_pedido_con_candidato(self):
+        repartidor = User.objects.create_user(username='repartidor_moto_despacho')
+        perfil = Repartidor.objects.create(
+            user=repartidor, pin='1111', disponible=True, vehiculo='moto',
+        )
+
+        respuesta = self.client.post(self.url, self._datos())
+
+        self.assertEqual(respuesta.status_code, 302)
+        pedido = Pedido.objects.get()
+        self.assertEqual(pedido.estado, 'asignado')
+        self.assertEqual(pedido.repartidor, repartidor)
+        self.assertIsNotNone(pedido.fecha_hora_asignacion)
+        self.assertIsNone(pedido.fecha_hora_aceptacion)
+        evento = HistorialEstado.objects.get(
+            pedido=pedido, estado_nuevo='asignado',
+        )
+        self.assertEqual(evento.estado_anterior, 'registrado')
+        self.assertIn('Asignación automática', evento.incidencia)
+        self.assertIn(repartidor.username, evento.incidencia)
+
+    def test_asignacion_manual_al_crear_pedido_con_vehiculo_correcto(self):
+        repartidor = User.objects.create_user(username='repartidor_manual_despacho')
+        perfil = Repartidor.objects.create(
+            user=repartidor, pin='2222', disponible=True, vehiculo='moto',
+        )
+
+        respuesta = self.client.post(self.url, self._datos(
+            repartidor=str(perfil.pk),
+        ))
+
+        self.assertEqual(respuesta.status_code, 302)
+        pedido = Pedido.objects.get()
+        self.assertEqual(pedido.estado, 'asignado')
+        self.assertEqual(pedido.repartidor, repartidor)
+        self.assertIn('Asignado por operario', HistorialEstado.objects.get(
+            pedido=pedido, estado_nuevo='asignado',
+        ).incidencia)
+
+    def test_asignacion_manual_con_vehiculo_distinto_se_rechaza(self):
+        repartidor = User.objects.create_user(username='repartidor_auto_despacho')
+        perfil = Repartidor.objects.create(
+            user=repartidor, pin='3333', disponible=True, vehiculo='auto',
+        )
+
+        respuesta = self.client.post(self.url, self._datos(
+            repartidor=str(perfil.pk),
+        ))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.context['form'].has_error('repartidor'))
+        self.assertFalse(Pedido.objects.exists())
+
+    def test_no_se_asigna_sin_candidato_del_vehiculo_requerido(self):
+        Repartidor.objects.create(
+            user=User.objects.create_user(username='repartidor_auto'),
+            pin='4444', disponible=True, vehiculo='auto',
+        )
+
+        respuesta = self.client.post(self.url, self._datos(
+            vehiculo_requerido='camion',
+        ))
+
+        self.assertEqual(respuesta.status_code, 302)
+        pedido = Pedido.objects.get()
+        self.assertEqual(pedido.estado, 'registrado')
+        self.assertIsNone(pedido.repartidor)
+        self.assertFalse(HistorialEstado.objects.filter(
+            pedido=pedido, estado_nuevo='asignado',
+        ).exists())
+
+    def test_no_se_asigna_candidato_ocupado_ni_inactivo(self):
+        ocupado = User.objects.create_user(username='repartidor_ocupado')
+        Repartidor.objects.create(
+            user=ocupado, pin='5555', disponible=True, vehiculo='moto',
+        )
+        Pedido.objects.create(
+            codigo='OCUPADO-001', repartidor=ocupado, estado='asignado',
+        )
+        inactivo = User.objects.create_user(
+            username='repartidor_inactivo_despacho', is_active=False,
+        )
+        Repartidor.objects.create(
+            user=inactivo, pin='6666', disponible=True, vehiculo='moto',
+        )
+
+        respuesta = self.client.post(self.url, self._datos())
+
+        self.assertEqual(respuesta.status_code, 302)
+        pedido = Pedido.objects.exclude(codigo='OCUPADO-001').get()
+        self.assertEqual(pedido.estado, 'registrado')
+        self.assertIsNone(pedido.repartidor)
+
+    def test_se_prefiere_repartidor_con_disponible_desde_mas_antiguo(self):
+        primero = User.objects.create_user(username='repartidor_cola_primero')
+        perfil_primero = Repartidor.objects.create(
+            user=primero, pin='7777', disponible=True, vehiculo='moto',
+        )
+        segundo = User.objects.create_user(username='repartidor_cola_segundo')
+        perfil_segundo = Repartidor.objects.create(
+            user=segundo, pin='8888', disponible=True, vehiculo='moto',
+        )
+        ahora = timezone.now()
+        Repartidor.objects.filter(pk=perfil_primero.pk).update(
+            disponible_desde=ahora - timedelta(hours=2),
+        )
+        Repartidor.objects.filter(pk=perfil_segundo.pk).update(
+            disponible_desde=ahora - timedelta(hours=1),
+        )
+
+        respuesta = self.client.post(self.url, self._datos())
+
+        self.assertEqual(respuesta.status_code, 302)
+        pedido = Pedido.objects.get(estado='asignado')
+        self.assertEqual(pedido.repartidor, primero)
+
+    def test_el_historial_de_viajes_no_altera_el_orden_fifo(self):
+        con_viaje = User.objects.create_user(username='repartidor_con_viaje')
+        perfil_con_viaje = Repartidor.objects.create(
+            user=con_viaje, pin='9999', disponible=True, vehiculo='moto',
+        )
+        Pedido.objects.create(
+            codigo='VIAJE-RECIENTE', repartidor=con_viaje, estado='entregado',
+            fecha_hora_asignacion=timezone.now() - timedelta(days=1),
+        )
+        sin_viaje = User.objects.create_user(username='repartidor_sin_viaje')
+        perfil_sin_viaje = Repartidor.objects.create(
+            user=sin_viaje, pin='1000', disponible=True, vehiculo='moto',
+        )
+        ahora = timezone.now()
+        Repartidor.objects.filter(pk=perfil_con_viaje.pk).update(
+            disponible_desde=ahora - timedelta(hours=2),
+        )
+        Repartidor.objects.filter(pk=perfil_sin_viaje.pk).update(
+            disponible_desde=ahora - timedelta(hours=1),
+        )
+
+        respuesta = self.client.post(self.url, self._datos())
+
+        self.assertEqual(respuesta.status_code, 302)
+        pedido = Pedido.objects.get(estado='asignado')
+        self.assertEqual(pedido.repartidor, con_viaje)
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class AlertaSinRepartidorTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_alerta', password='test1234', is_operario=True,
+        )
+        self.usuario_comun = User.objects.create_user(
+            username='usuario_alerta', password='test1234',
+        )
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio alerta', direccion='Calle 1', contacto='111',
+        )
+        self.afectado = Pedido.objects.create(
+            codigo='ALERTA-001', comercio=self.comercio, estado='registrado',
+            vehiculo_requerido='moto',
+        )
+        self.asignado = Pedido.objects.create(
+            codigo='ALERTA-002', comercio=self.comercio, estado='asignado',
+        )
+        self.client.force_login(self.operario)
+
+    def test_panel_y_detalle_muestran_alerta_y_boton(self):
+        lista = self.client.get(reverse('operario:inicio'))
+        detalle = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.afectado.pk])
+        )
+
+        for respuesta in (lista, detalle):
+            self.assertEqual(respuesta.status_code, 200)
+            self.assertContains(respuesta, 'Pedido sin repartidor disponible')
+            self.assertContains(respuesta, 'Reintentar asignación')
+            self.assertContains(
+                respuesta,
+                reverse('operario:reintentar_asignacion', args=[self.afectado.pk]),
+            )
+
+    def test_notificacion_flotizante_marca_los_pedidos_afectados(self):
+        for respuesta in (
+            self.client.get(reverse('operario:inicio')),
+            self.client.get(
+                reverse('operario:detalle_pedido', args=[self.afectado.pk])
+            ),
+        ):
+            self.assertContains(respuesta, 'id="alerta-sin-repartidor"')
+            self.assertContains(respuesta, 'position-fixed top-0 end-0')
+            self.assertEqual(
+                [
+                    pedido.codigo
+                    for pedido in respuesta.context['pedidos_sin_repartidor']
+                ],
+                ['ALERTA-001'],
+            )
+
+    def test_estado_pedidos_incluye_alerta_y_url_de_reintento(self):
+        respuesta = self.client.get(reverse('operario:estado_pedidos'))
+
+        self.assertEqual(respuesta.status_code, 200)
+        por_codigo = {
+            pedido['codigo']: pedido for pedido in respuesta.json()['pedidos']
+        }
+        self.assertTrue(por_codigo['ALERTA-001']['sin_repartidor'])
+        self.assertFalse(por_codigo['ALERTA-002']['sin_repartidor'])
+        self.assertEqual(
+            por_codigo['ALERTA-001']['url_reintentar'],
+            reverse('operario:reintentar_asignacion', args=[self.afectado.pk]),
+        )
+
+    def test_reintentar_sin_candidatos_conserva_alerta(self):
+        respuesta = self.client.post(
+            reverse('operario:reintentar_asignacion', args=[self.afectado.pk]),
+            {},
+            follow=True,
+        )
+
+        self.afectado.refresh_from_db()
+        self.assertEqual(self.afectado.estado, 'registrado')
+        self.assertIsNone(self.afectado.repartidor)
+        self.assertContains(respuesta, 'Pedido sin repartidor disponible')
+        self.assertFalse(HistorialEstado.objects.filter(
+            pedido=self.afectado, estado_nuevo='asignado',
+        ).exists())
+
+    def test_reintentar_asigna_cuando_aparece_candidato_compatible(self):
+        reintentar = reverse('operario:reintentar_asignacion', args=[self.afectado.pk])
+
+        self.client.post(reintentar, {})
+        self.afectado.refresh_from_db()
+        self.assertEqual(self.afectado.estado, 'registrado')
+
+        repartidor = User.objects.create_user(username='repartidor_reintento')
+        Repartidor.objects.create(
+            user=repartidor, pin='1234', disponible=True, vehiculo='moto',
+        )
+
+        respuesta = self.client.post(reintentar, {}, follow=True)
+
+        self.afectado.refresh_from_db()
+        self.assertEqual(self.afectado.estado, 'asignado')
+        self.assertEqual(self.afectado.repartidor, repartidor)
+        self.assertIsNotNone(self.afectado.fecha_hora_asignacion)
+        self.assertContains(respuesta, 'Pedido asignado')
+        self.assertIn('Asignación automática', HistorialEstado.objects.get(
+            pedido=self.afectado, estado_nuevo='asignado',
+        ).incidencia)
+
+        estado = self.client.get(reverse('operario:estado_pedidos')).json()
+        alerta_activa = any(
+            pedido['codigo'] == 'ALERTA-001' and pedido['sin_repartidor']
+            for pedido in estado['pedidos']
+        )
+        self.assertFalse(alerta_activa)
+
+    def test_reintentar_requiere_post_y_rol_operario(self):
+        url = reverse('operario:reintentar_asignacion', args=[self.afectado.pk])
+
+        self.assertEqual(self.client.get(url).status_code, 405)
+
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(self.client.post(url, {}).status_code, 403)
+
+    def test_alerta_aparece_tras_rechazo_del_repartidor(self):
+        repartidor = User.objects.create_user(
+            username='repartidor_rechaza', password='test1234',
+        )
+        perfil = Repartidor.objects.create(
+            user=repartidor, pin='4321', disponible=True, vehiculo='moto',
+        )
+
+        self.client.post(
+            reverse('operario:asignar_repartidor', args=[self.afectado.pk]),
+            {'repartidor': perfil.pk},
+        )
+        self.client.force_login(repartidor)
+        self.client.post(reverse('repartidor_rechazar', args=[self.afectado.pk]))
+
+        self.afectado.refresh_from_db()
+        self.assertEqual(self.afectado.estado, 'registrado')
+        self.assertIsNone(self.afectado.repartidor)
+        self.client.force_login(self.operario)
+        lista = self.client.get(reverse('operario:inicio'))
+        self.assertContains(lista, 'Pedido sin repartidor disponible')
+
+    def test_alerta_aparece_tras_expiracion_de_espera(self):
+        repartidor = User.objects.create_user(
+            username='repartidor_expirado', password='test1234',
+        )
+        perfil = Repartidor.objects.create(
+            user=repartidor, pin='5678', disponible=True, vehiculo='moto',
+        )
+
+        self.client.post(
+            reverse('operario:asignar_repartidor', args=[self.afectado.pk]),
+            {'repartidor': perfil.pk},
+        )
+        self.afectado.fecha_hora_asignacion = timezone.now() - timedelta(seconds=301)
+        self.afectado.save(update_fields=['fecha_hora_asignacion'])
+
+        self.client.force_login(repartidor)
+        self.client.get(reverse('repartidor'))
+
+        self.afectado.refresh_from_db()
+        self.assertEqual(self.afectado.estado, 'registrado')
+        self.assertIsNone(self.afectado.repartidor)
+        self.client.force_login(self.operario)
+        lista = self.client.get(reverse('operario:inicio'))
+        self.assertContains(lista, 'Pedido sin repartidor disponible')
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class CascadaReasignacionTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_cascada', password='test1234', is_operario=True,
+        )
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio cascada', direccion='Calle 30', contacto='333',
+        )
+        self.pedido = Pedido.objects.create(
+            codigo='CASC-001', comercio=self.comercio,
+            estado='registrado', vehiculo_requerido='moto',
+        )
+        self.r1 = User.objects.create_user(
+            username='cascada_r1', password='test1234',
+            first_name='R', last_name='Uno',
+        )
+        self.perfil_r1 = Repartidor.objects.create(
+            user=self.r1, pin='1111', disponible=True, vehiculo='moto',
+        )
+        self.r2 = User.objects.create_user(
+            username='cascada_r2', password='test1234',
+            first_name='R', last_name='Dos',
+        )
+        self.perfil_r2 = Repartidor.objects.create(
+            user=self.r2, pin='2222', disponible=True, vehiculo='moto',
+        )
+        self.client.force_login(self.operario)
+
+    def _asignar_a_r1(self):
+        self.client.post(
+            reverse('operario:asignar_repartidor', args=[self.pedido.pk]),
+            {'repartidor': self.perfil_r1.pk},
+        )
+
+    def _rechazar(self, pedido):
+        pedido.refresh_from_db()
+        self.client.force_login(pedido.repartidor)
+        self.client.post(reverse('repartidor_rechazar', args=[pedido.pk]))
+        self.client.force_login(self.operario)
+
+    def _sin_alerta(self):
+        inicio = self.client.get(reverse('operario:inicio'))
+        self.assertEqual(list(inicio.context['pedidos_sin_repartidor']), [])
+        estado = self.client.get(reverse('operario:estado_pedidos')).json()
+        self.assertFalse(any(
+            pedido['sin_repartidor'] for pedido in estado['pedidos']
+        ))
+
+    def test_rechazo_reasigna_al_siguiente_candidato_sin_alerta(self):
+        self._asignar_a_r1()
+        self._rechazar(self.pedido)
+
+        self.pedido.refresh_from_db()
+        self.perfil_r1.refresh_from_db()
+        self.perfil_r2.refresh_from_db()
+
+        self.assertEqual(self.pedido.estado, 'asignado')
+        self.assertEqual(self.pedido.repartidor, self.r2)
+        self.assertFalse(self.perfil_r1.disponible)
+        self.assertTrue(self.perfil_r2.disponible)
+
+        eventos = list(self.pedido.historial.order_by('pk'))
+        self.assertEqual(
+            [evento.estado_nuevo for evento in eventos],
+            ['asignado', 'registrado', 'asignado'],
+        )
+        self.assertEqual(
+            eventos[1].incidencia, 'Rechazado por repartidor R Uno',
+        )
+        self.assertIn('Asignación automática', eventos[2].incidencia)
+        self.assertIn(self.r2.get_full_name(), eventos[2].incidencia)
+        self._sin_alerta()
+
+    def test_expiracion_reasigna_al_siguiente_candidato_sin_alerta(self):
+        self._asignar_a_r1()
+        Pedido.objects.filter(pk=self.pedido.pk).update(
+            fecha_hora_asignacion=timezone.now() - timedelta(seconds=301),
+        )
+
+        self.client.get(reverse('operario:inicio'))
+
+        self.pedido.refresh_from_db()
+        self.perfil_r1.refresh_from_db()
+        self.assertEqual(self.pedido.estado, 'asignado')
+        self.assertEqual(self.pedido.repartidor, self.r2)
+        self.assertFalse(self.perfil_r1.disponible)
+
+        eventos = list(self.pedido.historial.order_by('pk'))
+        self.assertIn('expiración', eventos[1].incidencia)
+        self.assertIn('Asignación automática', eventos[2].incidencia)
+        self._sin_alerta()
+
+    def test_segundo_rechazo_deja_pedido_registrado_y_muestra_alerta(self):
+        self._asignar_a_r1()
+        self._rechazar(self.pedido)
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.repartidor, self.r2)
+
+        self._rechazar(self.pedido)
+        self.pedido.refresh_from_db()
+
+        self.assertEqual(self.pedido.estado, 'registrado')
+        self.assertIsNone(self.pedido.repartidor)
+
+        inicio = self.client.get(reverse('operario:inicio'))
+        self.assertContains(inicio, 'Pedido sin repartidor disponible')
+        self.assertEqual(
+            [pedido.codigo for pedido in inicio.context['pedidos_sin_repartidor']],
+            ['CASC-001'],
+        )
+
+        estado = self.client.get(reverse('operario:estado_pedidos')).json()
+        afectado = next(
+            pedido for pedido in estado['pedidos'] if pedido['codigo'] == 'CASC-001'
+        )
+        self.assertTrue(afectado['sin_repartidor'])
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class ColaFifoReasignacionTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_fifo', password='test1234', is_operario=True,
+        )
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio fifo', direccion='Calle 40', contacto='444',
+        )
+        self.pedido = Pedido.objects.create(
+            codigo='FIFO-001', comercio=self.comercio,
+            estado='registrado', vehiculo_requerido='moto',
+        )
+        self.perfiles = {}
+        for indice, username in enumerate(
+            ('fifo_r1', 'fifo_r2', 'fifo_r3'), start=1,
+        ):
+            usuario = User.objects.create_user(
+                username=username, password='test1234',
+                first_name=username, last_name='Cola',
+            )
+            self.perfiles[username] = Repartidor.objects.create(
+                user=usuario, pin=f'210{indice}',
+                disponible=True, vehiculo='moto',
+            )
+        ahora = timezone.now()
+        for horas, username in zip(
+            (3, 2, 1), ('fifo_r1', 'fifo_r2', 'fifo_r3'),
+        ):
+            Repartidor.objects.filter(
+                pk=self.perfiles[username].pk,
+            ).update(disponible_desde=ahora - timedelta(hours=horas))
+        self.client.force_login(self.operario)
+
+    def _rechazar(self, perfil):
+        self.client.force_login(perfil.user)
+        self.client.post(
+            reverse('repartidor_rechazar', args=[self.pedido.pk]),
+        )
+        self.client.force_login(self.operario)
+
+    def _repartidor_actual(self):
+        self.pedido.refresh_from_db()
+        return self.pedido.repartidor
+
+    def test_cola_fifo_tras_rechazos_y_reactivacion(self):
+        self.client.post(
+            reverse('operario:asignar_repartidor', args=[self.pedido.pk]),
+            {},
+        )
+        self.assertEqual(
+            self._repartidor_actual(), self.perfiles['fifo_r1'].user,
+        )
+
+        self._rechazar(self.perfiles['fifo_r1'])
+        self.assertEqual(
+            self._repartidor_actual(), self.perfiles['fifo_r2'].user,
+        )
+
+        self.client.force_login(self.perfiles['fifo_r1'].user)
+        self.client.post(reverse('repartidor_toggle_disponibilidad'))
+        self.client.force_login(self.operario)
+        self.perfiles['fifo_r1'].refresh_from_db()
+        self.perfiles['fifo_r3'].refresh_from_db()
+        self.assertTrue(self.perfiles['fifo_r1'].disponible)
+        self.assertGreater(
+            self.perfiles['fifo_r1'].disponible_desde,
+            self.perfiles['fifo_r3'].disponible_desde,
+        )
+
+        self._rechazar(self.perfiles['fifo_r2'])
+        self.assertEqual(
+            self._repartidor_actual(), self.perfiles['fifo_r3'].user,
+        )
+
+        self._rechazar(self.perfiles['fifo_r3'])
+        self.assertEqual(
+            self._repartidor_actual(), self.perfiles['fifo_r1'].user,
+        )

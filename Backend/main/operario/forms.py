@@ -16,6 +16,38 @@ MENSAJE_COMERCIO_DUPLICADO = 'Ya existe un comercio registrado con ese nombre'
 
 MARGEN_FECHA_ENTREGA = timedelta(minutes=10)
 
+MENSAJE_VEHICULO_INCOMPATIBLE = (
+    'El repartidor seleccionado no posee el vehículo requerido por el pedido.'
+)
+
+
+def _repartidores_disponibles():
+    ocupados = Pedido.objects.filter(
+        estado__in=('asignado', 'retirado', 'en_viaje'),
+        repartidor__isnull=False,
+    ).values('repartidor_id')
+    return (
+        Repartidor.objects.select_related('user')
+        .filter(disponible=True, user__is_active=True)
+        .exclude(user_id__in=ocupados)
+    )
+
+
+class RepartidorSelect(forms.Select):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.vehiculos = {}
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(
+            name, value, label, selected, index, subindex, attrs,
+        )
+        vehiculo = self.vehiculos.get(str(value))
+        if vehiculo:
+            option['attrs']['data-vehiculo'] = vehiculo
+        return option
+
+
 class ComercioActivoField(forms.ModelChoiceField):
     def to_python(self, value):
         if value in self.empty_values:
@@ -52,9 +84,17 @@ class PedidoForm(forms.Form):
         label='Tamaño del paquete',
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
     )
-    vehiculo_requerido = forms.CharField(
+    vehiculo_requerido = forms.ChoiceField(
+        choices=Repartidor.VEHICULOS,
         label='Vehículo requerido',
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    repartidor = forms.ModelChoiceField(
+        queryset=Repartidor.objects.none(),
+        label='Repartidor',
+        required=False,
+        empty_label='Automático',
+        widget=RepartidorSelect(attrs={'class': 'form-select'}),
     )
     especificaciones_traslado = forms.CharField(
         label='Especificaciones de traslado',
@@ -77,6 +117,11 @@ class PedidoForm(forms.Form):
         self.fields['fecha_hora_estimada_entrega'].widget.attrs['min'] = (
             ahora.strftime('%Y-%m-%dT%H:%M')
         )
+        disponibles = _repartidores_disponibles().order_by('user__username')
+        self.fields['repartidor'].queryset = disponibles
+        self.fields['repartidor'].widget.vehiculos = {
+            str(perfil.pk): perfil.vehiculo for perfil in disponibles
+        }
 
     def clean_fecha_hora_estimada_entrega(self):
         fecha_hora = self.cleaned_data['fecha_hora_estimada_entrega']
@@ -86,26 +131,33 @@ class PedidoForm(forms.Form):
             )
         return fecha_hora
 
+    def clean_repartidor(self):
+        perfil = self.cleaned_data.get('repartidor')
+        if perfil is None:
+            return None
+        vehiculo = self.cleaned_data.get('vehiculo_requerido')
+        if perfil.vehiculo != vehiculo:
+            raise ValidationError(MENSAJE_VEHICULO_INCOMPATIBLE)
+        return perfil
+
 class AsignarPedidoForm(forms.Form):
     repartidor = forms.ModelChoiceField(
         queryset=Repartidor.objects.none(),
         label='Repartidor disponible',
-        empty_label='Seleccioná un repartidor',
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False,
+        empty_label='Automático',
+        widget=RepartidorSelect(attrs={'class': 'form-select'}),
     )
 
     def __init__(self, *args, **kwargs):
+        pedido = kwargs.pop('pedido', None)
         super().__init__(*args, **kwargs)
-        activos = Pedido.objects.filter(
-            estado__in=('asignado', 'retirado', 'en_viaje'),
-            repartidor__isnull=False,
-        ).values('repartidor_id')
-        self.fields['repartidor'].queryset = (
-            Repartidor.objects.select_related('user')
-            .filter(disponible=True, user__is_active=True)
-            .exclude(user_id__in=activos)
-            .order_by('user__username')
-        )
+        queryset = _repartidores_disponibles()
+        if pedido is not None:
+            vehiculo = pedido.vehiculo_requerido
+            if vehiculo in dict(Repartidor.VEHICULOS):
+                queryset = queryset.filter(vehiculo=vehiculo)
+        self.fields['repartidor'].queryset = queryset.order_by('user__username')
 
 
 class RepartidorForm(forms.Form):

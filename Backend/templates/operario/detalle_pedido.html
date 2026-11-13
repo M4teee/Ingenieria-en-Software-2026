@@ -15,6 +15,20 @@
     {% endfor %}
 {% endif %}
 
+<div id="alerta-sin-repartidor" class="position-fixed top-0 end-0 m-3 card border-warning shadow" style="z-index: 1050; max-width: 22rem;" role="alert" {% if not pedidos_sin_repartidor %}hidden{% endif %}>
+    <div class="card-body py-3">
+        <div class="fw-semibold">
+            <i class="bi bi-exclamation-triangle text-warning" aria-hidden="true"></i>
+            Pedido sin repartidor disponible
+        </div>
+        <ul id="alerta-sin-repartidor-lista" class="small mb-0 mt-1">
+            {% for pedido_sin_repartidor in pedidos_sin_repartidor %}
+                <li><a href="{% url 'operario:detalle_pedido' pedido_sin_repartidor.pk %}">{{ pedido_sin_repartidor.codigo }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
 <div class="row g-4">
     <div class="col-12 col-lg-7">
         <section class="card shadow-sm h-100" aria-labelledby="datos-heading">
@@ -29,7 +43,7 @@
                     <dt class="col-sm-4">Destinatario</dt><dd class="col-sm-8">{{ pedido.datos_destinatario|default:"No informado"|linebreaksbr }}</dd>
                     <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido.direccion_destino|default:"Sin destino" }}</dd>
                     <dt class="col-sm-4">Tamaño del paquete</dt><dd class="col-sm-8">{{ pedido.tamano_paquete|default:"No informado"|linebreaksbr }}</dd>
-                    <dt class="col-sm-4">Vehículo requerido</dt><dd class="col-sm-8">{{ pedido.vehiculo_requerido|default:"No informado"|linebreaksbr }}</dd>
+                    <dt class="col-sm-4">Vehículo requerido</dt><dd class="col-sm-8">{{ pedido.get_vehiculo_requerido_display|default:"No informado" }}</dd>
                     <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
                     <dt class="col-sm-4">Entrega estimada</dt><dd class="col-sm-8">{% if pedido.fecha_hora_estimada_entrega %}{{ pedido.fecha_hora_estimada_entrega|date:"d/m/Y H:i" }}{% else %}Sin estimación{% endif %}</dd>
                     <dt class="col-sm-4">Repartidor</dt><dd class="col-sm-8">{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}Sin asignar{% endif %}</dd>
@@ -40,21 +54,32 @@
     </div>
     <div class="col-12 col-lg-5">
         {% if pedido.estado == 'registrado' and not pedido.repartidor %}
-            <section class="card shadow-sm" aria-labelledby="asignacion-heading">
+            <section class="card shadow-sm border-warning" aria-labelledby="asignacion-heading">
                 <div class="card-body">
                     <h2 id="asignacion-heading" class="h5">Asignar repartidor</h2>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                        Pedido sin repartidor disponible
+                    </div>
                     <p class="text-secondary">El repartidor verá la solicitud al abrir o actualizar su panel y tendrá cinco minutos para responder. No se envía una notificación externa.</p>
+                    <form method="post" action="{% url 'operario:reintentar_asignacion' pedido.pk %}" class="mb-3">
+                        {% csrf_token %}
+                        <button class="btn btn-warning" type="submit">Reintentar asignación</button>
+                    </form>
                     {% if formulario_asignacion.fields.repartidor.queryset.exists %}
                         <form method="post" action="{% url 'operario:asignar_repartidor' pedido.pk %}">
                             {% csrf_token %}
                             <div class="mb-3">
                                 {{ formulario_asignacion.repartidor.label_tag }}
                                 {{ formulario_asignacion.repartidor }}
+                                <small class="text-secondary d-block mt-1">
+                                    Dejá "Automático" para que el sistema elija al repartidor con el mismo vehículo.
+                                </small>
                             </div>
                             <button class="btn btn-app" type="submit">Asignar pedido</button>
                         </form>
                     {% else %}
-                        <p class="alert alert-warning mb-0">No hay repartidores activos y disponibles sin otro pedido en curso.</p>
+                        <p class="alert alert-warning mb-0">No hay repartidores activos y disponibles sin otro pedido en curso para el vehículo requerido.</p>
                     {% endif %}
                 </div>
             </section>
@@ -148,3 +173,39 @@
 </section>
 
  {% endblock %}
+
+{% block extrascript %}
+{% if pedido.estado == 'asignado' %}
+<script>
+(() => {
+    const codigo = "{{ pedido.codigo|escapejs }}";
+    const estadoInicial = "{{ pedido.estado }}";
+    const repartidorInicial = {{ pedido.repartidor_id|default_if_none:"null" }};
+    const urlEstado = "{% url 'operario:estado_pedidos' %}";
+
+    const verificar = async () => {
+        try {
+            const respuesta = await fetch(urlEstado, {
+                headers: {'Accept': 'application/json'},
+                credentials: 'same-origin',
+            });
+            if (!respuesta.ok) return;
+            const datos = await respuesta.json();
+            const actual = datos.pedidos.find((pedido) => pedido.codigo === codigo);
+            if (
+                !actual
+                || actual.estado_id !== estadoInicial
+                || actual.repartidor_id !== repartidorInicial
+            ) {
+                window.location.reload();
+            }
+        } catch (_) {
+            // Si la conexión falla, se conserva la vista actual.
+        }
+    };
+
+    window.setInterval(verificar, 5000);
+})();
+</script>
+{% endif %}
+{% endblock %}

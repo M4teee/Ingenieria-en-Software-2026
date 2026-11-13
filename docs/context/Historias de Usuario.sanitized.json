@@ -21,18 +21,18 @@
   "is_featured": false,
   "is_looking_for_people": false,
   "looking_for_people_note": "",
-  "totals_updated_datetime": "2026-10-12T17:58:13+0000",
+  "totals_updated_datetime": "2026-11-13T00:33:51+0000",
   "total_fans": 0,
   "total_fans_last_week": 0,
   "total_fans_last_month": 0,
   "total_fans_last_year": 0,
-  "total_activity": 318,
-  "total_activity_last_week": 205,
-  "total_activity_last_month": 318,
-  "total_activity_last_year": 318,
+  "total_activity": 434,
+  "total_activity_last_week": 6,
+  "total_activity_last_month": 115,
+  "total_activity_last_year": 434,
   "anon_permissions": [],
   "public_permissions": [],
-  "modified_date": "2026-09-24T22:35:18+0000",
+  "modified_date": "2026-11-03T18:07:47+0000",
   "roles": [
     {
       "name": "UX",
@@ -843,6 +843,11 @@
           "user_story": 36,
           "order": 1791238437298,
           "source_project_slug": null
+        },
+        {
+          "user_story": 40,
+          "order": 1792358982941,
+          "source_project_slug": null
         }
       ]
     },
@@ -929,10 +934,10 @@
           "points": "2"
         }
       ],
-      "status": "In progress",
+      "status": "Done",
       "swimlane": null,
       "milestone": "Sprint 1",
-      "modified_date": "2026-10-12T17:57:34+0000",
+      "modified_date": "2026-10-31T02:24:52+0000",
       "created_date": "2026-10-03T13:47:40+0000",
       "finish_date": null,
       "generated_from_issue": null,
@@ -941,15 +946,15 @@
       "ref": 9,
       "is_closed": false,
       "backlog_order": 1791035510483640,
-      "sprint_order": 11,
-      "kanban_order": 1791827854012948,
+      "sprint_order": 12,
+      "kanban_order": 1793413492230544,
       "subject": "Iniciar sesion operario",
-      "description": "Como Operario, quiero iniciar sesión en la plataforma web de escritorio para acceder al panel de control y gestionar los pedidos del sistema.\n\n*   Reglas:\n    1.  El usuario debe estar previamente registrado en el sistema con credenciales de operario.\n*   Criterios de Aceptación:\n    *   Escenario 1: Inicio de sesión exitoso   \n        En el formulario de acceso de escritorio, el operario ingresa su nombre de usuario y contraseña válidos. Al presionar \"Ingresar\", el sistema valida las credenciales contra la base de datos segura y redirige al panel principal de gestión de pedidos.\n    *   Escenario 2: Inicio de sesión fallido por usuario no registrado   \n        En el formulario de acceso, se ingresa un nombre de usuario inexistente en el sistema y una contraseña. Al presionar \"Ingresar\", el sistema permanece en la pantalla de login y muestra el mensaje: _\"El usuario ingresado no existe\"_.\n    *   Escenario 3: Inicio de sesión fallido por contraseña errónea   \n        En el formulario de acceso, se ingresa un usuario existente pero una contraseña incorrecta. Al presionar \"Ingresar\", el sistema permanece en la pantalla y muestra el mensaje: _\"Credenciales inválidas. Intente nuevamente\"_.",
+      "description": "Como Operario, quiero iniciar sesión en la plataforma web de escritorio para acceder al panel de control y gestionar los pedidos del sistema.\n\n*   Reglas:\n    1.  El usuario debe estar previamente registrado en el sistema con credenciales de operario.\n*   Criterios de Aceptación:\n    *   Escenario 1: Inicio de sesión exitoso    \n        En el formulario de acceso de escritorio, el operario ingresa su nombre de usuario y contraseña válidos. Al presionar \"Iniciar Sesión\", el sistema valida las credenciales contra la base de datos segura y redirige al panel principal de gestión de pedidos.\n    *   Escenario 2: Inicio de sesión fallido  \n        En el formulario de acceso, se ingresa un nombre de usuario inexistente en el sistema o una contraseña incorrecta. Al presionar \"Iniciar Sesión\", el sistema permanece en la pantalla de login y muestra el mensaje: _\"Por favor introduzca un nombre de usuario y una contraseña correctos. Tenga en cuenta que ambos campos son sensibles a mayúsculas/minúsculas.\"_.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
       "tribe_gig": null,
-      "version": 11,
+      "version": 16,
       "is_blocked": false,
       "tags": [],
       "due_date": "2026-10-30T00:00:00",
@@ -975,10 +980,10 @@
           "points": "2"
         }
       ],
-      "status": "In progress",
+      "status": "Done",
       "swimlane": null,
       "milestone": "Sprint 1",
-      "modified_date": "2026-10-12T17:57:39+0000",
+      "modified_date": "2026-10-31T02:24:42+0000",
       "created_date": "2026-10-03T13:54:11+0000",
       "finish_date": null,
       "generated_from_issue": null,
@@ -987,18 +992,662 @@
       "ref": 11,
       "is_closed": false,
       "backlog_order": 1791035510483643,
-      "sprint_order": 8,
-      "kanban_order": 1791827859907516,
+      "sprint_order": 10,
+      "kanban_order": 1793413482387705,
       "subject": "Dar de alta a repartidor",
-      "description": "Como Operario, quiero dar de alta a un nuevo repartidor para habilitarlo a operar en la plataforma móvil.\n\n*   Reglas:\n    1.  El DNI del repartidor debe ser único.\n    2.  Se debe generar el PIN de acceso numérico y de exactamente 4 dígitos.\n    3.  El repartidor inicia con estado de disponibilidad \"No disponible\" hasta que inicie su jornada.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Alta exitosa de repartidor con generación de PIN.    \n        El operario completa los datos de un repartidor con un DNI no registrado previamente y presiona \"Crear Repartidor\". El sistema guarda el perfil, genera automáticamente un PIN de 4 dígitos, lo muestra en pantalla para ser transmitido al repartidor y emite el mensaje: _\"Repartidor dado de alta exitosamente\"_.\n    *   ESCENARIO 2: Alta fallida por DNI duplicado.    \n        El operario ingresa los datos de un repartidor cuyo DNI ya pertenece a otro repartidor registrado. Al presionar \"Crear Repartidor\", el sistema rechaza la operación y muestra el mensaje: _\"El DNI ingresado ya se encuentra registrado en el sistema\"_.",
+      "description": "Como Operario, quiero dar de alta a un nuevo repartidor para habilitarlo a operar en la plataforma móvil.\n\n*   Reglas:\n    1.  El DNI del repartidor debe ser único.\n    2.  El operario debe asignar un PIN de acceso numérico de exactamente 4 dígitos (el cual no debe estar asignado a otro repartidor).\n    3.  El repartidor inicia con estado de disponibilidad \"No disponible\" hasta que inicie su jornada.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Alta exitosa de repartidor.     \n        El operario completa los datos de un repartidor con un DNI y un PIN de 4 dígitos no registrado previamente y presiona \"Crear Repartidor\". El sistema guarda el perfil, lo crea con disponibilidad \"No disponible\" y emite el mensaje: _\"Repartidor dado de alta exitosamente\"_.\n    *   ESCENARIO 2: Alta fallida por DNI duplicado.     \n        El operario ingresa los datos de un repartidor cuyo DNI ya pertenece a otro repartidor registrado. Al presionar \"Crear repartidor\", el sistema rechaza la operación y muestra el mensaje: _\"El DNI ingresado ya se encuentra registrado en el sistema\"_.\n    *   ESCENARIO 3: Alta fallida por PIN duplicado.  \n        El operario ingresa un PIN de 4 dígitos que ya está siendo utilizado por otro repartidor en el sistema. Al presionar \"Crear repartidor\", el sistema rechaza la operación y muestra el mensaje: _\"Ese PIN ya está asignado a otro repartidor\"_.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
       "tribe_gig": null,
-      "version": 14,
+      "version": 17,
       "is_blocked": false,
       "tags": [],
       "due_date": "2026-10-30T00:00:00",
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "2"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:24:37+0000",
+      "created_date": "2026-10-03T13:51:50+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 10,
+      "is_closed": false,
+      "backlog_order": 1791035510483644,
+      "sprint_order": 9,
+      "kanban_order": 1793413477814048,
+      "subject": "Registar comercios",
+      "description": "Como Operario, quiero registrar un nuevo comercio en el sistema para poder asociar sus futuros pedidos a la base de datos.\n\n*   Reglas:\n    1.  El nombre o identificador del comercio debe ser único en el sistema.\n*   Criterios de Aceptación:\n    *   Escenario 1: Registro exitoso de comercio      \n        El operario ingresa los datos de un comercio no existente (nombre, dirección y teléfono de contacto) y presiona \"Crear Comercio\". El sistema almacena el registro y muestra el mensaje: _\"Comercio dado de alta exitosamente.\"_, quedando habilitado para la emisión de pedidos.\n    *   Escenario 2: Registro fallido por comercio ya existente      \n        El operario ingresa un nombre de comercio que ya se encuentra activo en la base de datos. Al presionar \"Crear Comercio\", el sistema cancela el alta y emite la alerta: _\"Ya existe un comercio con ese nombre\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 16,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": "2026-10-30T00:00:00",
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-11T18:54:45+0000",
+      "created_date": "2026-10-05T21:50:53+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 25,
+      "is_closed": false,
+      "backlog_order": 1791035510483645,
+      "sprint_order": 2,
+      "kanban_order": 1794423285948117,
+      "subject": "Editar comercio",
+      "description": "Como Operario, quiero editar los datos de un comercio registrado para mantener actualizada su dirección y teléfono de contacto.\n\n*   Reglas\n    *   El nombre del comercio sigue siendo único: no puede coincidir con el de otro comercio existente.\n*   Criterios\n    *   ESCENARIO 1: Edición exitosa.    \n        El operario selecciona un comercio, modifica el teléfono y presiona \"Guardar cambios\". El sistema actualiza el registro y muestra: _\"Datos del comercio actualizados\"_.\n    *   ESCENARIO 2: Edición fallida por nombre duplicado.    \n        El operario cambia el nombre a uno que ya existe. El sistema rechaza el cambio y muestra: _\"Ya existe un comercio registrado con ese nombre\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 8,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "2"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:24:13+0000",
+      "created_date": "2026-10-03T13:55:38+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 12,
+      "is_closed": false,
+      "backlog_order": 1791035510483647,
+      "sprint_order": 4,
+      "kanban_order": 1793413453411773,
+      "subject": "Cargar pedido nuevo",
+      "description": "Como Operario, quiero cargar un nuevo pedido solicitado por un comercio para incorporarlo al sistema y comenzar su gestión.\n\n*   Reglas:\n    1.  El pedido debe asociarse a un comercio previamente registrado y activo en el sistema.\n    2.  El estado inicial de todo pedido nuevo es obligatoriamente \"Registrado\".\n    3.  El sistema debe generar automáticamente un código de seguimiento alfanumérico no secuencial y pseudoaleatorio.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Carga y registro exitoso de pedido.    \n        El operario selecciona un comercio activo, ingresa la dirección de destino, especificaciones de traslado y tiempo estimado de entrega, y presiona \"Registrar Pedido\". El sistema crea el envío con estado \"Registrado\", genera un código de seguimiento único no predecible, lo muestra en pantalla con opción de copiado rápido y muestra el mensaje: _\"Pedido registrado con éxito\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 15,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-11-03T18:39:33+0000",
+      "created_date": "2026-10-03T14:09:02+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 21,
+      "is_closed": false,
+      "backlog_order": 1791035510483648,
+      "sprint_order": 5,
+      "kanban_order": 1793413458543252,
+      "subject": "Ingresar codigo de seguimiento",
+      "description": "Como Cliente Final, quiero ingresar mi código de seguimiento en la plataforma pública para acceder a la información de mi paquete de forma segura y sin registrarme.\n\n*   Reglas\n    *   La pantalla de consulta debe ser web y accesible sin requerir creación de cuenta ni inicio de sesión.\n    *   El código de seguimiento ingresado debe ser validado contra los códigos pseudoaleatorios generados por el sistema.\n*   Criterios\n    *   ESCENARIO 1: Acceso exitoso con código válido.     \n        El cliente ingresa a la página pública de seguimiento, ingresa el código provisto por el comercio y envía la petición. El sistema valida que el código existe en la base de datos y redirige al cliente a la pantalla de detalles de su envío.\n    *   ESCENARIO 2: _Acceso denegado por código inválido._    \n        El cliente final ingresa un código con un formato erróneo o que no existe en el sistema. Al enviar la petición, el sistema permanece en la pantalla de búsqueda y muestra el mensaje “No encontramos un pedido con ese código. Revisá que esté bien escrito.”.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 16,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "5"
+        }
+      ],
+      "status": "Ready for test",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-10T23:40:34+0000",
+      "created_date": "2026-10-03T13:58:18+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 15,
+      "is_closed": false,
+      "backlog_order": 1791035510483649,
+      "sprint_order": 4,
+      "kanban_order": 1794354034146572,
+      "subject": "Visualizar repartidores activos",
+      "description": "Como Operario, quiero visualizar los repartidores activos y disponibles para conocer la capacidad operativa actual del servicio.\n\n*   Reglas:\n    1.  El listado debe diferenciar claramente el estado de cada repartidor (ej. \"Disponible\", \"No disponible\").\n    2.  Se debe visualizar el tipo de vehículo que posee el repartidor, ya que es el parámetro que usa el operario para asignar los viajes.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Visualización del listado de repartidores   \n        El operario accede a la sección de repartidores. El sistema muestra una lista con todos los repartidores registrados, indicando su nombre, tipo de vehículo y resaltando su estado actual (\"Disponible\" o \"No disponible\").\n    *   ESCENARIO 2: Actualización de disponibilidad   \n        Un repartidor cambia su estado desde su aplicación móvil de \"No disponible\" a \"Disponible\". El sistema actualiza automáticamente el listado en la pantalla del operario reflejando la nueva capacidad operativa.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 13,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "5"
+        }
+      ],
+      "status": "In progress",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-13T00:33:51+0000",
+      "created_date": "2026-10-05T22:07:41+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 32,
+      "is_closed": false,
+      "backlog_order": 1791035510483650,
+      "sprint_order": 13,
+      "kanban_order": 1791827863986687,
+      "subject": "Recuperar PIN de repartidor",
+      "description": "Como Operario, quiero regenerar el PIN de un repartidor para recuperar su acceso si lo olvidó o si fue comprometido.\n\n*   Reglas\n    *   El nuevo PIN debe ser numérico y de exactamente 4 dígitos.\n    *   El PIN debe ser único entre los repartidores, ya que es el único dato de ingreso.\n    *   El PIN anterior queda invalidado inmediatamente.\n*   Criterios\n    *   ESCENARIO 1: Regeneración exitosa.   \n        El operario selecciona un repartidor y presiona \"Regenerar PIN\". El sistema genera un nuevo PIN único de 4 dígitos, lo muestra en pantalla para transmitirlo al repartidor e invalida el anterior.\n    *   ESCENARIO 2: Uso del PIN anterior.   \n        El repartidor intenta ingresar con el PIN anterior. El sistema muestra: _\"PIN incorrecto. Verifique los dígitos\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 11,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:25:05+0000",
+      "created_date": "2026-10-03T14:01:46+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 17,
+      "is_closed": false,
+      "backlog_order": 1791035510483651,
+      "sprint_order": 15,
+      "kanban_order": 1793413505319342,
+      "subject": "Acceso con PIN de 4 dígitos",
+      "description": "Como Repartidor, quiero iniciar sesión mediante un PIN de 4 dígitos para acceder rápidamente a mis pedidos desde el celular.\n\n*   Reglas:\n    *   El PIN ingresado debe ser de 4 dígitos numéricos.\n    *   El repartidor debe estar registrado y activo en el sistema.\n*   Criterios:\n    *   ESCENARIO 1: Autenticación exitosa con PIN   \n        El repartidor ingresa su PIN de 4 dígitos en el teclado numérico en pantalla. El sistema valida el token y abre directamente la pantalla operativa de repartos.\n    *   ESCENARIO 2: Autenticación fallida por PIN incorrecto   \n        El repartidor introduce una combinación de 4 dígitos que no coincide con ningún repartidor registrado. El sistema limpia los campos y muestra: _\"PIN incorrecto. Verifique los dígitos\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 15,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-03T20:08:10+0000",
+      "created_date": "2026-10-05T22:02:49+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 28,
+      "is_closed": false,
+      "backlog_order": 1791035510483653,
+      "sprint_order": 3,
+      "kanban_order": 1793736490107610,
+      "subject": "Consultar lista de comercios",
+      "description": "Como Operario, quiero consultar el listado de comercios con su estado (Activo / Inactivo) para tener una visión general de los comercios asociados.\n\n*   Reglas\n    *   El listado incluye comercios activos e inactivos, diferenciados visualmente.\n    *   Debe permitir buscar por nombre.\n*   Criterios\n    *   ESCENARIO 1: Listado completo.   \n        El operario accede a \"Comercios\" y el sistema muestra nombre, dirección, teléfono y estado de cada uno.\n    *   ESCENARIO 2: Búsqueda sin coincidencias.   \n        El operario busca un nombre inexistente y el sistema muestra: _\"No se encontraron comercios con ese nombre\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 7,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "8"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-11-03T18:49:51+0000",
+      "created_date": "2026-10-03T14:03:26+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 18,
+      "is_closed": false,
+      "backlog_order": 1791035510483654,
+      "sprint_order": 7,
+      "kanban_order": 1793413467878169,
+      "subject": "Aceptar asignacion de pedidos",
+      "description": "Como Repartidor, quiero aceptar o rechazar una asignación de pedido para informar al sistema si puedo realizar el viaje.\n\n*   Reglas:\n    *   Si el repartidor presiona \"Aceptar pedido\", el pedido pasa a estar confirmado para su retiro.\n    *   Si el repartidor presiona \"Rechazar\" o no responde en 5 minutos, el evento se guarda en el historial de auditoría y su estado cambia automáticamente a \"No disponible\".\n*   Criterios:\n    *   ESCENARIO 1: Aceptación del pedido dentro del tiempo límite      \n        El repartidor recibe la solicitud de viaje con cuenta regresiva menor a 5 minutos y presiona \"Aceptar pedido\". El sistema confirma la asignación, detiene el temporizador, muestra el mensaje “Asignación confirmada. Ya podés retirar el pedido.” y habilita las acciones de retiro del paquete.\n    *   ESCENARIO 2: Rechazo explícito del pedido      \n        El repartidor recibe la solicitud y presiona \"Rechazar\". El sistema desvincula el pedido, guarda en el timeline el evento _\"Rechazado por repartidor \\[Nombre\\]\"_, cambia automáticamente la disponibilidad del repartidor a \"No disponible\", muestra el mensaje “El pedido se liberó para reasignación.\" y notifica al operario para reasignación.\n    *   ESCENARIO 3: Expiración por tiempo de espera agotado      \n        Transcurren 5 minutos desde la asignación sin respuesta. El sistema cambia automáticamente el estado del repartidor a \"No disponible\", libera el pedido a estado \"Registrado\" y registra la desasignación en el historial.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 19,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "5"
+        }
+      ],
+      "status": "In progress",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-03T15:58:40+0000",
+      "created_date": "2026-10-03T13:57:29+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 14,
+      "is_closed": false,
+      "backlog_order": 1791035510483656,
+      "sprint_order": 5,
+      "kanban_order": 1793721520141915,
+      "subject": "Ver historial de cambios de un pedido",
+      "description": "Como operario, quiero visualizar el historial de cambios de estado de un pedido, para verificar las acciones realizadas por cada usuario ante un reclamo por pedido perdido o demorado\n\n*   Reglas:\n    1.  El historial es inmutable: no se pueden editar ni borrar registros de auditoría.\n    2.  Debe exponer cronológicamente cada cambio de estado, hora exacta, usuario responsable y foto adjunta si existiera.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Visualización íntegra del timeline de un pedido   \n        El operario busca un pedido por su identificador o código y presiona \"Ver Historial/Timeline\". El sistema lista en orden temporal todos los estados por los que transitó, especificando fecha y hora exacta, qué usuario ejecutó el cambio (Operario o nombre del Repartidor) y miniaturas ampliables de las fotos de retiro y entrega.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 13,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-11-03T18:43:38+0000",
+      "created_date": "2026-10-03T14:08:24+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 20,
+      "is_closed": false,
+      "backlog_order": 1791035510483657,
+      "sprint_order": 14,
+      "kanban_order": 1793413500285488,
+      "subject": "Repartidor cambia de estado",
+      "description": "Como Repartidor, quiero cambiar mi estado de disponibilidad para indicar al sistema si puedo recibir nuevas asignaciones de pedidos.\n\n*   Reglas\n    *   El repartidor debe haber ingresado previamente al sistema mediante su PIN de acceso.\n    *   El estado por defecto al arrancar el día es ‘No disponible’. Hasta que el propio repartidor lo cambie\n*   Criterios\n    *   ESCENARIO 1: Cambio a estado Disponible     \n        El repartidor accede a su interfaz estando “No disponible” y presiona la opción para marcarse como \"Disponible\". El sistema actualiza su estado, muestra el mensaje “Ahora estás Disponible.” y lo habilita para ingresar en la lista de asignación de nuevos viajes.\n    *   ESCENARIO 2: Cambio a estado No Disponible     \n        El repartidor estando “Disponible” presiona la opción para marcarse como \"No disponible\". El sistema actualiza su estado, muestra el mensaje “Ahora estás No disponible.” y deja de considerarlo para las próximas asignaciones de pedidos.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 16,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "5"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:24:07+0000",
+      "created_date": "2026-10-03T14:07:27+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 19,
+      "is_closed": false,
+      "backlog_order": 1791035510483658,
+      "sprint_order": 3,
+      "kanban_order": 1793413447492057,
+      "subject": "Actualizar estado de entrega",
+      "description": "Como Repartidor, quiero actualizar los estados de mi entrega adjuntando fotos opcionales para dejar constancia del progreso del envío.\n\n*   Reglas:\n    *   Las transiciones permitidas son secuenciales: de _Asignado_ a _Retirado_, de _Retirado_ a _En viaje_, y de _En viaje_ a _Entregado_.\n    *   La captura de foto es opcional pero permitida en los estados _Retirado_ y _Entregado_.\n*   Criterios:\n    *   ESCENARIO 1: Avance de estado intermedio en el viaje    \n        El repartidor con un pedido en curso presiona el botón para avanzar de estado (\"Marcar como Retirado\" con o sin foto; “Iniciar viaje” sin foto). El sistema actualiza el estado del pedido, registra el evento en el timeline y mantiene al repartidor asignado a dicho viaje.\n    *   ESCENARIO 2: Finalización exitosa de la entrega    \n        El repartidor con el pedido en estado \"En viaje\" llega a destino, opcionalmente adjunta la fotografía del paquete y presiona \"Marcar como entregado\". El sistema actualiza el estado a \"Entregado\", guarda la evidencia y el registro en el timeline, da por concluido el viaje y actualiza la disponibilidad del repartidor a \"Disponible\".",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 21,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-13T00:26:51+0000",
+      "created_date": "2026-10-03T13:56:16+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 13,
+      "is_closed": false,
+      "backlog_order": 1791035510483659,
+      "sprint_order": 10,
+      "kanban_order": 1794529611895704,
+      "subject": "Cancelar pedido",
+      "description": "Como Operario, quiero cancelar un pedido si el comercio o cliente lo solicita para anular la orden antes de que sea despachada a la calle.\n\n*   Reglas:\n    1.  Solo se admiten cancelaciones si el pedido se encuentra en estado \"Registrado\" o \"Asignado\".\n    2.  Está estrictamente prohibido cancelar un pedido que ya se encuentre en estado \"Retirado\" o \"En viaje\".\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Cancelación exitosa de un pedido no retirado   \n        El operario visualiza un pedido en estado \"Asignado\", presiona el botón \"Cancelar Pedido\" y confirma la acción. El sistema cambia el estado a \"Cancelado\", notifica la baja del viaje al repartidor asignado, lo libera y registra el evento en el historial.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 12,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:25:10+0000",
+      "created_date": "2026-10-03T14:33:10+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 22,
+      "is_closed": false,
+      "backlog_order": 1791035510483660,
+      "sprint_order": 16,
+      "kanban_order": 1793413510134194,
+      "subject": "Visualizar datos del viaje",
+      "description": "Como Repartidor, quiero visualizar los datos básicos del viaje al recibir una asignación automática, para decidir si acepto o rechazo el pedido dentro de mi límite de tiempo.\n\n*   Reglas\n    *   La información solo debe estar visible en pantalla durante el periodo de tolerancia de 5 minutos.\n    *   Se deben mostrar los datos requeridos por el sistema: quién lo envía (comercio) y a dónde (dirección de destino).\n*   Criterios\n    *   _ESCENARIO 1: Visualización correcta durante la asignación_    \n        El sistema asigna un viaje automáticamente a un repartidor disponible. En la pantalla del móvil del repartidor se despliega un cartel con la información del comercio, del destino y un cronómetro visible de 5 minutos en cuenta regresiva.\n    *   ESCENARIO 2: Desaparición de los detalles por tiempo agotado    \n        El cronómetro de la pantalla de asignación llega a 00:00. El sistema cierra inmediatamente el cartel de asignación y devuelve al repartidor a la pantalla principal, impidiendo que interactúe con el viaje.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 18,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
       "due_date_reason": ""
     },
     {
@@ -1023,20 +1672,342 @@
       ],
       "status": "New",
       "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-09T11:35:30+0000",
-      "created_date": "2026-10-03T13:51:50+0000",
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-03T12:35:08+0000",
+      "created_date": "2026-10-03T14:38:15+0000",
       "finish_date": null,
       "generated_from_issue": null,
       "generated_from_task": null,
       "from_task_ref": null,
-      "ref": 10,
+      "ref": 23,
       "is_closed": false,
-      "backlog_order": 1791035510483644,
-      "sprint_order": 7,
-      "kanban_order": 1791035510497396,
-      "subject": "Registar comercios",
-      "description": "Como Operario, quiero registrar un nuevo comercio en el sistema para poder asociar sus futuros pedidos a la base de datos.\n\n*   Reglas:\n    1.  El nombre o identificador del comercio debe ser único en el sistema.\n*   Criterios de Aceptación:\n    *   Escenario 1: Registro exitoso de comercio    \n        El operario ingresa los datos de un comercio no existente (nombre, dirección y teléfono de contacto) y presiona \"Guardar Comercio\". El sistema almacena el registro y muestra el mensaje: _\"Comercio registrado exitosamente\"_, quedando habilitado para la emisión de pedidos.\n    *   Escenario 2: Registro fallido por comercio ya existente    \n        El operario ingresa un nombre de comercio que ya se encuentra activo en la base de datos. Al presionar \"Guardar Comercio\", el sistema cancela el alta y emite la alerta: _\"Ya existe un comercio registrado con ese nombre\"_.",
+      "backlog_order": 1791035510483661,
+      "sprint_order": 1,
+      "kanban_order": 1791038295515860,
+      "subject": "Filtrar historial de pedidos",
+      "description": "Como Operario, quiero filtrar el historial de pedidos por nombre de comercio o estado, para encontrar rápidamente un envío específico cuando se presenta un reclamo o paquete perdido.\n\n*   Reglas:\n    *   El buscador debe permitir buscar envíos pertenecientes a todos los comercios, incluidos los que hayan sido \"deshabilitados lógicamente\".\n    *   Los filtros deben aplicarse sobre la base de datos completa de pedidos registrados.\n*   Criterios:\n    *   ESCENARIO 1: Búsqueda exitosa con filtros   \n        El operario ingresa a la vista del historial general, selecciona filtros y escribe el nombre de un comercio particular. Al presionar \"Buscar\", el sistema actualiza la lista mostrando únicamente los pedidos de ese comercio que fracasaron en la entrega, permitiendo acceder a su línea de tiempo.\n    *   ESCENARIO 2: Búsqueda sin resultados   \n        El operario ingresa parámetros de búsqueda para un comercio que nunca realizó envíos o aplica un filtro de estado inexistente para ese comercio. El sistema limpia la lista y muestra el mensaje: \"No se encontraron pedidos que coincidan con los filtros ingresados\".",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 8,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "2"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:24:32+0000",
+      "created_date": "2026-10-03T14:51:52+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 24,
+      "is_closed": false,
+      "backlog_order": 1791035510483662,
+      "sprint_order": 8,
+      "kanban_order": 1793413472926271,
+      "subject": "Visualizar estado del pedido",
+      "description": "Como Cliente Final, quiero visualizar el estado actualizado de mi pedido para saber cuándo llegará mi paquete.\n\n*   Reglas\n    *   El cliente solo tiene permisos de lectura sobre esta pantalla, no puede interactuar.\n    *   Los datos a mostrar provienen de la información: estado, comercio remitente y tiempo estimado (si está en viaje).\n    *   Si el pedido pasa a estado \"Entregado\", \"Fallido\" o \"Cancelado\", el tiempo estimado de llegada debe dejar de mostrarse.\n*   Criterios\n    *   _ESCENARIO 1: Visualización de envío confirmado._   \n        El cliente accede a la pantalla de detalles de su envío. El sistema carga la información y muestra claramente el estado actual, el nombre del comercio remitente y un texto con el tiempo estimado de llegada.\n    *   _ESCENARIO 2: Visualización de envío finalizado o interrumpido._   \n        El cliente accede a la pantalla de un envío que ya finalizó (ya sea fallido o entregado). El sistema muestra el estado actual resaltado, el comercio de origen, y oculta/elimina el campo de tiempo estimado de llegada para evitar confusiones.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 20,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:24:22+0000",
+      "created_date": "2026-10-05T21:59:22+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 26,
+      "is_closed": false,
+      "backlog_order": 1791035510483663,
+      "sprint_order": 6,
+      "kanban_order": 1793413462945797,
+      "subject": "Listado pedidos en curso",
+      "description": "Como Operario, quiero visualizar el listado de pedidos en curso con su estado actual para controlar la operación diaria desde un solo lugar.\n\n*   Reglas\n    *   Se muestran los pedidos no finalizados (Registrado, Asignado, Retirado, En viaje).\n    *   Cada pedido muestra comercio, destino, estado y repartidor asignado (si corresponde).\n*   Criterios\n    *   ESCENARIO 1: Visualización del panel.   \n        El operario ingresa al panel principal y ve la lista de pedidos en curso, ordenada por antigüedad.\n    *   ESCENARIO 2: Actualización automática.   \n        Cuando un repartidor cambia el estado de un pedido, el panel lo refleja sin recargar la página.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 8,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "In progress",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-05T04:25:54+0000",
+      "created_date": "2026-10-05T22:08:38+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 33,
+      "is_closed": false,
+      "backlog_order": 1791035510483665,
+      "sprint_order": 12,
+      "kanban_order": 1793852754305984,
+      "subject": "Ver detalle de pedidos",
+      "description": "Como Operario, quiero ver el detalle completo de un pedido para conocer todos sus datos ante una consulta del comercio o del cliente.\n\n*   Reglas\n    *   El detalle muestra: comercio emisor, datos del destinatario, dirección de destino, tamaño del paquete, vehículo requerido, estado actual, código de seguimiento y repartidor asignado (si corresponde).\n    *   Desde el detalle se accede al timeline del pedido.\n    *   Es de solo lectura, excepto las acciones permitidas según el estado (por ejemplo, cancelar).\n*   Criterios\n    *   ESCENARIO 1: Visualización del detalle.    \n        El operario selecciona un pedido del listado. El sistema muestra todos sus datos y los botones de acción habilitados para su estado actual.\n    *   ESCENARIO 2: Pedido sin repartidor.    \n        El operario abre un pedido en estado \"Registrado\". El sistema muestra el campo de repartidor vacío con la leyenda \"Sin asignar\".",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 7,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "5"
+        }
+      ],
+      "status": "Ready for test",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-10T19:31:18+0000",
+      "created_date": "2026-10-05T22:04:02+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 29,
+      "is_closed": false,
+      "backlog_order": 1791035510483666,
+      "sprint_order": 9,
+      "kanban_order": 1794339078777813,
+      "subject": "Deshabilitar repartidor",
+      "description": "Como Operario, quiero deshabilitar a un repartidor para impedir que opere sin perder su historial de entregas.\n\n*   Reglas\n    *   Se aplica borrado lógico.\n    *   No se puede deshabilitar a un repartidor con un pedido en estado \"Asignado\", \"Retirado\" o \"En viaje\".\n*   Criterios\n    *   ESCENARIO 1: Deshabilitación exitosa.   \n        El repartidor sin viajes activos pasa a \"Inactivo\" y su PIN deja de funcionar.\n    *   ESCENARIO 2: Deshabilitación bloqueada.   \n        Si tiene un pedido activo, el sistema muestra: _\"El repartidor tiene pedidos en curso\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 7,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "5"
+        }
+      ],
+      "status": "New",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-03T21:26:13+0000",
+      "created_date": "2026-10-05T22:05:49+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 30,
+      "is_closed": false,
+      "backlog_order": 1791035510483666,
+      "sprint_order": 11,
+      "kanban_order": 1791237949189609,
+      "subject": "Alerta de pedido sin repartidor",
+      "description": "Como Operario, quiero ser alertado cuando un pedido no consigue repartidor para poder reintentar la asignación o informar al comercio.\n\n*   Reglas\n    *   La alerta se genera cuando no hay candidatos disponibles o cuando ya se agotaron todos.\n    *   El pedido permanece en estado \"Registrado\" mientras no sea aceptado.\n    *   El operario puede relanzar la asignación automática manualmente.\n*   Criterios\n    *   ESCENARIO 1: Visualización de la alerta.   \n        El sistema no logra asignar un pedido. En el panel del operario aparece destacado el aviso _\"Pedido sin repartidor disponible\"_ junto al pedido afectado.\n    *   ESCENARIO 2: Reintento de asignación.   \n        El operario presiona \"Reintentar asignación\" sobre el pedido. El sistema vuelve a buscar candidatos disponibles y cercanos, y si encuentra uno, le envía la solicitud y quita la alerta.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 4,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "In progress",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-05T04:26:10+0000",
+      "created_date": "2026-10-05T22:10:12+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 34,
+      "is_closed": false,
+      "backlog_order": 1791035510483666,
+      "sprint_order": 6,
+      "kanban_order": 1793852770688191,
+      "subject": "Visualizar pedidos fallidos",
+      "description": "Como Operario, quiero visualizar los pedidos con entrega fallida y confirmar su devolución para dar cierre a los envíos que no pudieron entregarse.\n\n*   Reglas\n    *   Se listan los pedidos en estado \"Fallido\" con el motivo, la foto (si existe) y el repartidor que intentó la entrega.\n    *   La confirmación de devolución queda registrada en el timeline con fecha, hora y usuario.\n*   Criterios\n    *   ESCENARIO 1: Listado de entregas fallidas.   \n        El operario accede a la sección \"Entregas fallidas\". El sistema muestra los pedidos en estado \"Fallido\" ordenados por fecha.\n    *   ESCENARIO 2: Confirmación de devolución.   \n        El operario selecciona un pedido fallido y presiona \"Confirmar devolución\". El sistema registra el evento en el timeline y muestra: _\"Devolución registrada\"_.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 6,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:24:47+0000",
+      "created_date": "2026-10-05T22:12:09+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 35,
+      "is_closed": false,
+      "backlog_order": 1791035510483667,
+      "sprint_order": 11,
+      "kanban_order": 1793413487826186,
+      "subject": "Ver informacion del pedido activo",
+      "description": "Como Repartidor, quiero ver mi pedido activo y sus datos completos tras aceptarlo para poder retirarlo y entregarlo correctamente.\n\n*   Reglas\n    *   Tras aceptar, se muestran comercio (dirección y contacto), dirección de destino y especificaciones de traslado.\n    *   La pantalla debe habilitar las acciones de estado correspondientes al progreso del pedido.\n*   Criterios\n    *   ESCENARIO 1: Visualización del pedido activo.   \n        El repartidor abre su pantalla operativa y ve todos los datos del viaje con las acciones de estado disponibles.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
@@ -1067,68 +2038,22 @@
           "points": "3"
         }
       ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-09T11:35:44+0000",
-      "created_date": "2026-10-05T21:50:53+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 25,
-      "is_closed": false,
-      "backlog_order": 1791035510483645,
-      "sprint_order": 2,
-      "kanban_order": 1791237053561833,
-      "subject": "Editar comercio",
-      "description": "Como Operario, quiero editar los datos de un comercio registrado para mantener actualizada su dirección y teléfono de contacto.\n\n*   Reglas\n    *   El nombre del comercio sigue siendo único: no puede coincidir con el de otro comercio existente.\n    *   Los cambios no alteran los pedidos históricos ya registrados.\n*   Criterios\n    *   ESCENARIO 1: Edición exitosa.   \n        El operario selecciona un comercio, modifica el teléfono y presiona \"Guardar cambios\". El sistema actualiza el registro y muestra: _\"Datos del comercio actualizados\"_.\n    *   ESCENARIO 2: Edición fallida por nombre duplicado.   \n        El operario cambia el nombre a uno que ya existe. El sistema rechaza el cambio y muestra: _\"Ya existe un comercio registrado con ese nombre\"_.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 4,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "2"
-        }
-      ],
-      "status": "New",
+      "status": "Done",
       "swimlane": null,
       "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T22:59:57+0000",
-      "created_date": "2026-10-03T13:55:38+0000",
+      "modified_date": "2026-10-31T02:24:02+0000",
+      "created_date": "2026-10-05T22:13:39+0000",
       "finish_date": null,
       "generated_from_issue": null,
       "generated_from_task": null,
       "from_task_ref": null,
-      "ref": 12,
+      "ref": 36,
       "is_closed": false,
-      "backlog_order": 1791035510483647,
-      "sprint_order": 3,
-      "kanban_order": 1791035738418591,
-      "subject": "Cargar pedido nuevo",
-      "description": "Como Operario, quiero cargar un nuevo pedido solicitado por un comercio para incorporarlo al sistema y comenzar su gestión.\n\n*   Reglas:\n    1.  El pedido debe asociarse a un comercio previamente registrado y activo en el sistema.\n    2.  El estado inicial de todo pedido nuevo es obligatoriamente \"Registrado\".\n    3.  El sistema debe generar automáticamente un código de seguimiento alfanumérico no secuencial y pseudoaleatorio.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Carga y registro exitoso de pedido.   \n        El operario selecciona un comercio activo, ingresa la dirección de destino, especificaciones de traslado y tiempo estimado de entrega, y presiona \"Registrar Pedido\". El sistema crea el envío con estado \"Registrado\", genera un código de seguimiento único no predecible, lo muestra en pantalla con opción de copiado rápido y muestra el mensaje: _\"Pedido registrado con éxito\"_.\n    *   ESCENARIO 2: Carga rechazada por comercio inactivo / dado de baja.   \n        El operario intenta ingresar un pedido seleccionando un comercio que fue dado de baja lógica. Al presionar \"Registrar Pedido\", el sistema bloquea la carga e indica: _\"El comercio seleccionado se encuentra inhabilitado para nuevos pedidos\"_.",
+      "backlog_order": 1791035510483668,
+      "sprint_order": 2,
+      "kanban_order": 1793413442617710,
+      "subject": "Registrar entrega fallida",
+      "description": "Como Repartidor, quiero registrar una entrega fallida adjuntando una foto como evidencia para dejar constancia de que se intentó entregar el paquete.\n\n*   Reglas\n    *   Solo se puede marcar \"Fallido\" desde el estado \"En viaje\".\n    *   La foto es opcional, pero recomendable como respaldo ante un reclamo.\n*   Criterios\n    *   ESCENARIO 1: Entrega fallida con fotografía.       \n        El repartidor escribe el motivo del fallo, opcionalmente adjunta una foto y presiona \"Marcar entrega fallida\". El sistema cambia el estado a “Fallido”, registra fecha, hora, usuario y foto en el timeline, da por concluido el viaje y actualiza la disponibilidad del repartidor a \"Disponible\"\n    *   ESCENARIO 2: Entrega fallida sin fotografía.       \n        El repartidor presiona \"Marcar Entrega Fallida\" sin adjuntar archivo y confirma. El sistema registra el cambio de estado y la incidencia en el timeline, termina el viaje y libera al repartidor a “Disponible”.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
@@ -1156,71 +2081,25 @@
         },
         {
           "role": "Back",
-          "points": "3"
+          "points": "2"
         }
       ],
-      "status": "New",
+      "status": "Done",
       "swimlane": null,
       "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T22:24:04+0000",
-      "created_date": "2026-10-03T14:09:02+0000",
+      "modified_date": "2026-10-31T02:24:56+0000",
+      "created_date": "2026-10-05T22:15:17+0000",
       "finish_date": null,
       "generated_from_issue": null,
       "generated_from_task": null,
       "from_task_ref": null,
-      "ref": 21,
+      "ref": 38,
       "is_closed": false,
-      "backlog_order": 1791035510483648,
-      "sprint_order": 4,
-      "kanban_order": 1791036542832162,
-      "subject": "Ingresar codigo de seguimiento",
-      "description": "Como Cliente Final, quiero ingresar mi código de seguimiento en la plataforma pública para acceder a la información de mi paquete de forma segura y sin registrarme.\n\n*   Reglas\n    *   La pantalla de consulta debe ser web y accesible sin requerir creación de cuenta ni inicio de sesión.\n    *   El código de seguimiento ingresado debe ser validado contra los códigos pseudoaleatorios generados por el sistema.\n*   Criterios\n    *   ESCENARIO 1: Acceso exitoso con código válido.    \n        El cliente ingresa a la página pública de seguimiento, ingresa el código provisto por el comercio y envía la petición. El sistema valida que el código existe en la base de datos y redirige al cliente a la pantalla de detalles de su envío.\n    *   ESCENARIO 2: _Acceso denegado por código inválido._   \n        El cliente final ingresa un código con un formato erróneo o que no existe en el sistema. Al enviar la petición, el sistema permanece en la pantalla de búsqueda y muestra un mensaje de error.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 12,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "5"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:24:31+0000",
-      "created_date": "2026-10-03T13:58:18+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 15,
-      "is_closed": false,
-      "backlog_order": 1791035510483649,
-      "sprint_order": 4,
-      "kanban_order": 1791035898827176,
-      "subject": "Visualizar repartidores activos",
-      "description": "Como Operario, quiero visualizar los repartidores activos y disponibles para conocer la capacidad operativa actual del servicio.\n\n*   Reglas:\n    1.  El listado debe diferenciar claramente el estado de cada repartidor (ej. \"Disponible\", \"No disponible\").\n    2.  Se debe visualizar el tipo de vehículo que posee el repartidor, ya que es el parámetro que usa el operario para asignar los viajes.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Visualización del listado de repartidores   \n        El operario accede a la sección de repartidores. El sistema muestra una lista con todos los repartidores registrados, indicando su nombre, tipo de vehículo y resaltando su estado actual (\"Disponible\" o \"No disponible\").\n    *   ESCENARIO 2: Actualización de disponibilidad   \n        Un repartidor cambia su estado desde su aplicación móvil de \"No disponible\" a \"Disponible\". El sistema actualiza automáticamente el listado en la pantalla del operario reflejando la nueva capacidad operativa.",
+      "backlog_order": 1791035510483669,
+      "sprint_order": 13,
+      "kanban_order": 1793413496471453,
+      "subject": "Ver el historial de estados del pedido",
+      "description": "Como Cliente Final, quiero ver el historial de estados de mi pedido para entender por qué etapas pasó mi paquete.\n\n*   Reglas\n    *   Solo lectura.\n    *   Se muestran estados y horarios, pero no datos internos (nombre o teléfono del repartidor, fotos).\n*   Criterios\n    *   Escenario 1: Historial.  \n        El cliente ve la lista cronológica de estados con fecha y hora.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
@@ -1253,342 +2132,20 @@
       ],
       "status": "In progress",
       "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-12T17:57:43+0000",
-      "created_date": "2026-10-05T22:07:41+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 32,
-      "is_closed": false,
-      "backlog_order": 1791035510483650,
-      "sprint_order": 15,
-      "kanban_order": 1791827863986687,
-      "subject": "Generar PIN de repartidor",
-      "description": "Como Operario, quiero regenerar el PIN de un repartidor para recuperar su acceso si lo olvidó o si fue comprometido.\n\n*   Reglas\n    *   El nuevo PIN debe ser numérico y de exactamente 4 dígitos.\n    *   El PIN debe ser único entre los repartidores, ya que es el único dato de ingreso.\n    *   El PIN anterior queda invalidado inmediatamente.\n*   Criterios\n    *   ESCENARIO 1: Regeneración exitosa.   \n        El operario selecciona un repartidor y presiona \"Regenerar PIN\". El sistema genera un nuevo PIN único de 4 dígitos, lo muestra en pantalla para transmitirlo al repartidor e invalida el anterior.\n    *   ESCENARIO 2: Uso del PIN anterior.   \n        El repartidor intenta ingresar con el PIN anterior. El sistema muestra: _\"PIN incorrecto. Verifique los dígitos\"_.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 7,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": "2026-10-30T00:00:00",
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-09T11:35:19+0000",
-      "created_date": "2026-10-03T14:01:46+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 17,
-      "is_closed": false,
-      "backlog_order": 1791035510483651,
-      "sprint_order": 14,
-      "kanban_order": 1791036106203068,
-      "subject": "Acceso con PIN de 4 dígitos",
-      "description": "Como Repartidor, quiero iniciar sesión mediante un PIN de 4 dígitos para acceder rápidamente a mis pedidos desde el celular.\n\n*   Reglas:\n    *   El PIN ingresado debe ser de 4 dígitos numéricos.\n    *   El repartidor debe estar registrado y activo en el sistema.\n*   Criterios:\n    *   ESCENARIO 1: Autenticación exitosa con PIN   \n        El repartidor ingresa su PIN de 4 dígitos en el teclado numérico en pantalla. El sistema valida el token y abre directamente la pantalla operativa de repartos.\n    *   ESCENARIO 2: Autenticación fallida por PIN incorrecto   \n        El repartidor introduce una combinación de 4 dígitos que no coincide con ningún repartidor registrado. El sistema limpia los campos y muestra: _\"PIN incorrecto. Verifique los dígitos\"_.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 11,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
       "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:29:29+0000",
-      "created_date": "2026-10-05T22:02:49+0000",
+      "modified_date": "2026-11-03T19:17:21+0000",
+      "created_date": "2026-10-03T13:59:22+0000",
       "finish_date": null,
       "generated_from_issue": null,
       "generated_from_task": null,
       "from_task_ref": null,
-      "ref": 28,
+      "ref": 16,
       "is_closed": false,
-      "backlog_order": 1791035510483653,
-      "sprint_order": 3,
-      "kanban_order": 1791237769593779,
-      "subject": "Consultar lista de comercios",
-      "description": "Como Operario, quiero consultar el listado de comercios con su estado (Activo / Inactivo) para tener una visión general de los comercios asociados.\n\n*   Reglas\n    *   El listado incluye comercios activos e inactivos, diferenciados visualmente.\n    *   Debe permitir buscar por nombre.\n*   Criterios\n    *   ESCENARIO 1: Listado completo.   \n        El operario accede a \"Comercios\" y el sistema muestra nombre, dirección, teléfono y estado de cada uno.\n    *   ESCENARIO 2: Búsqueda sin coincidencias.   \n        El operario busca un nombre inexistente y el sistema muestra: _\"No se encontraron comercios con ese nombre\"_.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 4,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "8"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-09T11:34:09+0000",
-      "created_date": "2026-10-03T14:03:26+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 18,
-      "is_closed": false,
-      "backlog_order": 1791035510483654,
-      "sprint_order": 5,
-      "kanban_order": 1791036206570186,
-      "subject": "Aceptar asignacion de pedidos",
-      "description": "Como Repartidor, quiero aceptar o rechazar una asignación de pedido para informar al sistema si puedo realizar el viaje.\n\n*   Reglas:\n    *   Si el repartidor presiona \"Aceptar\", el pedido pasa a estar confirmado para su retiro.\n    *   Si el repartidor presiona \"Rechazar\" o no responde en 5 minutos, el evento se guarda en el historial de auditoría y su estado cambia automáticamente a \"No disponible\".\n*   Criterios:\n    *   ESCENARIO 1: Aceptación del pedido dentro del tiempo límite    \n        El repartidor recibe la solicitud de viaje con cuenta regresiva menor a 5 minutos y presiona \"Aceptar viaje\". El sistema confirma la asignación, detiene el temporizador y habilita las acciones de retiro del paquete.\n    *   ESCENARIO 2: Rechazo explícito del pedido    \n        El repartidor recibe la solicitud y presiona \"Rechazar viaje\". El sistema desvincula el pedido, guarda en el timeline el evento _\"Rechazado por repartidor \\[Nombre\\]\"_, cambia automáticamente la disponibilidad del repartidor a \"No disponible\" y notifica al operario para reasignación.\n    *   ESCENARIO 3: Expiración por tiempo de espera agotado    \n        Transcurren 5 minutos desde la asignación sin respuesta. El sistema cambia automáticamente el estado del repartidor a \"No disponible\", libera el pedido a estado \"Registrado\" y registra la desasignación en el historial.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 11,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "5"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:30:40+0000",
-      "created_date": "2026-10-03T13:57:29+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 14,
-      "is_closed": false,
-      "backlog_order": 1791035510483656,
-      "sprint_order": 5,
-      "kanban_order": 1791035849754238,
-      "subject": "Ver historial de cambios de un pedido",
-      "description": "Como operario, quiero visualizar el historial de cambios de estado de un pedido, para verificar las acciones realizadas por cada usuario ante un reclamo por pedido perdido o demorado\n\n*   Reglas:\n    1.  El historial es inmutable: no se pueden editar ni borrar registros de auditoría.\n    2.  Debe exponer cronológicamente cada cambio de estado, hora exacta, usuario responsable y foto adjunta si existiera.\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Visualización íntegra del timeline de un pedido   \n        El operario busca un pedido por su identificador o código y presiona \"Ver Historial/Timeline\". El sistema lista en orden temporal todos los estados por los que transitó, especificando fecha y hora exacta, qué usuario ejecutó el cambio (Operario o nombre del Repartidor) y miniaturas ampliables de las fotos de retiro y entrega.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 11,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T22:29:43+0000",
-      "created_date": "2026-10-03T14:08:24+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 20,
-      "is_closed": false,
-      "backlog_order": 1791035510483657,
-      "sprint_order": 13,
-      "kanban_order": 1791036504902092,
-      "subject": "Repartidor cambia de estado",
-      "description": "Como Repartidor, quiero cambiar mi estado de disponibilidad para indicar al sistema si puedo recibir nuevas asignaciones de pedidos.\n\n*   Reglas\n    *   El repartidor debe haber ingresado previamente al sistema mediante su PIN de acceso.\n    *   El estado por defecto al arrancar el día es ‘No disponible’. Hasta que el propio repartidor lo cambie\n*   Criterios\n    *   ESCENARIO 1: Cambio a estado Disponible   \n        El repartidor accede a su interfaz y presiona la opción para marcarse como \"Disponible\". El sistema actualiza su estado, lo confirma en pantalla y lo habilita para ingresar en la lista de asignación de nuevos viajes.\n    *   ESCENARIO 2: Cambio a estado No Disponible   \n        El repartidor presiona la opción para marcarse como \"No disponible\". El sistema actualiza su estado, lo confirma en pantalla y deja de considerarlo para las próximas asignaciones de pedidos.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 11,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "5"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T22:33:49+0000",
-      "created_date": "2026-10-03T14:07:27+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 19,
-      "is_closed": false,
-      "backlog_order": 1791035510483658,
-      "sprint_order": 2,
-      "kanban_order": 1791036447236281,
-      "subject": "Actualizar estado de entrega",
-      "description": "Como Repartidor, quiero actualizar los estados de mi entrega adjuntando fotos opcionales para dejar constancia del progreso del envío.\n\n*   Reglas:\n    *   Las transiciones permitidas son secuenciales: de _Asignado_ a _Retirado_, de _Retirado_ a _En viaje_, y de _En viaje_ a _Entregado_.\n    *   La captura de foto es opcional pero permitida en los estados _Retirado_ y _Entregado_.\n*   Criterios:\n    *   ESCENARIO 1: Actualización de estado exitosa con fotografía adjunta    \n        El repartidor presiona \"Marcar como Entregado\", toma/adjunta una fotografía del paquete y presiona \"Confirmar\". El sistema comprime la imagen, actualiza el estado a \"Entregado\", registra fecha, hora y usuario en el timeline, y libera al repartidor dejándolo \"Disponible\" para nuevos pedidos.\n    *   ESCENARIO 2: Actualización de estado exitosa sin fotografía    \n        El repartidor presiona \"Marcar como En viaje\" sin adjuntar archivo y presiona \"Confirmar\". El sistema procesa la transición y actualiza el estado del pedido inmediatamente a \"En viaje\".\n    *   ESCENARIO 3: Registro de entrega fallida (destinatario ausente)    \n        El repartidor llega a destino en estado \"En viaje\", nadie atiende y presiona \"Marcar Entrega Fallida\". El sistema actualiza el estado del pedido a \"Fallido\", genera la instrucción de retorno al centro de distribución y registra la incidencia en el timeline.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 15,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:34:36+0000",
-      "created_date": "2026-10-03T13:56:16+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 13,
-      "is_closed": false,
-      "backlog_order": 1791035510483659,
-      "sprint_order": 10,
-      "kanban_order": 1791035776214434,
-      "subject": "Cancelar pedido",
-      "description": "Como Operario, quiero cancelar un pedido si el comercio o cliente lo solicita para anular la orden antes de que sea despachada a la calle.\n\n*   Reglas:\n    1.  Solo se admiten cancelaciones si el pedido se encuentra en estado \"Registrado\" o \"Asignado\".\n    2.  Está estrictamente prohibido cancelar un pedido que ya se encuentre en estado \"Retirado\" o \"En viaje\".\n*   Criterios de Aceptación:\n    *   ESCENARIO 1: Cancelación exitosa de un pedido no retirado   \n        El operario visualiza un pedido en estado \"Asignado\", presiona el botón \"Cancelar Pedido\" y confirma la acción. El sistema cambia el estado a \"Cancelado\", notifica la baja del viaje al repartidor asignado, lo libera y registra el evento en el historial.",
+      "backlog_order": 1791035510483670,
+      "sprint_order": 7,
+      "kanban_order": 1793733441373546,
+      "subject": "Deshabilitar comercio",
+      "description": "Como Operario, quiero deshabilitar un comercio para impedir que continúe siendo utilizado, conservando el historial de sus pedidos anteriores.\n\n*   Reglas:\n    *   Se debe aplicar un borrado lógico; la información del comercio no se elimina de la base de datos.\n    *   Un comercio deshabilitado no debe aparecer como opción disponible al momento de registrar un nuevo pedido.\n    *   Los pedidos anteriores asociados al comercio deshabilitado deben permanecer intactos en el historial y en la línea de tiempo (timeline).\n*   Criterios:\n    *   ESCENARIO 1: Deshabilitación exitosa de un comercio   \n        El operario accede a la gestión de comercios, selecciona un comercio activo y elige la opción de \"Deshabilitar\". El sistema solicita confirmación. Tras confirmar, el sistema actualiza el estado del comercio a \"Inactivo\" y muestra el mensaje: _\"Comercio deshabilitado exitosamente\"_. Al intentar crear un nuevo pedido, este comercio ya no figura en la lista de opciones.\n    *   ESCENARIO 2: Conservación del historial tras la deshabilitación   \n        Luego de deshabilitar un comercio exitosamente (como en el Escenario 1), el operario consulta la lista de pedidos históricos. El sistema sigue mostrando los pedidos previos asociados a dicho comercio y el acceso a su correspondiente timeline, sin errores ni omisiones.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
@@ -1616,565 +2173,13 @@
         },
         {
           "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T23:02:10+0000",
-      "created_date": "2026-10-03T14:33:10+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 22,
-      "is_closed": false,
-      "backlog_order": 1791035510483660,
-      "sprint_order": 16,
-      "kanban_order": 1791037990236834,
-      "subject": "Visualizar datos del viaje",
-      "description": "Como Repartidor, quiero visualizar los datos básicos del viaje al recibir una asignación automática, para decidir si acepto o rechazo el pedido dentro de mi límite de tiempo.\n\n*   Reglas\n    *   La información solo debe estar visible en pantalla durante el periodo de tolerancia de 5 minutos.\n    *   Se deben mostrar los datos requeridos por el sistema: quién lo envía (comercio) y a dónde (dirección de destino).\n*   Criterios\n    *   _ESCENARIO 1: Visualización correcta durante la asignación_    \n        El sistema asigna un viaje automáticamente a un repartidor disponible. En la pantalla del móvil del repartidor se despliega un cartel con la información del comercio, del destino y un cronómetro visible de 5 minutos en cuenta regresiva.\n    *   ESCENARIO 2: Desaparición de los detalles por tiempo agotado    \n        El cronómetro de la pantalla de asignación llega a 00:00. El sistema cierra inmediatamente el cartel de asignación y devuelve al repartidor a la pantalla principal, impidiendo que interactúe con el viaje.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 15,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "2"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:35:24+0000",
-      "created_date": "2026-10-03T14:38:15+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 23,
-      "is_closed": false,
-      "backlog_order": 1791035510483661,
-      "sprint_order": 1,
-      "kanban_order": 1791038295515860,
-      "subject": "Filtrar historial de pedidos",
-      "description": "Como Operario, quiero filtrar el historial de pedidos por nombre de comercio o estado, para encontrar rápidamente un envío específico cuando se presenta un reclamo o paquete perdido.\n\n*   Reglas:\n    *   El buscador debe permitir buscar envíos pertenecientes a todos los comercios, incluidos los que hayan sido \"deshabilitados lógicamente\".\n    *   Los filtros deben aplicarse sobre la base de datos completa de pedidos registrados.\n*   Criterios:\n    *   ESCENARIO 1: Búsqueda exitosa con filtros   \n        El operario ingresa a la vista del historial general, selecciona filtros y escribe el nombre de un comercio particular. Al presionar \"Buscar\", el sistema actualiza la lista mostrando únicamente los pedidos de ese comercio que fracasaron en la entrega, permitiendo acceder a su línea de tiempo.\n    *   ESCENARIO 2: Búsqueda sin resultados   \n        El operario ingresa parámetros de búsqueda para un comercio que nunca realizó envíos o aplica un filtro de estado inexistente para ese comercio. El sistema limpia la lista y muestra el mensaje: \"No se encontraron pedidos que coincidan con los filtros ingresados\".",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 7,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "2"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T22:38:11+0000",
-      "created_date": "2026-10-03T14:51:52+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 24,
-      "is_closed": false,
-      "backlog_order": 1791035510483662,
-      "sprint_order": 6,
-      "kanban_order": 1791039112477933,
-      "subject": "Visualizar estado del pedido",
-      "description": "Como Cliente Final, quiero visualizar el estado actualizado de mi pedido para saber cuándo llegará mi paquete.\n\n*   Reglas\n    *   El cliente solo tiene permisos de lectura sobre esta pantalla, no puede interactuar.\n    *   Los datos a mostrar provienen de la información: estado, comercio remitente y tiempo estimado (si está en viaje).\n    *   Si el pedido pasa a estado \"Entregado\", \"Fallido\" o \"Cancelado\", el tiempo estimado de llegada debe dejar de mostrarse.\n*   Criterios\n    *   _ESCENARIO 1: Visualización de envío confirmado._   \n        El cliente accede a la pantalla de detalles de su envío. El sistema carga la información y muestra claramente el estado actual, el nombre del comercio remitente y un texto con el tiempo estimado de llegada.\n    *   _ESCENARIO 2: Visualización de envío finalizado o interrumpido._   \n        El cliente accede a la pantalla de un envío que ya finalizó (ya sea fallido o entregado). El sistema muestra el estado actual resaltado, el comercio de origen, y oculta/elimina el campo de tiempo estimado de llegada para evitar confusiones.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 16,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T22:38:42+0000",
-      "created_date": "2026-10-05T21:59:22+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 26,
-      "is_closed": false,
-      "backlog_order": 1791035510483663,
-      "sprint_order": 10,
-      "kanban_order": 1791237562871131,
-      "subject": "Listado pedidos en curso",
-      "description": "Como Operario, quiero visualizar el listado de pedidos en curso con su estado actual para controlar la operación diaria desde un solo lugar.\n\n*   Reglas\n    *   Se muestran los pedidos no finalizados (Registrado, Asignado, Retirado, En viaje).\n    *   Cada pedido muestra comercio, destino, estado y repartidor asignado (si corresponde).\n*   Criterios\n    *   ESCENARIO 1: Visualización del panel.   \n        El operario ingresa al panel principal y ve la lista de pedidos en curso, ordenada por antigüedad.\n    *   ESCENARIO 2: Actualización automática.   \n        Cuando un repartidor cambia el estado de un pedido, el panel lo refleja sin recargar la página.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 4,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:39:28+0000",
-      "created_date": "2026-10-05T22:08:38+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 33,
-      "is_closed": false,
-      "backlog_order": 1791035510483665,
-      "sprint_order": 12,
-      "kanban_order": 1791238118079034,
-      "subject": "Ver detalle de pedidos",
-      "description": "Como Operario, quiero ver el detalle completo de un pedido para conocer todos sus datos ante una consulta del comercio o del cliente.\n\n*   Reglas\n    *   El detalle muestra: comercio emisor, datos del destinatario, dirección de destino, tamaño del paquete, vehículo requerido, estado actual, código de seguimiento y repartidor asignado (si corresponde).\n    *   Desde el detalle se accede al timeline del pedido.\n    *   Es de solo lectura, excepto las acciones permitidas según el estado (por ejemplo, cancelar).\n*   Criterios\n    *   ESCENARIO 1: Visualización del detalle.    \n        El operario selecciona un pedido del listado. El sistema muestra todos sus datos y los botones de acción habilitados para su estado actual.\n    *   ESCENARIO 2: Pedido sin repartidor.    \n        El operario abre un pedido en estado \"Registrado\". El sistema muestra el campo de repartidor vacío con la leyenda \"Sin asignar\".",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 5,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
           "points": "5"
         }
       ],
-      "status": "New",
+      "status": "In progress",
       "swimlane": null,
       "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:48:46+0000",
-      "created_date": "2026-10-05T22:04:02+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 29,
-      "is_closed": false,
-      "backlog_order": 1791035510483666,
-      "sprint_order": 9,
-      "kanban_order": 1791237842323044,
-      "subject": "Deshabilitar repartidor",
-      "description": "Como Operario, quiero deshabilitar a un repartidor para impedir que opere sin perder su historial de entregas.\n\n*   Reglas\n    *   Se aplica borrado lógico.\n    *   No se puede deshabilitar a un repartidor con un pedido en estado \"Asignado\", \"Retirado\" o \"En viaje\".\n*   Criterios\n    *   ESCENARIO 1: Deshabilitación exitosa.   \n        El repartidor sin viajes activos pasa a \"Inactivo\" y su PIN deja de funcionar.\n    *   ESCENARIO 2: Deshabilitación bloqueada.   \n        Si tiene un pedido activo, el sistema muestra: _\"El repartidor tiene pedidos en curso\"_.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 4,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "5"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:39:01+0000",
-      "created_date": "2026-10-05T22:05:49+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 30,
-      "is_closed": false,
-      "backlog_order": 1791035510483666,
-      "sprint_order": 11,
-      "kanban_order": 1791237949189609,
-      "subject": "Alerta de pedido sin repartidor",
-      "description": "Como Operario, quiero ser alertado cuando un pedido no consigue repartidor para poder reintentar la asignación o informar al comercio.\n\n*   Reglas\n    *   La alerta se genera cuando no hay candidatos disponibles o cuando ya se agotaron todos.\n    *   El pedido permanece en estado \"Registrado\" mientras no sea aceptado.\n    *   El operario puede relanzar la asignación automática manualmente.\n*   Criterios\n    *   ESCENARIO 1: Visualización de la alerta.   \n        El sistema no logra asignar un pedido. En el panel del operario aparece destacado el aviso _\"Pedido sin repartidor disponible\"_ junto al pedido afectado.\n    *   ESCENARIO 2: Reintento de asignación.   \n        El operario presiona \"Reintentar asignación\" sobre el pedido. El sistema vuelve a buscar candidatos disponibles y cercanos, y si encuentra uno, le envía la solicitud y quita la alerta.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 3,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:39:49+0000",
-      "created_date": "2026-10-05T22:10:12+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 34,
-      "is_closed": false,
-      "backlog_order": 1791035510483666,
-      "sprint_order": 6,
-      "kanban_order": 1791238212774788,
-      "subject": "Visualizar pedidos fallidos",
-      "description": "Como Operario, quiero visualizar los pedidos con entrega fallida y confirmar su devolución para dar cierre a los envíos que no pudieron entregarse.\n\n*   Reglas\n    *   Se listan los pedidos en estado \"Fallido\" con el motivo, la foto (si existe) y el repartidor que intentó la entrega.\n    *   La confirmación de devolución queda registrada en el timeline con fecha, hora y usuario.\n*   Criterios\n    *   ESCENARIO 1: Listado de entregas fallidas.   \n        El operario accede a la sección \"Entregas fallidas\". El sistema muestra los pedidos en estado \"Fallido\" ordenados por fecha.\n    *   ESCENARIO 2: Confirmación de devolución.   \n        El operario selecciona un pedido fallido y presiona \"Confirmar devolución\". El sistema registra el evento en el timeline y muestra: _\"Devolución registrada\"_.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 4,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T23:08:24+0000",
-      "created_date": "2026-10-05T22:12:09+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 35,
-      "is_closed": false,
-      "backlog_order": 1791035510483667,
-      "sprint_order": 9,
-      "kanban_order": 1791238329537510,
-      "subject": "Ver informacion del pedido activo",
-      "description": "Como Repartidor, quiero ver mi pedido activo y sus datos completos tras aceptarlo para poder retirarlo y entregarlo correctamente.\n\n*   Reglas\n    *   Tras aceptar, se muestran comercio (dirección y contacto), dirección de destino y especificaciones de traslado.\n    *   La pantalla debe habilitar las acciones de estado correspondientes al progreso del pedido.\n*   Criterios\n    *   ESCENARIO 1: Visualización del pedido activo.   \n        El repartidor abre su pantalla operativa y ve todos los datos del viaje con las acciones de estado disponibles.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 7,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "3"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:45:07+0000",
-      "created_date": "2026-10-05T22:13:39+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 36,
-      "is_closed": false,
-      "backlog_order": 1791035510483668,
-      "sprint_order": 13,
-      "kanban_order": 1791238419378322,
-      "subject": "Registrar entrega fallida",
-      "description": "Como Repartidor, quiero registrar una entrega fallida adjuntando una foto como evidencia para dejar constancia de que se intentó entregar el paquete.\n\n*   Reglas\n    *   Solo se puede marcar \"Fallido\" desde el estado \"En viaje\".\n    *   La foto es opcional, pero recomendable como respaldo ante un reclamo.\n*   Criterios\n    *   ESCENARIO 1: Entrega fallida con fotografía.    \n        El repartidor llega a destino, nadie atiende, presiona \"Marcar Entrega Fallida\", adjunta una foto del lugar y confirma. El sistema comprime la imagen, cambia el estado a \"Fallido\" y registra fecha, hora, usuario y foto en el timeline.\n    *   ESCENARIO 2: Entrega fallida sin fotografía.    \n        El repartidor presiona \"Marcar Entrega Fallida\" sin adjuntar archivo y confirma. El sistema registra el cambio de estado y la incidencia en el timeline.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 4,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "2"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 1",
-      "modified_date": "2026-10-11T22:48:04+0000",
-      "created_date": "2026-10-05T22:15:17+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 38,
-      "is_closed": false,
-      "backlog_order": 1791035510483669,
-      "sprint_order": 12,
-      "kanban_order": 1791238517714436,
-      "subject": "Ver el historial de estados del pedido",
-      "description": "Como Cliente Final, quiero ver el historial de estados de mi pedido para entender por qué etapas pasó mi paquete.\n\n*   Reglas\n    *   Solo lectura.\n    *   Se muestran estados y horarios, pero no datos internos (nombre o teléfono del repartidor, fotos).\n*   Criterios\n    *   Escenario 1 Historial.\n    *   El cliente ve la lista cronológica de estados con fecha y hora.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 5,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "5"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:49:00+0000",
-      "created_date": "2026-10-03T13:59:22+0000",
-      "finish_date": null,
-      "generated_from_issue": null,
-      "generated_from_task": null,
-      "from_task_ref": null,
-      "ref": 16,
-      "is_closed": false,
-      "backlog_order": 1791035510483670,
-      "sprint_order": 7,
-      "kanban_order": 1791035962405997,
-      "subject": "Deshabilitar comercio",
-      "description": "Como Operario, quiero deshabilitar un comercio para impedir que continúe siendo utilizado, conservando el historial de sus pedidos anteriores.\n\n*   Reglas:\n    *   Se debe aplicar un borrado lógico; la información del comercio no se elimina de la base de datos.\n    *   Un comercio deshabilitado no debe aparecer como opción disponible al momento de registrar un nuevo pedido.\n    *   Los pedidos anteriores asociados al comercio deshabilitado deben permanecer intactos en el historial y en la línea de tiempo (timeline).\n*   Criterios:\n    *   ESCENARIO 1: Deshabilitación exitosa de un comercio   \n        El operario accede a la gestión de comercios, selecciona un comercio activo y elige la opción de \"Deshabilitar\". El sistema solicita confirmación. Tras confirmar, el sistema actualiza el estado del comercio a \"Inactivo\" y muestra el mensaje: _\"Comercio deshabilitado exitosamente\"_. Al intentar crear un nuevo pedido, este comercio ya no figura en la lista de opciones.\n    *   ESCENARIO 2: Conservación del historial tras la deshabilitación   \n        Luego de deshabilitar un comercio exitosamente (como en el Escenario 1), el operario consulta la lista de pedidos históricos. El sistema sigue mostrando los pedidos previos asociados a dicho comercio y el acceso a su correspondiente timeline, sin errores ni omisiones.",
-      "client_requirement": false,
-      "team_requirement": false,
-      "external_reference": null,
-      "tribe_gig": null,
-      "version": 7,
-      "is_blocked": false,
-      "tags": [],
-      "due_date": null,
-      "due_date_reason": ""
-    },
-    {
-      "custom_attributes_values": {},
-      "role_points": [
-        {
-          "role": "UX",
-          "points": "0"
-        },
-        {
-          "role": "Design",
-          "points": "0"
-        },
-        {
-          "role": "Front",
-          "points": "0"
-        },
-        {
-          "role": "Back",
-          "points": "5"
-        }
-      ],
-      "status": "New",
-      "swimlane": null,
-      "milestone": "Sprint 2",
-      "modified_date": "2026-10-11T22:49:25+0000",
+      "modified_date": "2026-11-03T19:17:17+0000",
       "created_date": "2026-10-05T22:00:58+0000",
       "finish_date": null,
       "generated_from_issue": null,
@@ -2184,14 +2189,60 @@
       "is_closed": false,
       "backlog_order": 1791035510483671,
       "sprint_order": 8,
-      "kanban_order": 1791237658528340,
+      "kanban_order": 1793733437673958,
       "subject": "Reactivar comercio",
       "description": "Como Operario, quiero reactivar un comercio deshabilitado para que pueda volver a solicitar pedidos sin tener que registrarlo de nuevo.\n\n*   Reglas\n    *   La reactivación revierte el borrado lógico y conserva todo el historial previo.\n    *   Un comercio reactivado vuelve a aparecer en la lista de opciones al registrar pedidos.\n*   Criterios\n    *   ESCENARIO 1: Reactivación exitosa.   \n        El operario filtra comercios \"Inactivos\", selecciona uno y elige \"Reactivar\". Tras confirmar, el estado pasa a \"Activo\" y se muestra: _\"Comercio reactivado exitosamente\"_.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
       "tribe_gig": null,
-      "version": 4,
+      "version": 6,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "2"
+        }
+      ],
+      "status": "Done",
+      "swimlane": null,
+      "milestone": "Sprint 1",
+      "modified_date": "2026-10-31T02:25:14+0000",
+      "created_date": "2026-10-16T11:19:39+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 40,
+      "is_closed": false,
+      "backlog_order": 1792149579198656,
+      "sprint_order": 17,
+      "kanban_order": 1793413514389255,
+      "subject": "Listar pedidos del repartidor",
+      "description": "Como repartidor quiero ver una lista con mi historial de entregas para tener seguimiento de los viajes realizados.\n\n*   Reglas:\n    *   El repartidor debe haber iniciado sesión previamente mediante su PIN de 4 dígitos.\n    *   Solo se deben listar los pedidos finalizados que hayan estado asignados al repartidor autenticado, sin exponer viajes de otros repartidores.\n    *   La información del listado es estrictamente de solo lectura y debe ordenarse cronológicamente por fecha de finalización.\n    *   Para cada entrega se debe mostrar: identificador/código de seguimiento, nombre del comercio de origen, dirección de destino, estado final y fecha/hora de cierre.\n*   Criterios:\n    *   ESCENARIO 1: Consulta exitosa del historial de entregas  \n         El repartidor autenticado accede a la sección \"Historial de entregas\" habiendo realizado viajes previos. El sistema lista cronológicamente todos sus pedidos finalizados en estado \"Entregado\", \"Fallido\" o \"Cancelado\", exponiendo para cada uno el comercio de origen, dirección de destino, estado de cierre y fecha/hora. \n    *   ESCENARIO 2: Historial vacío sin viajes finalizados  \n         El repartidor accede a la sección \"Historial de entregas\" sin haber completado ni registrado viajes finalizados en su cuenta. El sistema muestra la pantalla limpia con el mensaje: \"Aún no tienes entregas registradas en tu historial\".",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 9,
       "is_blocked": false,
       "tags": [],
       "due_date": null,
@@ -2228,7 +2279,7 @@
   "wiki_pages": [],
   "tags": [],
   "_sanitization": {
-    "source_sha256": "0bd43d1a2fa00cadde222fca5b020964e4fbb2a0735443cdda3a4c414bcf94ef",
+    "source_sha256": "d8b0b8be973f04451b96bdc1934cc7d422a45b6672bd1bef8096f5af1dfc6300",
     "policy": "Se omitieron propietarios, asignaciones, adjuntos, historial, actividad, watchers y datos de cuentas; correos en texto libre se reemplazaron."
   }
 }

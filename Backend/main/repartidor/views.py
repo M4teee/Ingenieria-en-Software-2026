@@ -1,6 +1,5 @@
 # main/repartidor/views.py
 
-from datetime import timedelta
 from io import BytesIO
 
 from PIL import Image
@@ -19,34 +18,14 @@ from django.utils import timezone
 import mimetypes
 from django.views.decorators.http import require_GET, require_POST
 
+from main.despacho import (
+    despacho_automatico,
+    expirado,
+    liberar_asignacion_vencida,
+    liberar_pedido,
+)
 from .models import HistorialEstado, Pedido, Repartidor
 from .forms import ActualizarEstadoForm, MAX_FOTOGRAFIA_BYTES
-
-
-def _expirado(pedido):
-    return (
-        pedido.fecha_hora_asignacion is None
-        or timezone.now() - pedido.fecha_hora_asignacion
-        >= timedelta(seconds=Pedido.LIMITE_ACEPTACION_SEGUNDOS)
-    )
-
-
-def _liberar_pedido(pedido, usuario, incidencia):
-    estado_anterior = pedido.estado
-    pedido.repartidor = None
-    pedido.fecha_hora_asignacion = None
-    pedido.fecha_hora_aceptacion = None
-    pedido.estado = 'registrado'
-    pedido.save(update_fields=[
-        'repartidor', 'fecha_hora_asignacion', 'fecha_hora_aceptacion', 'estado',
-    ])
-    HistorialEstado.objects.create(
-        pedido=pedido,
-        estado_anterior=estado_anterior,
-        estado_nuevo='registrado',
-        usuario=usuario,
-        incidencia=incidencia,
-    )
 
 
 def _exigir_repartidor_activo(usuario):
@@ -83,23 +62,17 @@ def home(req):
         fecha_hora_asignacion__isnull=False,
         fecha_hora_aceptacion__isnull=True,
     ).order_by('fecha_hora_asignacion').first()
-    expirado = False
-    if asignado and _expirado(asignado):
+    expirado_actual = False
+    if asignado and expirado(asignado):
         with transaction.atomic():
             pedido = Pedido.objects.select_for_update().filter(
                 pk=asignado.pk, estado='asignado',
                 fecha_hora_aceptacion__isnull=True,
             ).first()
-            if pedido and _expirado(pedido):
-                _liberar_pedido(
-                    pedido,
-                    req.user,
-                    'Desasignado por expiración del tiempo de espera (5 minutos)',
-                )
-                if repartidor:
-                    repartidor.disponible = False
-                    repartidor.save(update_fields=['disponible'])
-        expirado = True
+            if pedido and expirado(pedido):
+                liberar_asignacion_vencida(pedido, req.user)
+        expirado_actual = True
+        repartidor.refresh_from_db()
 
     pedido_activo = Pedido.objects.filter(
         repartidor=req.user,
@@ -115,14 +88,14 @@ def home(req):
         'repartidor/index.html',
         {
             'pedido_activo': pedido_activo,
-            'esperando_respuesta': bool(asignado and not expirado),
+            'esperando_respuesta': bool(asignado and not expirado_actual),
             'segundos_restantes': (
                 max(0, int(
                     Pedido.LIMITE_ACEPTACION_SEGUNDOS
                     - (timezone.now() - asignado.fecha_hora_asignacion).total_seconds()
-                )) if asignado and not expirado else None
+                )) if asignado and not expirado_actual else None
             ),
-            'expirado': expirado,
+            'expirado': expirado_actual,
             'perfil_repartidor': repartidor,
             'disponible': bool(repartidor and repartidor.disponible and req.user.disponible),
             'pedidos_cerrados': pedidos_cerrados,
@@ -228,16 +201,8 @@ def aceptar(req, pedido_id):
     ).first()
     if pedido is None:
         return HttpResponseBadRequest('El pedido no está asignado a este repartidor.')
-    if _expirado(pedido):
-        _liberar_pedido(
-            pedido,
-            req.user,
-            'Desasignado por expiración del tiempo de espera (5 minutos)',
-        )
-        perfil = Repartidor.objects.filter(user=req.user).first()
-        if perfil:
-            perfil.disponible = False
-            perfil.save(update_fields=['disponible'])
+    if expirado(pedido):
+        liberar_asignacion_vencida(pedido, req.user)
         return redirect('repartidor')
 
     pedido.fecha_hora_aceptacion = timezone.now()
@@ -270,14 +235,15 @@ def rechazar(req, pedido_id):
 
     incidencia = (
         'Desasignado por expiración del tiempo de espera (5 minutos)'
-        if _expirado(pedido)
+        if expirado(pedido)
         else f'Rechazado por repartidor {req.user.get_full_name() or req.user.username}'
     )
-    _liberar_pedido(pedido, req.user, incidencia)
+    liberar_pedido(pedido, req.user, incidencia)
     perfil = Repartidor.objects.filter(user=req.user).first()
     if perfil:
         perfil.disponible = False
-        perfil.save(update_fields=['disponible'])
+        perfil.save(update_fields=['disponible', 'disponible_desde'])
+    despacho_automatico(pedido, req.user)
     messages.info(req, 'El pedido se liberó para reasignación.')
     return redirect('repartidor')
 
@@ -300,7 +266,11 @@ def toggle_disponibilidad(req):
         return redirect('repartidor')
 
     repartidor.disponible = not repartidor.disponible
-    repartidor.save(update_fields=['disponible'])
+    if repartidor.disponible:
+        repartidor.disponible_desde = timezone.now()
+    else:
+        repartidor.disponible_desde = None
+    repartidor.save(update_fields=['disponible', 'disponible_desde'])
     messages.success(
         req,
         'Ahora estás Disponible.' if repartidor.disponible else 'Ahora estás No disponible.',
@@ -421,11 +391,12 @@ def actualizar_estado(req, pedido_id):
             pedido.estado = nuevo_estado
             pedido.save(update_fields=['estado'])
 
-            if nuevo_estado == 'entregado':
+            if nuevo_estado in ('entregado', 'fallido'):
                 perfil = Repartidor.objects.select_for_update().filter(user=req.user).first()
                 if perfil:
                     perfil.disponible = True
-                    perfil.save(update_fields=['disponible'])
+                    perfil.disponible_desde = timezone.now()
+                    perfil.save(update_fields=['disponible', 'disponible_desde'])
     except Exception:
         if ruta_fotografia:
             default_storage.delete(ruta_fotografia)

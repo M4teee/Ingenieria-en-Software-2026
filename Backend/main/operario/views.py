@@ -11,6 +11,11 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
 
+from main.despacho import (
+    aplicar_asignacion as _aplicar_asignacion,
+    despacho_automatico as _despacho_automatico,
+    procesar_asignaciones_vencidas,
+)
 from main.operario.models import Comercio
 from main.repartidor.models import HistorialEstado, Pedido, Repartidor
 from main.users.models import User
@@ -20,6 +25,7 @@ from .forms import (
     ComercioForm,
     MENSAJE_COMERCIO_INACTIVO,
     MENSAJE_COMERCIO_DUPLICADO,
+    MENSAJE_VEHICULO_INCOMPATIBLE,
     PedidoForm,
     RepartidorForm,
 )
@@ -51,11 +57,22 @@ def _pedidos_en_curso():
     )
 
 
+def _pedidos_sin_repartidor(pedidos):
+    return [
+        pedido for pedido in pedidos
+        if pedido.estado == 'registrado' and pedido.repartidor_id is None
+    ]
+
+
 @login_required
 def inicio(request):
     _exigir_operario(request)
+    procesar_asignaciones_vencidas(request.user)
     pedidos = _pedidos_en_curso()
-    return render(request, 'operario/inicio.html', {'pedidos': pedidos})
+    return render(request, 'operario/inicio.html', {
+        'pedidos': pedidos,
+        'pedidos_sin_repartidor': _pedidos_sin_repartidor(pedidos),
+    })
 
 @login_required
 def buscar_pedido(request):
@@ -210,6 +227,7 @@ def nuevo_repartidor(request):
 @login_required
 def estado_pedidos(request):
     _exigir_operario(request)
+    procesar_asignaciones_vencidas(request.user)
     pedidos = _pedidos_en_curso()
     return JsonResponse({
         'pedidos': [{
@@ -222,8 +240,15 @@ def estado_pedidos(request):
                 pedido.repartidor.get_full_name() or pedido.repartidor.username
                 if pedido.repartidor else 'Sin asignar'
             ),
+            'repartidor_id': pedido.repartidor_id,
             'creado': timezone.localtime(pedido.fecha_creacion).strftime('%d/%m/%Y %H:%M'),
             'url': reverse('operario:detalle_pedido', args=[pedido.pk]),
+            'sin_repartidor': (
+                pedido.estado == 'registrado' and pedido.repartidor_id is None
+            ),
+            'url_reintentar': reverse(
+                'operario:reintentar_asignacion', args=[pedido.pk]
+            ),
         } for pedido in pedidos],
     })
 
@@ -231,16 +256,20 @@ def estado_pedidos(request):
 @login_required
 def detalle_pedido(request, pedido_id):
     _exigir_operario(request)
+    procesar_asignaciones_vencidas(request.user)
     pedido = get_object_or_404(
         Pedido.objects.select_related('comercio', 'repartidor')
         .prefetch_related('historial__usuario'),
         pk=pedido_id,
     )
-    formulario = AsignarPedidoForm() if pedido.estado == 'registrado' else None
+    formulario = (
+        AsignarPedidoForm(pedido=pedido) if pedido.estado == 'registrado' else None
+    )
     return render(request, 'operario/detalle_pedido.html', {
         'pedido': pedido,
         'historial': pedido.historial.all(),
         'formulario_asignacion': formulario,
+        'pedidos_sin_repartidor': _pedidos_sin_repartidor(_pedidos_en_curso()),
     })
 
 
@@ -254,14 +283,28 @@ def asignar_repartidor(request, pedido_id):
         messages.error(request, 'Solo se puede asignar un pedido sin asignar y en estado Registrado.')
         return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
 
-    formulario = AsignarPedidoForm(request.POST)
+    formulario = AsignarPedidoForm(request.POST, pedido=pedido)
     if not formulario.is_valid():
         messages.error(request, 'Elegí un repartidor disponible para asignar el pedido.')
         return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
 
+    perfil = formulario.cleaned_data['repartidor']
+    if perfil is None:
+        if _despacho_automatico(pedido, request.user) is None:
+            messages.error(
+                request,
+                'Pedido sin repartidor disponible. No hay candidatos para el vehículo requerido.',
+            )
+        else:
+            messages.success(
+                request,
+                'Pedido asignado automáticamente. El repartidor verá la solicitud al ingresar y tendrá cinco minutos para responder.',
+            )
+        return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
+
     perfil = get_object_or_404(
         Repartidor.objects.select_for_update().select_related('user'),
-        pk=formulario.cleaned_data['repartidor'].pk,
+        pk=perfil.pk,
     )
     tiene_pedido_activo = Pedido.objects.filter(
         repartidor=perfil.user,
@@ -270,23 +313,44 @@ def asignar_repartidor(request, pedido_id):
     if not perfil.disponible or not perfil.user.is_active or tiene_pedido_activo:
         messages.error(request, 'El repartidor seleccionado ya no está disponible.')
         return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
+    vehiculo_pedido = pedido.vehiculo_requerido
+    if (
+        vehiculo_pedido in dict(Repartidor.VEHICULOS)
+        and perfil.vehiculo != vehiculo_pedido
+    ):
+        messages.error(request, MENSAJE_VEHICULO_INCOMPATIBLE)
+        return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
 
-    estado_anterior = pedido.estado
-    pedido.repartidor = perfil.user
-    pedido.estado = 'asignado'
-    pedido.fecha_hora_asignacion = timezone.now()
-    pedido.fecha_hora_aceptacion = None
-    pedido.save(update_fields=[
-        'repartidor', 'estado', 'fecha_hora_asignacion', 'fecha_hora_aceptacion',
-    ])
-    HistorialEstado.objects.create(
-        pedido=pedido,
-        estado_anterior=estado_anterior,
-        estado_nuevo='asignado',
-        usuario=request.user,
-        incidencia=f'Asignado por operario a {perfil.user.get_full_name() or perfil.user.username}',
+    _aplicar_asignacion(
+        pedido,
+        perfil,
+        request.user,
+        f'Asignado por operario a {perfil.user.get_full_name() or perfil.user.username}',
     )
     messages.success(request, 'Pedido asignado. El repartidor verá la solicitud al ingresar y tendrá cinco minutos para responder.')
+    return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
+
+
+@login_required
+@require_POST
+@transaction.atomic
+def reintentar_asignacion(request, pedido_id):
+    _exigir_operario(request)
+    pedido = get_object_or_404(Pedido.objects.select_for_update(), pk=pedido_id)
+    if pedido.estado != 'registrado' or pedido.repartidor_id is not None:
+        messages.error(request, 'El pedido ya no está pendiente de repartidor.')
+        return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
+
+    if _despacho_automatico(pedido, request.user) is None:
+        messages.error(
+            request,
+            'Pedido sin repartidor disponible. No hay candidatos para el vehículo requerido.',
+        )
+    else:
+        messages.success(
+            request,
+            'Pedido asignado. El repartidor verá la solicitud al ingresar y tendrá cinco minutos para responder.',
+        )
     return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
 
 
@@ -314,7 +378,8 @@ def cancelar_pedido(request, pedido_id):
         perfil = Repartidor.objects.select_for_update().filter(user=repartidor).first()
         if perfil is not None:
             perfil.disponible = True
-            perfil.save(update_fields=['disponible'])
+            perfil.disponible_desde = timezone.now()
+            perfil.save(update_fields=['disponible', 'disponible_desde'])
 
     HistorialEstado.objects.create(
         pedido=pedido,
@@ -372,6 +437,16 @@ def _crear_pedido(formulario, usuario):
                             estado_nuevo='registrado',
                             usuario=usuario,
                         )
+                        perfil = datos.get('repartidor')
+                        if perfil is not None:
+                            _aplicar_asignacion(
+                                pedido,
+                                perfil,
+                                usuario,
+                                f'Asignado por operario a {perfil.user.get_full_name() or perfil.user.username}',
+                            )
+                        else:
+                            _despacho_automatico(pedido, usuario)
                     return pedido
                 except IntegrityError:
                     pedido_existente = Pedido.objects.filter(

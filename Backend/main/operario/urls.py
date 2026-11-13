@@ -41,6 +41,11 @@ urlpatterns = [
         name='cancelar_pedido',
     ),
     path(
+        'pedidos/<int:pedido_id>/reintentar-asignacion/',
+        views.reintentar_asignacion,
+        name='reintentar_asignacion',
+    ),
+    path(
         'pedidos/<int:pedido_id>/registrado/',
         views.pedido_registrado,
         name='pedido_registrado',
