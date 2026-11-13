@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -287,6 +287,43 @@ def asignar_repartidor(request, pedido_id):
         incidencia=f'Asignado por operario a {perfil.user.get_full_name() or perfil.user.username}',
     )
     messages.success(request, 'Pedido asignado. El repartidor verá la solicitud al ingresar y tendrá cinco minutos para responder.')
+    return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
+
+
+@login_required
+@require_POST
+@transaction.atomic
+def cancelar_pedido(request, pedido_id):
+    _exigir_operario(request)
+    pedido = get_object_or_404(
+        Pedido.objects.select_for_update(of=('self',)).select_related('repartidor'),
+        pk=pedido_id,
+    )
+    if pedido.estado not in ('registrado', 'asignado'):
+        return HttpResponseBadRequest('No se puede cancelar un pedido en su estado actual.')
+
+    estado_anterior = pedido.estado
+    repartidor = pedido.repartidor
+    pedido.estado = 'cancelado'
+    pedido.fecha_hora_aceptacion = None
+    pedido.save(update_fields=['estado', 'fecha_hora_aceptacion'])
+
+    incidencia = 'Cancelación solicitada por operario.'
+    if repartidor is not None:
+        incidencia += f' Baja de asignación para repartidor {repartidor.username}.'
+        perfil = Repartidor.objects.select_for_update().filter(user=repartidor).first()
+        if perfil is not None:
+            perfil.disponible = True
+            perfil.save(update_fields=['disponible'])
+
+    HistorialEstado.objects.create(
+        pedido=pedido,
+        estado_anterior=estado_anterior,
+        estado_nuevo='cancelado',
+        usuario=request.user,
+        incidencia=incidencia,
+    )
+    messages.success(request, 'Pedido cancelado.')
     return redirect('operario:detalle_pedido', pedido_id=pedido.pk)
 
 

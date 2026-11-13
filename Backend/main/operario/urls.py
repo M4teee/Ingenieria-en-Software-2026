@@ -36,6 +36,11 @@ urlpatterns = [
         name='asignar_repartidor',
     ),
     path(
+        'pedidos/<int:pedido_id>/cancelar/',
+        views.cancelar_pedido,
+        name='cancelar_pedido',
+    ),
+    path(
         'pedidos/<int:pedido_id>/registrado/',
         views.pedido_registrado,
         name='pedido_registrado',

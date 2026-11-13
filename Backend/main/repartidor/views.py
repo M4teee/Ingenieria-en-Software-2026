@@ -13,7 +13,7 @@ from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import F, OuterRef, Subquery
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.http import FileResponse, Http404, HttpResponseBadRequest
+from django.http import FileResponse, Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 import mimetypes
@@ -128,6 +128,17 @@ def home(req):
             'pedidos_cerrados': pedidos_cerrados,
         }
     )
+
+
+@login_required(login_url='repartidor_login_pin')
+@require_GET
+def estado_pedido_activo(req):
+    _exigir_repartidor_activo(req.user)
+    pedido_id = Pedido.objects.filter(
+        repartidor=req.user,
+        estado__in=['asignado', 'retirado', 'en_viaje'],
+    ).values_list('pk', flat=True).first()
+    return JsonResponse({'pedido_id': pedido_id})
 
 
 @login_required(login_url='repartidor_login_pin')

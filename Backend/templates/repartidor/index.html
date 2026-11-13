@@ -3,7 +3,30 @@
 {% block title %}Panel repartidor{% endblock %}
 
 {% block content %}
-{% if not pedido_activo %}
+{% if pedido_activo %}
+<script>
+  // Si el operario cancela la asignación, quitarla del panel sin interferir
+  // con formularios que el repartidor esté editando.
+  (function () {
+    var pedidoActual = {{ pedido_activo.pk }};
+    setInterval(function () {
+      if (document.visibilityState !== 'visible') return;
+      fetch("{% url 'repartidor_estado_pedido_activo' %}", {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+      }).then(function (response) {
+        if (!response.ok) return;
+        return response.json();
+      }).then(function (data) {
+        if (!data || data.pedido_id === pedidoActual) return;
+        var active = document.activeElement;
+        var isEditing = active && active.matches && active.matches('input, textarea, select');
+        if (!isEditing) location.reload();
+      }).catch(function () {});
+    }, 15000);
+  })();
+</script>
+{% else %}
 <script>
   // Auto-refresh solo cuando el panel no tiene pedido activo: en ese estado
   // no hay formularios ni file inputs, así que es imposible interrumpir una

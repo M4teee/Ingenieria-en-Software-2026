@@ -603,6 +603,28 @@ class DetalleRepartidorTests(TestCase):
         self.assertEqual(pedido_ajeno.estado, 'en_viaje')
         self.assertFalse(HistorialEstado.objects.filter(pedido=pedido_ajeno).exists())
 
+    def test_panel_estado_activo_deja_de_incluir_pedido_cancelado(self):
+        pedido = Pedido.objects.create(
+            codigo='CANCELADO-PANEL', repartidor=self.repartidor, estado='cancelado',
+        )
+        self.client.force_login(self.repartidor)
+
+        response = self.client.get(reverse('repartidor_estado_pedido_activo'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json()['pedido_id'])
+
+    def test_estado_pedido_activo_exige_repartidor_y_autenticacion(self):
+        self.client.force_login(self.otro_repartidor)
+        self.assertEqual(
+            self.client.get(reverse('repartidor_estado_pedido_activo')).status_code,
+            200,
+        )
+
+        self.client.logout()
+        response = self.client.get(reverse('repartidor_estado_pedido_activo'))
+        self.assertEqual(response.status_code, 302)
+
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class FotografiasEntregaTests(TestCase):
