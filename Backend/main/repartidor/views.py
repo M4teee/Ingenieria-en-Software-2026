@@ -82,7 +82,6 @@ def home(req):
         repartidor=req.user,
         estado__in=['entregado', 'fallido', 'cancelado'],
     ).select_related('comercio').order_by('-fecha_creacion')
-
     return render(
         req,
         'repartidor/index.html',
@@ -97,7 +96,7 @@ def home(req):
             ),
             'expirado': expirado_actual,
             'perfil_repartidor': repartidor,
-            'disponible': bool(repartidor and repartidor.disponible and req.user.disponible),
+            'disponible': bool(repartidor and repartidor.disponible),
             'pedidos_cerrados': pedidos_cerrados,
         }
     )

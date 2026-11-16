@@ -2,6 +2,10 @@
 
 Esta carpeta contiene el material usado para comprender el alcance académico del SGR. Los documentos Word son copias de las fuentes recibidas. El [índice de fuentes](../SOURCE_INDEX.md) describe qué aporta cada una y sus límites.
 
+## Exportación CSV de historias de usuario
+
+[`userstories.csv`](userstories.csv) es el resultado de exportar las historias de usuario el 16/11/2026 a las 15:56 hs. Es un snapshot, no una conexión con Taiga en vivo. El archivo contiene campos de propietario, asignación, watchers y votantes; verificá la autorización del equipo antes de compartirlo fuera de este repositorio.
+
 ## Exportación de Taiga
 
 El SHA-256 del JSON de entrada queda registrado en `_sanitization.source_sha256` dentro del derivado. El original no se modifica y no se incorpora al repositorio (tiene datos privados lol). Para regenerar el derivado a partir de una exportación autorizada:

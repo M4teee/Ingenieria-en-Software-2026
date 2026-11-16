@@ -183,9 +183,8 @@ class ActualizarEstadoTests(TestCase):
             'entregado'
         )
 
-        self.assertTrue(
-            self.repartidor.disponible
-        )
+        self.perfil.refresh_from_db()
+        self.assertTrue(self.perfil.disponible)
 
     def test_fallido_registra_incidencia(self):
         self.pedido.estado = 'en_viaje'
@@ -201,7 +200,8 @@ class ActualizarEstadoTests(TestCase):
         historial = self.pedido.historial.first()
         self.assertEqual(historial.estado_nuevo, 'fallido')
         self.assertEqual(historial.incidencia, 'Destinatario ausente, no respondió al timbre.')
-        self.assertTrue(self.repartidor.disponible)
+        self.perfil.refresh_from_db()
+        self.assertTrue(self.perfil.disponible)
 
     def test_fallido_sin_motivo_no_cambia_estado_ni_crea_historial(self):
         self.pedido.estado = 'en_viaje'
@@ -437,7 +437,6 @@ class DisponibilidadRepartidorTests(TestCase):
         self.perfil.refresh_from_db()
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.perfil.disponible)
-        self.assertTrue(self.user.disponible)
 
     def test_toggle_rechaza_disponibilidad_con_pedido_activo(self):
         self.client.force_login(self.user)

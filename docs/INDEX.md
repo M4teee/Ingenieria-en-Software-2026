@@ -6,7 +6,7 @@ Leé primero el estado para conocer qué existe en el código y qué sigue pendi
 
 - [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md): propósito, alcance y requisitos extraídos de las fuentes.
 - [`SOURCE_INDEX.md`](SOURCE_INDEX.md): ubicación y utilidad de las fuentes académicas originales.
-- [`context/README.md`](context/README.md): política de privacidad, procedencia y regeneración de la exportación Taiga derivada.
+- [`context/README.md`](context/README.md): procedencia y tratamiento de las exportaciones de Taiga incluidas en `context/`.
 - [`CURRENT_STATE.md`](CURRENT_STATE.md): implementación observada, verificaciones y pendientes.
 - [`GUIA-EJECUCION-Y-PRUEBAS.md`](GUIA-EJECUCION-Y-PRUEBAS.md): preparación del entorno, pruebas y recorrido manual reproducible.
 - [`MANUAL-DE-USO.md`](MANUAL-DE-USO.md): procedimientos reales para operario, repartidor, cliente y administrador.

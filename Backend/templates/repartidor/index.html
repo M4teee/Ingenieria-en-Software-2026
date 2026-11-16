@@ -63,7 +63,7 @@
         </div>
         <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}">
             {% csrf_token %}
-            {% if perfil_repartidor.disponible %}
+            {% if disponible %}
                 <button type="submit" class="btn btn-sm btn-app-outline">Marcarme no disponible</button>
             {% else %}
                 <button type="submit" class="btn btn-sm btn-app">Marcarme disponible</button>
