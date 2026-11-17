@@ -853,6 +853,7 @@ class RepartidoresOperarioTests(TestCase):
         self.assertContains(respuesta, 'repartidor_lista')
         self.assertContains(respuesta, 'Bicicleta')
         self.assertContains(respuesta, 'Disponible')
+        self.assertContains(respuesta, 'Regenerar PIN')
         self.assertContains(
             respuesta,
             'type="checkbox" role="switch" data-username="repartidor_lista"',
@@ -910,6 +911,76 @@ class RepartidoresOperarioTests(TestCase):
         })
         self.assertEqual(respuesta.status_code, 200)
         self.assertFalse(User.objects.filter(username='repartidor_pin_duplicado').exists())
+
+    def test_regenerar_pin_muestra_un_nuevo_pin_unico_y_permite_ingresar(self):
+        usuario = User.objects.create_user(username='repartidor_recuperar_pin')
+        perfil = Repartidor.objects.create(user=usuario, pin='0123')
+        url = reverse(
+            'operario:regenerar_pin_repartidor', args=[perfil.pk],
+        )
+
+        with patch('main.operario.views._pin_aleatorio', return_value='0042'):
+            respuesta = self.client.post(url)
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'PIN regenerado para repartidor_recuperar_pin')
+        self.assertContains(respuesta, '<output', html=False)
+        self.assertContains(respuesta, '0042')
+        self.assertEqual(respuesta['Cache-Control'], 'max-age=0, no-cache, no-store, must-revalidate, private')
+        perfil.refresh_from_db()
+        self.assertEqual(perfil.pin, '0042')
+        self.assertNotEqual(perfil.pin, '0123')
+        self.assertRegex(perfil.pin, r'^\d{4}$')
+        self.assertEqual(Repartidor.objects.filter(pin=perfil.pin).count(), 1)
+
+        self.client.logout()
+        respuesta_pin_anterior = self.client.post(
+            reverse('repartidor_login_pin'), {'pin': '0123'},
+        )
+        self.assertContains(
+            respuesta_pin_anterior,
+            'PIN incorrecto. Verifique los dígitos',
+        )
+        respuesta_pin_nuevo = self.client.post(
+            reverse('repartidor_login_pin'), {'pin': '0042'},
+        )
+        self.assertRedirects(respuesta_pin_nuevo, reverse('repartidor'))
+        self.assertEqual(int(self.client.session['_auth_user_id']), usuario.pk)
+
+    def test_regenerar_pin_reintenta_si_otra_cuenta_ya_tiene_el_pin(self):
+        existente = User.objects.create_user(username='repartidor_pin_tomado')
+        Repartidor.objects.create(user=existente, pin='4567')
+        usuario = User.objects.create_user(username='repartidor_pin_objetivo')
+        perfil = Repartidor.objects.create(user=usuario, pin='1234')
+        url = reverse(
+            'operario:regenerar_pin_repartidor', args=[perfil.pk],
+        )
+
+        with patch(
+            'main.operario.views._pin_aleatorio',
+            side_effect=['4567', '8765'],
+        ):
+            respuesta = self.client.post(url)
+
+        self.assertEqual(respuesta.status_code, 200)
+        perfil.refresh_from_db()
+        self.assertEqual(perfil.pin, '8765')
+        self.assertEqual(Repartidor.objects.filter(pin='4567').count(), 1)
+
+    def test_regenerar_pin_requiere_post_y_permiso_de_operario(self):
+        usuario = User.objects.create_user(username='repartidor_pin_permisos')
+        perfil = Repartidor.objects.create(user=usuario, pin='5678')
+        url = reverse(
+            'operario:regenerar_pin_repartidor', args=[perfil.pk],
+        )
+
+        self.assertEqual(self.client.get(url).status_code, 405)
+        self.client.logout()
+        self.assertEqual(self.client.post(url).status_code, 302)
+        self.client.force_login(self.usuario_comun)
+        self.assertEqual(self.client.post(url).status_code, 403)
+        perfil.refresh_from_db()
+        self.assertEqual(perfil.pin, '5678')
 
     def test_vehiculo_es_obligatorio_y_debe_pertenecer_a_las_opciones_del_modelo(self):
         url = reverse('operario:nuevo_repartidor')

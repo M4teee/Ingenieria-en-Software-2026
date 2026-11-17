@@ -22,6 +22,14 @@
     {% endfor %}
 {% endif %}
 
+{% if pin_regenerado %}
+    <div class="alert alert-success" role="status">
+        <strong>PIN regenerado para {{ repartidor_pin.user.username }}:</strong>
+        <output class="fs-4 font-monospace user-select-all">{{ pin_regenerado }}</output>
+        <p class="mb-0">Transmití este PIN al repartidor. El PIN anterior ya no permite ingresar.</p>
+    </div>
+{% endif %}
+
 <section class="app-section" aria-labelledby="repartidores-heading">
     <div class="app-section-body">
         <h2 id="repartidores-heading" class="h5">Personal de reparto</h2>
@@ -35,6 +43,7 @@
                             <th scope="col">Vehículo</th>
                             <th scope="col">Disponible</th>
                             <th scope="col">Activo</th>
+                            <th scope="col">Acceso</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,6 +64,12 @@
                                             <input class="form-check-input" type="checkbox" role="switch" data-username="{{ perfil.user.username }}" aria-label="Activar o desactivar {{ perfil.user.username }}"{% if perfil.user.is_active %} checked{% endif %}>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-outline-primary btn-sm" type="submit">Regenerar PIN</button>
+                                    </form>
                                 </td>
                             </tr>
                         {% endfor %}

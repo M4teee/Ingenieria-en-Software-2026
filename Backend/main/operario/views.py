@@ -1,4 +1,5 @@
 from uuid import UUID, uuid4
+import secrets
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,6 +13,7 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
 
 from main.despacho import (
     aplicar_asignacion as _aplicar_asignacion,
@@ -34,6 +36,10 @@ from .forms import (
 
 
 MAX_INTENTOS_CODIGO = Pedido.INTENTOS_CODIGO
+
+
+def _pin_aleatorio(disponibles):
+    return secrets.choice(disponibles)
 
 
 class ComercioInactivoError(Exception):
@@ -216,6 +222,55 @@ def repartidores(request):
     _exigir_operario(request)
     perfiles = Repartidor.objects.select_related('user').order_by('user__username')
     return render(request, 'operario/repartidores.html', {'repartidores': perfiles})
+
+
+@login_required
+@require_POST
+@never_cache
+def regenerar_pin_repartidor(request, repartidor_id):
+    _exigir_operario(request)
+
+    with transaction.atomic():
+        perfil = get_object_or_404(
+            Repartidor.objects.select_for_update(of=('self',)),
+            pk=repartidor_id,
+        )
+        pin_regenerado = None
+        for _ in range(10):
+            ocupados = set(
+                Repartidor.objects.exclude(pk=perfil.pk)
+                .values_list('pin', flat=True)
+            )
+            disponibles = [
+                f'{numero:04d}' for numero in range(10000)
+                if f'{numero:04d}' not in ocupados
+            ]
+            if not disponibles:
+                break
+
+            pin_candidato = _pin_aleatorio(disponibles)
+            try:
+                # El savepoint permite reintentar si otra transacción ganó
+                # la carrera por el mismo PIN único.
+                with transaction.atomic():
+                    perfil.pin = pin_candidato
+                    perfil.save(update_fields=['pin'])
+                pin_regenerado = pin_candidato
+                break
+            except IntegrityError:
+                continue
+
+    if pin_regenerado is None:
+        return HttpResponseBadRequest(
+            'No se pudo generar un PIN único. Intentá nuevamente.'
+        )
+
+    perfiles = Repartidor.objects.select_related('user').order_by('user__username')
+    return render(request, 'operario/repartidores.html', {
+        'repartidores': perfiles,
+        'pin_regenerado': pin_regenerado,
+        'repartidor_pin': perfil,
+    })
 
 
 @login_required
