@@ -2102,3 +2102,125 @@ class EntregasFallidasTests(TestCase):
                 self.assertNotContains(seguimiento, 'repartidor_con_foto')
                 self.assertNotContains(seguimiento, ruta_foto)
                 self.assertNotContains(seguimiento, 'Devolución registrada')
+
+
+class HistorialPedidosFiltrosTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_hu23',
+            password='test1234',
+            is_operario=True,
+        )
+        self.client.force_login(self.operario)
+
+        self.comercio_activo = Comercio.objects.create(
+            nombre='Panaderia Sol',
+            direccion='Calle 10',
+            contacto='111',
+        )
+        self.comercio_inactivo = Comercio.objects.create(
+            nombre='Farmacia Norte',
+            direccion='Calle 20',
+            contacto='222',
+            activo=False,
+        )
+
+        self.pedido_fallido = Pedido.objects.create(
+            codigo='HU23-001',
+            comercio=self.comercio_activo,
+            estado='fallido',
+        )
+        self.pedido_entregado = Pedido.objects.create(
+            codigo='HU23-002',
+            comercio=self.comercio_activo,
+            estado='entregado',
+        )
+        self.pedido_inactivo = Pedido.objects.create(
+            codigo='HU23-003',
+            comercio=self.comercio_inactivo,
+            estado='fallido',
+        )
+
+    def test_filtrar_por_comercio_y_estado(self):
+        respuesta = self.client.get(
+            reverse('operario:historial_pedidos'),
+            {
+                'comercio': 'panaderia',
+                'estado': 'fallido',
+            },
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'HU23-001')
+        self.assertNotContains(respuesta, 'HU23-002')
+        self.assertNotContains(respuesta, 'HU23-003')
+
+    def test_incluye_comercios_deshabilitados(self):
+        respuesta = self.client.get(
+            reverse('operario:historial_pedidos'),
+            {'comercio': 'Farmacia Norte'},
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'HU23-003')
+
+    def test_busqueda_sin_resultados(self):
+        respuesta = self.client.get(
+            reverse('operario:historial_pedidos'),
+            {'comercio': 'Comercio inexistente'},
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(
+            respuesta,
+            'No se encontraron pedidos que coincidan con los filtros ingresados',
+        )
+        self.assertNotContains(respuesta, 'HU23-001')
+        self.assertNotContains(respuesta, 'HU23-002')
+        self.assertNotContains(respuesta, 'HU23-003')
+
+    def test_acceso_al_historial_del_pedido(self):
+        respuesta = self.client.get(
+            reverse('operario:historial_pedidos')
+        )
+
+        url_detalle = reverse(
+            'operario:detalle_pedido',
+            args=[self.pedido_fallido.pk],
+        )
+
+        self.assertContains(respuesta, url_detalle)
+
+    def test_usuario_no_operario_no_puede_acceder(self):
+        usuario = User.objects.create_user(
+            username='usuario_hu23',
+            password='test1234',
+        )
+        self.client.force_login(usuario)
+
+        respuesta = self.client.get(
+            reverse('operario:historial_pedidos')
+        )
+
+        self.assertEqual(respuesta.status_code, 403)
+
+    
+    def test_comercio_existente_sin_pedidos_del_estado(self):
+        respuesta = self.client.get(
+            reverse('operario:historial_pedidos'),
+            {
+                'comercio': 'Panaderia Sol',
+                'estado': 'cancelado',
+            },
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(
+            respuesta,
+            'No se encontraron pedidos que coincidan con los filtros ingresados',
+        )
+        self.assertNotContains(respuesta, 'HU23-001')
+        self.assertNotContains(respuesta, 'HU23-002')
+        self.assertNotContains(respuesta, 'HU23-003')
+
+

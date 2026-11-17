@@ -151,6 +151,32 @@ def confirmar_devolucion(request, pedido_id):
     messages.success(request, 'Devolución registrada')
     return redirect('operario:entregas_fallidas')
 
+
+@login_required
+def historial_pedidos(request):
+    _exigir_operario(request)
+
+    comercio = request.GET.get('comercio', '').strip()
+    estado = request.GET.get('estado', '').strip()
+
+    pedidos = Pedido.objects.select_related('comercio').all()
+
+    if comercio:
+        pedidos = pedidos.filter(comercio__nombre__icontains=comercio)
+
+    if estado:
+        pedidos = pedidos.filter(estado=estado)
+
+    pedidos = pedidos.order_by('-pk')
+
+    return render(request, 'operario/historial_pedidos.html', {
+        'pedidos': pedidos,
+        'comercio_buscado': comercio,
+        'estado_seleccionado': estado,
+        'estados': Pedido.ESTADOS,
+    })
+
+
 @login_required
 def buscar_pedido(request):
     _exigir_operario(request)

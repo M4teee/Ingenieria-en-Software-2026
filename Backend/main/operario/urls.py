@@ -14,6 +14,7 @@ urlpatterns = [
     ),
     path('comercios/estado/', views.cambiar_estado_comercio, name='cambiar_estado_comercio'),
     path('comercios/nuevo/', views.nuevo_comercio, name='nuevo_comercio'),
+    path('pedidos/historial/', views.historial_pedidos, name='historial_pedidos'),
     path('repartidores/', views.repartidores, name='repartidores'),
     path(
         'repartidores/<int:repartidor_id>/regenerar-pin/',
