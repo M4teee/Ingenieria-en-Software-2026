@@ -1,6 +1,6 @@
 # Brief del proyecto
 
-Actualizado: 2026-10-16. Síntesis de las fuentes originales listadas en [`SOURCE_INDEX.md`](SOURCE_INDEX.md); no sustituye esas fuentes ni el tablero vigente.
+Actualizado: 2026-11-17. Síntesis de las fuentes originales listadas en [`SOURCE_INDEX.md`](SOURCE_INDEX.md); no sustituye esas fuentes ni el tablero vigente.
 
 ## Propósito y actores
 
@@ -18,9 +18,9 @@ El repositorio fija Python 3.14 en `.python-version` y Django 6.1.2 en `requirem
 
 ## Diferencia entre requisitos y producto actual
 
-El backend mantiene modelos persistentes `Pedido` e `HistorialEstado`. En la rama actual, el operario registra pedidos asociados a comercios activos, con estado inicial `registrado`, código seguro, fecha estimada y evento de historial. El panel de operario también permite asignar manualmente un repartidor disponible a un pedido registrado sin asignar; es un puente provisional, no la asignación automática descrita por HU 22/30. La consulta pública busca pedidos por el código persistido. El repartidor puede avanzar un pedido previamente asignado y guardar los cambios en el historial, con fotografía opcional al retirar, entregar o registrar una falla.
+El backend mantiene modelos persistentes `Pedido` e `HistorialEstado`. En la rama actual, el operario registra pedidos asociados a comercios activos, con estado inicial `registrado`, código seguro, datos del destinatario, tamaño del paquete, vehículo requerido, fecha estimada y evento de historial. HU 33 presenta esos datos, los del comercio, el estado, el código, el repartidor y el historial en un detalle operativo protegido por rol. El panel permite asignar manualmente o dejar que HU 30 asigne según vehículo, disponibilidad, cola FIFO y ausencia de otro pedido activo; la cercanía de HU 22 no está implementada. La consulta pública busca pedidos por el código persistido. El repartidor puede avanzar un pedido previamente asignado y guardar los cambios en el historial, con fotografía opcional al retirar, entregar o registrar una falla. HU 13 permite al operario cancelar pedidos `registrado` o `asignado` desde el detalle.
 
-Las entrevistas describen siete estados y reglas de cancelación antes del retiro; el modelo contempla esos estados, pero no todas las operaciones cuentan con una pantalla. La asignación automática y la cancelación desde la interfaz no están implementadas. Los requisitos no funcionales listados arriba tampoco están implementados ni verificados íntegramente. Las historias fuera del alcance implementado no deben presentarse como funcionalidades disponibles.
+Las entrevistas describen siete estados y reglas de cancelación antes del retiro; el modelo contempla esos estados y HU 13 implementa la cancelación desde la interfaz antes del retiro. HU 30 implementa asignación automática con criterios acotados que no incluyen cercanía, por lo que HU 22 no debe considerarse cubierta por completo. Los requisitos no funcionales listados arriba tampoco están implementados ni verificados íntegramente. Las historias fuera del alcance implementado no deben presentarse como funcionalidades disponibles.
 
 ## Plan académico
 

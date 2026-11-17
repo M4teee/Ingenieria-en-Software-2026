@@ -80,7 +80,7 @@ git diff --check
 
 ### Resultados de esta revisión
 
-Con Python 3.14.8 y las dependencias de `requirements.txt`, desde `Backend/` se ejecutó `../.venv/bin/python manage.py test --settings=config.settings_test`: 104 pruebas aprobadas. `check` pasó, `makemigrations --check --dry-run` no detectó cambios pendientes y `pip check` no encontró dependencias incompatibles. Desde la raíz, `python3 scripts/check_docs.py .` verificó 42 enlaces y `git diff --check` pasó. La suite usa SQLite en memoria y no conecta a Neon ni borra la base local.
+Con Python 3.14.8 y las dependencias de `requirements.txt`, en la revisión del 2026-11-17 se ejecutó desde `Backend/` `../.venv/bin/python manage.py test --settings=config.settings_test`: 150 pruebas aprobadas, incluyendo la cobertura agregada al detalle de HU33. `check` pasó, no se detectaron cambios de migración y `pip check` no encontró incompatibilidades. Desde la raíz, `python3 scripts/check_docs.py .` verificó 44 enlaces y `git diff --check` pasó. La suite usa SQLite en memoria y no conecta a Neon ni borra la base local.
 
 La aplicación se abrió en un navegador local y se inspeccionaron visualmente la entrada pública y el panel de operario en un viewport estrecho, sin escribir datos. No se realizó una inspección visual autenticada del módulo del repartidor ni de escritorio amplio. El Django Test Client comprobó el acceso a la raíz, las redirecciones por rol, la navegación sin enlaces cruzados, el acceso protegido a Django Admin y las pruebas existentes de propiedad de pedidos y operaciones. Windows no se probó.
 

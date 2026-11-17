@@ -189,6 +189,45 @@ class PanelOperarioTests(TestCase):
         self.assertContains(detalle, 'Historial del pedido')
         self.assertContains(detalle, 'Registrado')
 
+    def test_detalle_muestra_datos_completos_requeridos_por_hu33(self):
+        self.pedido.datos_destinatario = 'Ana Pérez · 11 5555 0101'
+        self.pedido.direccion_destino = 'Pasaje Norte 456'
+        self.pedido.tamano_paquete = 'Caja mediana · 30 x 20 x 15 cm'
+        self.pedido.vehiculo_requerido = 'moto'
+        self.pedido.especificaciones_traslado = 'Mantener vertical'
+        self.pedido.save(update_fields=[
+            'datos_destinatario',
+            'direccion_destino',
+            'tamano_paquete',
+            'vehiculo_requerido',
+            'especificaciones_traslado',
+        ])
+
+        detalle = self.client.get(
+            reverse('operario:detalle_pedido', args=[self.pedido.pk])
+        )
+
+        self.assertEqual(detalle.status_code, 200)
+        for dato in (
+            'Panel Comercio',
+            'Calle 10',
+            '111',
+            'Ana Pérez · 11 5555 0101',
+            'Pasaje Norte 456',
+            'Caja mediana · 30 x 20 x 15 cm',
+            'Moto',
+            'Mantener vertical',
+            'PANEL-001',
+            'Registrado',
+        ):
+            with self.subTest(dato=dato):
+                self.assertContains(detalle, dato)
+        self.assertContains(
+            detalle,
+            '<dd class="col-sm-8">Sin asignar</dd>',
+            html=True,
+        )
+
     def test_historial_muestra_miniatura_ampliable(self):
         evento = HistorialEstado.objects.create(
             pedido=self.pedido,
