@@ -29,6 +29,7 @@ El rol administrativo mantiene los datos de configuración. Para operar pedidos,
 6. Si el comercio se inactiva antes de enviar el formulario, el servidor rechaza el alta con el mensaje exigido por HU 12. Si un repartidor ya no está disponible, no se realiza la asignación.
 7. Abrí **Repartidores** o `/operario/repartidores/` para consultar usuario, vehículo y disponibilidad. En **Nuevo repartidor** o `/operario/repartidores/nuevo/`, ingresá un usuario, elegí un vehículo y un PIN numérico de cuatro dígitos; nombre, apellido y e-mail son opcionales. El perfil comienza no disponible.
 8. Abrí **Comercios** o `/operario/comercios/` para consultar nombre, dirección, contacto y estado. En **Nuevo comercio** o `/operario/comercios/nuevo/`, completá esos cuatro campos; seleccioná explícitamente si el comercio está activo o inactivo.
+9. Desde el panel, abrí **Entregas fallidas** o `/operario/pedidos/fallidos/` para consultar pedidos Fallidos ordenados por fecha, con motivo, repartidor del evento de falla y fotografía protegida si existe. En la cronología de cada fila, presioná **Confirmar devolución** al recibir el paquete en el centro. El pedido permanece `Fallido`; la operación registra tu usuario y la fecha/hora, y una confirmación repetida no crea otro registro.
 
 La asignación manual es un puente provisional elegido por el equipo. Las HU 22 y 30 siguen sin implementar y no se consideran completas: no hay cálculo automático ni de cercanía. Tampoco se envía aviso externo; el repartidor ve la solicitud al abrir o actualizar `/repartidor/`.
 

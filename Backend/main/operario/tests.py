@@ -1,13 +1,16 @@
+import tempfile
 from datetime import timedelta
-from uuid import UUID
 from unittest.mock import patch
+from uuid import UUID
 
+from django.core.files.base import ContentFile
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from django.urls import reverse
 
-from main.operario.models import Comercio
+from main.operario.models import Comercio, Devolucion
 from main.repartidor.models import HistorialEstado, Pedido
 from main.repartidor.models import Repartidor
 from main.users.models import User
@@ -1722,3 +1725,233 @@ class ColaFifoReasignacionTests(TestCase):
         self.assertEqual(
             self._repartidor_actual(), self.perfiles['fifo_r1'].user,
         )
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class EntregasFallidasTests(TestCase):
+    def setUp(self):
+        self.operario = User.objects.create_user(
+            username='operario_fallas', is_operario=True,
+        )
+        self.sin_rol = User.objects.create_user(username='usuario_fallas')
+        self.solo_staff = User.objects.create_user(
+            username='staff_fallas', is_staff=True,
+        )
+        self.comercio = Comercio.objects.create(
+            nombre='Comercio fallido', direccion='Calle 1', contacto='444',
+        )
+        self.url = reverse('operario:entregas_fallidas')
+        self.client.force_login(self.operario)
+
+    def _pedido(self, codigo, estado='fallido'):
+        return Pedido.objects.create(
+            codigo=codigo,
+            comercio=self.comercio,
+            estado=estado,
+        )
+
+    def _evento_falla(self, pedido, usuario, incidencia, fecha=None):
+        evento = HistorialEstado.objects.create(
+            pedido=pedido,
+            estado_anterior='en_viaje',
+            estado_nuevo='fallido',
+            usuario=usuario,
+            incidencia=incidencia,
+        )
+        if fecha is not None:
+            HistorialEstado.objects.filter(pk=evento.pk).update(fecha=fecha)
+            evento.refresh_from_db()
+        return evento
+
+    def test_solo_operario_puede_consultar_la_seccion(self):
+        self.client.logout()
+        anonima = self.client.get(self.url)
+        self.assertEqual(anonima.status_code, 302)
+
+        self.client.force_login(self.sin_rol)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+        self.client.force_login(self.solo_staff)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+        self.client.force_login(self.operario)
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+
+    def test_lista_vacia_muestra_un_mensaje(self):
+        respuesta = self.client.get(self.url)
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'No hay pedidos con entrega fallida.')
+        self.assertEqual(respuesta.context['entregas'], [])
+
+    def test_incluye_fallidos_y_excluye_otros_estados(self):
+        repartidor = User.objects.create_user(
+            username='repartidor_falla', first_name='Ana', last_name='Ríos',
+        )
+        fallido = self._pedido('FALLA-INCLUIDA')
+        evento = self._evento_falla(
+            fallido, repartidor, 'Destinatario ausente.',
+        )
+        self._pedido('ENTREGADO-EXCLUIDO', estado='entregado')
+
+        respuesta = self.client.get(self.url)
+
+        self.assertContains(respuesta, 'FALLA-INCLUIDA')
+        self.assertContains(respuesta, 'Comercio fallido')
+        self.assertContains(respuesta, 'Destinatario ausente.')
+        self.assertContains(respuesta, 'Ana Ríos')
+        self.assertContains(respuesta, 'No adjunta')
+        self.assertNotContains(respuesta, 'ENTREGADO-EXCLUIDO')
+        self.assertEqual(len(respuesta.context['entregas']), 1)
+        self.assertEqual(respuesta.context['entregas'][0]['evento'], evento)
+
+    def test_usa_el_ultimo_evento_de_falla_y_no_duplica_pedidos(self):
+        primero = self._pedido('FALLA-ANTIGUA')
+        segundo = self._pedido('FALLA-RECIENTE')
+        responsable_anterior = User.objects.create_user(
+            username='repartidor_anterior',
+        )
+        responsable_actual = User.objects.create_user(
+            username='repartidor_actual', first_name='Luis', last_name='Paz',
+        )
+        ahora = timezone.now()
+        primer_evento = self._evento_falla(
+            primero, responsable_anterior, 'Motivo anterior.',
+            ahora - timedelta(days=3),
+        )
+        ultimo_evento = self._evento_falla(
+            primero, responsable_actual, 'Motivo más reciente.',
+            ahora - timedelta(days=2),
+        )
+        self._evento_falla(
+            segundo, responsable_actual, 'Motivo del segundo pedido.',
+            ahora - timedelta(days=1),
+        )
+
+        respuesta = self.client.get(self.url)
+
+        filas = respuesta.context['entregas']
+        self.assertEqual(
+            [fila['pedido'].codigo for fila in filas],
+            ['FALLA-ANTIGUA', 'FALLA-RECIENTE'],
+        )
+        self.assertEqual(filas[0]['evento'], ultimo_evento)
+        self.assertNotEqual(filas[0]['evento'], primer_evento)
+        self.assertEqual(respuesta.content.decode().count('FALLA-ANTIGUA'), 1)
+        self.assertContains(respuesta, 'Motivo más reciente.')
+        self.assertContains(respuesta, 'Luis Paz')
+        self.assertNotContains(respuesta, 'repartidor_anterior')
+
+    def test_confirma_por_post_con_actor_fecha_mensaje_y_estado_fallido(self):
+        pedido = self._pedido('FALLA-CONFIRMABLE')
+        repartidor = User.objects.create_user(username='repartidor_confirmable')
+        self._evento_falla(pedido, repartidor, 'No atendió.')
+        url = reverse('operario:confirmar_devolucion', args=[pedido.pk])
+
+        respuesta = self.client.post(url)
+
+        self.assertRedirects(respuesta, self.url)
+        devolucion = Devolucion.objects.get(pedido=pedido)
+        self.assertEqual(devolucion.usuario, self.operario)
+        self.assertLessEqual(
+            abs((timezone.now() - devolucion.fecha).total_seconds()), 2,
+        )
+        pedido.refresh_from_db()
+        self.assertEqual(pedido.estado, 'fallido')
+
+        listado = self.client.get(respuesta.url)
+        self.assertContains(listado, 'Devolución registrada')
+        self.assertContains(listado, 'Cronología HU 34')
+        self.assertNotContains(listado, 'Confirmar devolución')
+        self.assertContains(listado, 'Devolución registrada por operario_fallas')
+
+    def test_repetir_confirmacion_es_idempotente_y_no_cambia_el_actor_original(self):
+        pedido = self._pedido('FALLA-CONFIRMACION-UNICA')
+        primer_operario = self.operario
+        segundo_operario = User.objects.create_user(
+            username='segundo_operario', is_operario=True,
+        )
+        url = reverse('operario:confirmar_devolucion', args=[pedido.pk])
+
+        primera = self.client.post(url)
+        fecha_original = Devolucion.objects.get(pedido=pedido).fecha
+        self.client.force_login(segundo_operario)
+        segunda = self.client.post(url)
+
+        self.assertRedirects(primera, self.url)
+        self.assertRedirects(segunda, self.url)
+        self.assertEqual(Devolucion.objects.filter(pedido=pedido).count(), 1)
+        devolucion = Devolucion.objects.get(pedido=pedido)
+        self.assertEqual(devolucion.usuario, primer_operario)
+        self.assertEqual(devolucion.fecha, fecha_original)
+        self.assertContains(self.client.get(self.url), 'Devolución registrada')
+
+    def test_metodo_rol_y_estado_limitan_la_confirmacion(self):
+        pedido_fallido = self._pedido('FALLA-METODO')
+        url_fallido = reverse(
+            'operario:confirmar_devolucion', args=[pedido_fallido.pk],
+        )
+        self.assertEqual(self.client.get(url_fallido).status_code, 405)
+
+        pedido_en_viaje = self._pedido('EN-VIAJE-SIN-DEVOLUCION', 'en_viaje')
+        url_en_viaje = reverse(
+            'operario:confirmar_devolucion', args=[pedido_en_viaje.pk],
+        )
+        respuesta = self.client.post(url_en_viaje)
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertFalse(Devolucion.objects.exists())
+
+        self.client.force_login(self.sin_rol)
+        self.assertEqual(self.client.post(url_fallido).status_code, 403)
+        self.assertFalse(Devolucion.objects.exists())
+
+    def test_devolucion_no_se_puede_editar_ni_eliminar(self):
+        pedido = self._pedido('FALLA-INMUTABLE')
+        devolucion = Devolucion.objects.create(
+            pedido=pedido,
+            usuario=self.operario,
+        )
+
+        with self.assertRaises(ValidationError):
+            devolucion.save()
+        with self.assertRaises(ValidationError):
+            devolucion.delete()
+        with self.assertRaises(ValidationError):
+            Devolucion.objects.filter(pk=devolucion.pk).update(usuario=self.sin_rol)
+        with self.assertRaises(ValidationError):
+            Devolucion.objects.filter(pk=devolucion.pk).delete()
+
+    def test_fotografia_enlaza_al_endpoint_protegido_y_no_se_publica(self):
+        repartidor = User.objects.create_user(
+            username='repartidor_con_foto', first_name='Eva', last_name='Sol',
+        )
+        pedido = self._pedido('FALLA-CON-FOTO')
+        evento = self._evento_falla(pedido, repartidor, 'No respondió.')
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                evento.fotografia.save(
+                    'evidencia.jpg', ContentFile(b'evidencia privada'), save=True,
+                )
+                ruta_foto = reverse('repartidor_fotografia', args=[evento.pk])
+                listado = self.client.get(self.url)
+                self.assertContains(listado, ruta_foto)
+
+                foto_operario = self.client.get(ruta_foto)
+                self.assertEqual(foto_operario.status_code, 200)
+
+                self.client.force_login(self.sin_rol)
+                self.assertEqual(self.client.get(ruta_foto).status_code, 404)
+
+                self.client.logout()
+                self.assertEqual(self.client.get(ruta_foto).status_code, 302)
+
+                Devolucion.objects.create(pedido=pedido, usuario=self.operario)
+                seguimiento = self.client.get(
+                    reverse('seguimiento', args=[pedido.codigo]),
+                )
+                self.assertEqual(seguimiento.status_code, 200)
+                self.assertNotContains(seguimiento, 'Eva Sol')
+                self.assertNotContains(seguimiento, 'repartidor_con_foto')
+                self.assertNotContains(seguimiento, ruta_foto)
+                self.assertNotContains(seguimiento, 'Devolución registrada')

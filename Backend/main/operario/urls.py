@@ -27,6 +27,16 @@ urlpatterns = [
     ),
     path('repartidores/nuevo/', views.nuevo_repartidor, name='nuevo_repartidor'),
     path('pedidos/estado/', views.estado_pedidos, name='estado_pedidos'),
+    path(
+        'pedidos/fallidos/',
+        views.entregas_fallidas,
+        name='entregas_fallidas',
+    ),
+    path(
+        'pedidos/<int:pedido_id>/confirmar-devolucion/',
+        views.confirmar_devolucion,
+        name='confirmar_devolucion',
+    ),
     path('pedidos/buscar/', views.buscar_pedido, name='buscar_pedido'),
     path('pedidos/nuevo/', views.cargar_pedido, name='cargar_pedido'),
     path('pedidos/<int:pedido_id>/', views.detalle_pedido, name='detalle_pedido'),
