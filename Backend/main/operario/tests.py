@@ -1328,6 +1328,8 @@ class OperarioRoleAuthorizationTests(TestCase):
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class DespachoAutomaticoTests(TestCase):
+    """Pruebas de HU #41: Asignación automática de repartidor al registrar pedidos."""
+
     def setUp(self):
         self.operario = User.objects.create_user(
             username='operario_despacho', password='test1234', is_operario=True,
@@ -1505,6 +1507,8 @@ class DespachoAutomaticoTests(TestCase):
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class AlertaSinRepartidorTests(TestCase):
+    """Pruebas de HU #30 (Alerta de pedido sin repartidor) y HU #42 (Reintentar asignación)."""
+
     def setUp(self):
         self.operario = User.objects.create_user(
             username='operario_alerta', password='test1234', is_operario=True,
@@ -1670,9 +1674,24 @@ class AlertaSinRepartidorTests(TestCase):
         lista = self.client.get(reverse('operario:inicio'))
         self.assertContains(lista, 'Pedido sin repartidor disponible')
 
+    def test_reintentar_sobre_pedido_ya_asignado_muestra_error_y_redirige(self):
+        # HU #42 Regla 1: reintentar solo habilitado para pedidos en estado 'registrado' sin repartidor
+        url = reverse('operario:reintentar_asignacion', args=[self.asignado.pk])
+        respuesta = self.client.post(url, {}, follow=True)
+
+        self.assertRedirects(
+            respuesta,
+            reverse('operario:detalle_pedido', args=[self.asignado.pk]),
+        )
+        self.assertContains(respuesta, 'El pedido ya no está pendiente de repartidor.')
+        self.asignado.refresh_from_db()
+        self.assertEqual(self.asignado.estado, 'asignado')
+
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class CascadaReasignacionTests(TestCase):
+    """Pruebas de HU #41: Reasignación automática en cascada ante rechazo o expiración."""
+
     def setUp(self):
         self.operario = User.objects.create_user(
             username='operario_cascada', password='test1234', is_operario=True,
@@ -1792,6 +1811,8 @@ class CascadaReasignacionTests(TestCase):
 
 @override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class ColaFifoReasignacionTests(TestCase):
+    """Pruebas de HU #41: Prioridad FIFO por tiempo de espera disponible en despacho."""
+
     def setUp(self):
         self.operario = User.objects.create_user(
             username='operario_fifo', password='test1234', is_operario=True,

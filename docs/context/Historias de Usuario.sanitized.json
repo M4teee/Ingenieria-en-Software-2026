@@ -21,15 +21,15 @@
   "is_featured": false,
   "is_looking_for_people": false,
   "looking_for_people_note": "",
-  "totals_updated_datetime": "2026-11-13T00:33:51+0000",
+  "totals_updated_datetime": "2026-11-17T21:11:44+0000",
   "total_fans": 0,
   "total_fans_last_week": 0,
   "total_fans_last_month": 0,
   "total_fans_last_year": 0,
-  "total_activity": 434,
-  "total_activity_last_week": 6,
-  "total_activity_last_month": 115,
-  "total_activity_last_year": 434,
+  "total_activity": 457,
+  "total_activity_last_week": 27,
+  "total_activity_last_month": 106,
+  "total_activity_last_year": 457,
   "anon_permissions": [],
   "public_permissions": [],
   "modified_date": "2026-11-03T18:07:47+0000",
@@ -805,6 +805,16 @@
           "user_story": 30,
           "order": 1791237969821,
           "source_project_slug": null
+        },
+        {
+          "user_story": 41,
+          "order": 1794869059157,
+          "source_project_slug": null
+        },
+        {
+          "user_story": 42,
+          "order": 1794869066028,
+          "source_project_slug": null
         }
       ]
     },
@@ -1259,7 +1269,7 @@
       "status": "In progress",
       "swimlane": null,
       "milestone": "Sprint 2",
-      "modified_date": "2026-11-13T00:33:51+0000",
+      "modified_date": "2026-11-13T11:48:14+0000",
       "created_date": "2026-10-05T22:07:41+0000",
       "finish_date": null,
       "generated_from_issue": null,
@@ -1268,7 +1278,7 @@
       "ref": 32,
       "is_closed": false,
       "backlog_order": 1791035510483650,
-      "sprint_order": 13,
+      "sprint_order": 15,
       "kanban_order": 1791827863986687,
       "subject": "Recuperar PIN de repartidor",
       "description": "Como Operario, quiero regenerar el PIN de un repartidor para recuperar su acceso si lo olvidó o si fue comprometido.\n\n*   Reglas\n    *   El nuevo PIN debe ser numérico y de exactamente 4 dígitos.\n    *   El PIN debe ser único entre los repartidores, ya que es el único dato de ingreso.\n    *   El PIN anterior queda invalidado inmediatamente.\n*   Criterios\n    *   ESCENARIO 1: Regeneración exitosa.   \n        El operario selecciona un repartidor y presiona \"Regenerar PIN\". El sistema genera un nuevo PIN único de 4 dígitos, lo muestra en pantalla para transmitirlo al repartidor e invalida el anterior.\n    *   ESCENARIO 2: Uso del PIN anterior.   \n        El repartidor intenta ingresar con el PIN anterior. El sistema muestra: _\"PIN incorrecto. Verifique los dígitos\"_.",
@@ -1276,7 +1286,7 @@
       "team_requirement": false,
       "external_reference": null,
       "tribe_gig": null,
-      "version": 11,
+      "version": 13,
       "is_blocked": false,
       "tags": [],
       "due_date": null,
@@ -1670,10 +1680,10 @@
           "points": "2"
         }
       ],
-      "status": "New",
+      "status": "In progress",
       "swimlane": null,
       "milestone": "Sprint 2",
-      "modified_date": "2026-11-03T12:35:08+0000",
+      "modified_date": "2026-11-17T20:24:25+0000",
       "created_date": "2026-10-03T14:38:15+0000",
       "finish_date": null,
       "generated_from_issue": null,
@@ -1683,14 +1693,14 @@
       "is_closed": false,
       "backlog_order": 1791035510483661,
       "sprint_order": 1,
-      "kanban_order": 1791038295515860,
+      "kanban_order": 1794947065831701,
       "subject": "Filtrar historial de pedidos",
       "description": "Como Operario, quiero filtrar el historial de pedidos por nombre de comercio o estado, para encontrar rápidamente un envío específico cuando se presenta un reclamo o paquete perdido.\n\n*   Reglas:\n    *   El buscador debe permitir buscar envíos pertenecientes a todos los comercios, incluidos los que hayan sido \"deshabilitados lógicamente\".\n    *   Los filtros deben aplicarse sobre la base de datos completa de pedidos registrados.\n*   Criterios:\n    *   ESCENARIO 1: Búsqueda exitosa con filtros   \n        El operario ingresa a la vista del historial general, selecciona filtros y escribe el nombre de un comercio particular. Al presionar \"Buscar\", el sistema actualiza la lista mostrando únicamente los pedidos de ese comercio que fracasaron en la entrega, permitiendo acceder a su línea de tiempo.\n    *   ESCENARIO 2: Búsqueda sin resultados   \n        El operario ingresa parámetros de búsqueda para un comercio que nunca realizó envíos o aplica un filtro de estado inexistente para ese comercio. El sistema limpia la lista y muestra el mensaje: \"No se encontraron pedidos que coincidan con los filtros ingresados\".",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
       "tribe_gig": null,
-      "version": 8,
+      "version": 9,
       "is_blocked": false,
       "tags": [],
       "due_date": null,
@@ -1820,7 +1830,7 @@
       "ref": 33,
       "is_closed": false,
       "backlog_order": 1791035510483665,
-      "sprint_order": 12,
+      "sprint_order": 14,
       "kanban_order": 1793852754305984,
       "subject": "Ver detalle de pedidos",
       "description": "Como Operario, quiero ver el detalle completo de un pedido para conocer todos sus datos ante una consulta del comercio o del cliente.\n\n*   Reglas\n    *   El detalle muestra: comercio emisor, datos del destinatario, dirección de destino, tamaño del paquete, vehículo requerido, estado actual, código de seguimiento y repartidor asignado (si corresponde).\n    *   Desde el detalle se accede al timeline del pedido.\n    *   Es de solo lectura, excepto las acciones permitidas según el estado (por ejemplo, cancelar).\n*   Criterios\n    *   ESCENARIO 1: Visualización del detalle.    \n        El operario selecciona un pedido del listado. El sistema muestra todos sus datos y los botones de acción habilitados para su estado actual.\n    *   ESCENARIO 2: Pedido sin repartidor.    \n        El operario abre un pedido en estado \"Registrado\". El sistema muestra el campo de repartidor vacío con la leyenda \"Sin asignar\".",
@@ -1857,7 +1867,7 @@
       "status": "Ready for test",
       "swimlane": null,
       "milestone": "Sprint 2",
-      "modified_date": "2026-11-10T19:31:18+0000",
+      "modified_date": "2026-11-13T11:34:37+0000",
       "created_date": "2026-10-05T22:04:02+0000",
       "finish_date": null,
       "generated_from_issue": null,
@@ -1869,12 +1879,12 @@
       "sprint_order": 9,
       "kanban_order": 1794339078777813,
       "subject": "Deshabilitar repartidor",
-      "description": "Como Operario, quiero deshabilitar a un repartidor para impedir que opere sin perder su historial de entregas.\n\n*   Reglas\n    *   Se aplica borrado lógico.\n    *   No se puede deshabilitar a un repartidor con un pedido en estado \"Asignado\", \"Retirado\" o \"En viaje\".\n*   Criterios\n    *   ESCENARIO 1: Deshabilitación exitosa.   \n        El repartidor sin viajes activos pasa a \"Inactivo\" y su PIN deja de funcionar.\n    *   ESCENARIO 2: Deshabilitación bloqueada.   \n        Si tiene un pedido activo, el sistema muestra: _\"El repartidor tiene pedidos en curso\"_.",
+      "description": "Como Operario, quiero deshabilitar a un repartidor para impedir que opere sin perder su historial de entregas.\n\n*   Reglas\n    *   Se aplica borrado lógico.\n    *   No se puede deshabilitar a un repartidor con un pedido en estado \"Asignado\", \"Retirado\" o \"En viaje\".\n*   Criterios\n    *   ESCENARIO 1: Deshabilitación exitosa.    \n        El repartidor sin viajes activos pasa a \"Deshabilitado\" y su PIN deja de funcionar.\n    *   ESCENARIO 2: Deshabilitación bloqueada.    \n        Si tiene un pedido activo, el sistema muestra: _\"El repartidor tiene pedidos en curso\"_.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
       "tribe_gig": null,
-      "version": 7,
+      "version": 8,
       "is_blocked": false,
       "tags": [],
       "due_date": null,
@@ -1897,13 +1907,13 @@
         },
         {
           "role": "Back",
-          "points": "5"
+          "points": "3"
         }
       ],
-      "status": "New",
+      "status": "Done",
       "swimlane": null,
       "milestone": "Sprint 2",
-      "modified_date": "2026-11-03T21:26:13+0000",
+      "modified_date": "2026-11-17T21:11:25+0000",
       "created_date": "2026-10-05T22:05:49+0000",
       "finish_date": null,
       "generated_from_issue": null,
@@ -1913,14 +1923,14 @@
       "is_closed": false,
       "backlog_order": 1791035510483666,
       "sprint_order": 11,
-      "kanban_order": 1791237949189609,
+      "kanban_order": 1794949885674293,
       "subject": "Alerta de pedido sin repartidor",
-      "description": "Como Operario, quiero ser alertado cuando un pedido no consigue repartidor para poder reintentar la asignación o informar al comercio.\n\n*   Reglas\n    *   La alerta se genera cuando no hay candidatos disponibles o cuando ya se agotaron todos.\n    *   El pedido permanece en estado \"Registrado\" mientras no sea aceptado.\n    *   El operario puede relanzar la asignación automática manualmente.\n*   Criterios\n    *   ESCENARIO 1: Visualización de la alerta.   \n        El sistema no logra asignar un pedido. En el panel del operario aparece destacado el aviso _\"Pedido sin repartidor disponible\"_ junto al pedido afectado.\n    *   ESCENARIO 2: Reintento de asignación.   \n        El operario presiona \"Reintentar asignación\" sobre el pedido. El sistema vuelve a buscar candidatos disponibles y cercanos, y si encuentra uno, le envía la solicitud y quita la alerta.",
+      "description": "Como Operario, quiero ser alertado cuando un pedido no consigue repartidor disponible para estar al tanto de la demora.\n\n*   Reglas\n    *   La alerta se genera automáticamente cuando un pedido queda sin repartidor asignado porque no hay candidatos disponibles compatibles con el vehículo requerido.\n*   Criterios\n    *   ESCENARIO 1: Visualización de la alerta por falta de candidatos disponibles  \n        El sistema no encuentra ningún repartidor disponible compatible con el vehículo requerido. El pedido queda en estado \"Registrado\" y en el panel del operario aparece destacada la notificación y el aviso \"Pedido sin repartidor disponible\" con una redirección al pedido, hasta que el operario interactúa con la notificación.",
       "client_requirement": false,
       "team_requirement": false,
       "external_reference": null,
       "tribe_gig": null,
-      "version": 4,
+      "version": 9,
       "is_blocked": false,
       "tags": [],
       "due_date": null,
@@ -2247,6 +2257,98 @@
       "tags": [],
       "due_date": null,
       "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "8"
+        }
+      ],
+      "status": "Ready for test",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-17T21:11:35+0000",
+      "created_date": "2026-11-16T22:25:55+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 41,
+      "is_closed": false,
+      "backlog_order": 1794867955690336,
+      "sprint_order": 12,
+      "kanban_order": 1794949895970145,
+      "subject": "Asignación automática de repartidor",
+      "description": "Como Operario quiero asignar automáticamente un pedido a un repartidor al registrar un nuevo pedido para agilizar el despacho de viajes sin tener que seleccionarlo manualmente.\n\n*   Reglas\n    *   Al cargar un pedido, el selector de repartidor ofrece la opción predeterminada \"Automático\".\n    *   La asignación automática selecciona únicamente repartidores activos, en estado \"Disponible\"  y cuyo vehículo sea el requerido del pedido.\n    *   Entre los candidatos que cumplen las condiciones, se prioriza por orden FIFO a quien lleve más tiempo esperando disponible sin viaje.\n    *   Si un repartidor asignado rechaza el viaje o deja vencer el tiempo de respuesta, el sistema reintenta la asignación automáticamente en cascada con el siguiente candidato disponible en la cola.\n*   Criterios\n    *   ESCENARIO 1: Asignación automática exitosa al registrar un pedido  \n        El operario registra un pedido dejando la opción predeterminada \"Automático\". El sistema asigna el pedido al repartidor que lleva más tiempo esperando disponible, cambia el estado a \"Asignado\" y registra el evento en el historial.\n    *   ESCENARIO 2: Reasignación automática en cascada ante rechazo o expiración  \n        Un repartidor asignado rechaza el pedido o deja expirar los 5 minutos de tolerancia, habiendo otro repartidor disponible con el mismo vehículo en espera. El sistema libera la asignación anterior, asigna automáticamente el pedido al siguiente repartidor de la cola y registra ambos movimientos en el historial.",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 5,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
+    },
+    {
+      "custom_attributes_values": {},
+      "role_points": [
+        {
+          "role": "UX",
+          "points": "0"
+        },
+        {
+          "role": "Design",
+          "points": "0"
+        },
+        {
+          "role": "Front",
+          "points": "0"
+        },
+        {
+          "role": "Back",
+          "points": "3"
+        }
+      ],
+      "status": "Ready for test",
+      "swimlane": null,
+      "milestone": "Sprint 2",
+      "modified_date": "2026-11-17T21:11:44+0000",
+      "created_date": "2026-11-16T22:44:00+0000",
+      "finish_date": null,
+      "generated_from_issue": null,
+      "generated_from_task": null,
+      "from_task_ref": null,
+      "ref": 42,
+      "is_closed": false,
+      "backlog_order": 1794869040100194,
+      "sprint_order": 13,
+      "kanban_order": 1794949904823289,
+      "subject": "Reintentar asignación de pedido",
+      "description": "Como Operario quiero relanzar manualmente la búsqueda automática de repartidor sobre un pedido pendiente para asignarlo a un repartidor disponible.\n\n*   Reglas\n    *   La opción de reintentar asignación solo está habilitada para pedidos que se encuentren en estado \"Registrado\" sin repartidor asignado. \n    *   El reintento aplica los mismos criterios de compatibilidad de vehículo y prioridad por tiempo de espera (FIFO) que la asignación automática.\n*   Criterios\n    *   ESCENARIO 1: Reintento de asignación exitoso  \n        El operario presiona \"Reintentar asignación\" sobre un pedido en estado \"Registrado\" sin repartidor (desde el panel principal o desde el detalle del pedido) cuando ya hay un repartidor disponible compatible. El sistema le asigna el pedido, cambia su estado a \"Asignado\" y registra la asignación en el historial.\n    *   ESCENARIO 2: Reintento sin repartidores disponibles  \n        El operario presiona \"Reintentar asignación\" sobre un pedido afectado, pero continúa sin haber repartidores disponibles que coincidan con el vehículo requerido. El sistema mantiene el pedido en estado \"Registrado\" y conserva el aviso \"Pedido sin repartidor disponible\".",
+      "client_requirement": false,
+      "team_requirement": false,
+      "external_reference": null,
+      "tribe_gig": null,
+      "version": 5,
+      "is_blocked": false,
+      "tags": [],
+      "due_date": null,
+      "due_date_reason": ""
     }
   ],
   "tasks": [],
@@ -2279,7 +2381,7 @@
   "wiki_pages": [],
   "tags": [],
   "_sanitization": {
-    "source_sha256": "d8b0b8be973f04451b96bdc1934cc7d422a45b6672bd1bef8096f5af1dfc6300",
+    "source_sha256": "7c43dfde53e5697f627ae6e6ce2243b19e3666426e3b85c40635225870d5b462",
     "policy": "Se omitieron propietarios, asignaciones, adjuntos, historial, actividad, watchers y datos de cuentas; correos en texto libre se reemplazaron."
   }
 }

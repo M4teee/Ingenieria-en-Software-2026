@@ -147,7 +147,7 @@ id,ref,subject,description,sprint_id,sprint,sprint_estimated_start,sprint_estima
     *   ESCENARIO 1: Búsqueda exitosa con filtros   
         El operario ingresa a la vista del historial general, selecciona filtros y escribe el nombre de un comercio particular. Al presionar ""Buscar"", el sistema actualiza la lista mostrando únicamente los pedidos de ese comercio que fracasaron en la entrega, permitiendo acceder a su línea de tiempo.
     *   ESCENARIO 2: Búsqueda sin resultados   
-        El operario ingresa parámetros de búsqueda para un comercio que nunca realizó envíos o aplica un filtro de estado inexistente para ese comercio. El sistema limpia la lista y muestra el mensaje: ""No se encontraron pedidos que coincidan con los filtros ingresados"".",532934,Sprint 2,2026-10-30,2026-11-20,sai21,Simon,felicarre,Felipe Carressane,felicarre,Felipe Carressane,New,False,,2.0,0.0,0.0,0.0,2.0,1791035510483661,1,1791038295515860,2026-10-03 14:38:15.515865+00:00,2026-11-03 12:35:08.725916+00:00,,False,False,0,,,,,,,[],0,,,8
+        El operario ingresa parámetros de búsqueda para un comercio que nunca realizó envíos o aplica un filtro de estado inexistente para ese comercio. El sistema limpia la lista y muestra el mensaje: ""No se encontraron pedidos que coincidan con los filtros ingresados"".",532934,Sprint 2,2026-10-30,2026-11-20,sai21,Simon,felicarre,Felipe Carressane,felicarre,Felipe Carressane,In progress,False,,2.0,0.0,0.0,0.0,2.0,1791035510483661,1,1791038295515860,2026-10-03 14:38:15.515865+00:00,2026-11-17 20:24:25.000000+00:00,,False,False,0,,,,,,,[],0,,,8
 9597944,24,Visualizar estado del pedido,"Como Cliente Final, quiero visualizar el estado actualizado de mi pedido para saber cuándo llegará mi paquete.
 
 *   Reglas
@@ -205,18 +205,14 @@ id,ref,subject,description,sprint_id,sprint,sprint_estimated_start,sprint_estima
     *   ESCENARIO 1: Deshabilitación exitosa.    
         El repartidor sin viajes activos pasa a ""Deshabilitado"" y su PIN deja de funcionar.
     *   ESCENARIO 2: Deshabilitación bloqueada.    
-        Si tiene un pedido activo, el sistema muestra: _""El repartidor tiene pedidos en curso""_.",532934,Sprint 2,2026-10-30,2026-11-20,santi.rossetti,Santiago Rossetti,santi.rossetti,Santiago Rossetti,santi.rossetti,Santiago Rossetti,Ready for test,False,,5.0,0.0,0.0,0.0,5.0,1791035510483666,9,1794339078777813,2026-10-05 22:04:02.323049+00:00,2026-11-13 11:34:37.973823+00:00,,False,False,0,,,,,,,[],0,,,4
-9602923,30,Alerta de pedido sin repartidor,"Como Operario, quiero ser alertado cuando un pedido no consigue repartidor para poder reintentar la asignación o informar al comercio.
+        Si tiene un pedido activo, el sistema muestra: _""El repartidor tiene pedidos en curso""_.",532934,Sprint 2,2026-10-30,2026-11-20,santi.rossetti,Santiago Rossetti,santi.rossetti,Santiago Rossetti,santi.rossetti,Santiago Rossetti,Ready for test,False,,5.0,0.0,0.0,0.0,5.0,1791035510483666,9,1794339078777813,2026-10-05 22:04:02.323049+00:00,2026-11-13 11:34:37.000000+00:00,,False,False,0,,,,,,,[],0,,,4
+9602923,30,Alerta de pedido sin repartidor,"Como Operario, quiero ser alertado cuando un pedido no consigue repartidor disponible para estar al tanto de la demora.
 
 *   Reglas
-    *   La alerta se genera cuando no hay candidatos disponibles o cuando ya se agotaron todos.
-    *   El pedido permanece en estado ""Registrado"" mientras no sea aceptado.
-    *   El operario puede relanzar la asignación automática manualmente.
+    *   La alerta se genera automáticamente cuando un pedido queda sin repartidor asignado porque no hay candidatos disponibles compatibles con el vehículo requerido.
 *   Criterios
-    *   ESCENARIO 1: Visualización de la alerta.   
-        El sistema no logra asignar un pedido. En el panel del operario aparece destacado el aviso _""Pedido sin repartidor disponible""_ junto al pedido afectado.
-    *   ESCENARIO 2: Reintento de asignación.   
-        El operario presiona ""Reintentar asignación"" sobre el pedido. El sistema vuelve a buscar candidatos disponibles y cercanos, y si encuentra uno, le envía la solicitud y quita la alerta.",532934,Sprint 2,2026-10-30,2026-11-20,santi.rossetti,Santiago Rossetti,sai21,Simon,sai21,Simon,Ready for test,False,,5.0,0.0,0.0,0.0,5.0,1791035510483666,11,1794587407568976,2026-10-05 22:05:49.189615+00:00,2026-11-13 16:30:07.571762+00:00,,False,False,0,,,,,,,[],0,,,5
+    *   ESCENARIO 1: Visualización de la alerta por falta de candidatos disponibles  
+        El sistema no encuentra ningún repartidor disponible compatible con el vehículo requerido. El pedido queda en estado ""Registrado"" y en el panel del operario aparece destacada la notificación y el aviso ""Pedido sin repartidor disponible"" con una redirección al pedido, hasta que el operario interactúa con la notificación.",532934,Sprint 2,2026-10-30,2026-11-20,santi.rossetti,Santiago Rossetti,sai21,Simon,sai21,Simon,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483666,11,1794587407568976,2026-10-05 22:05:49.189615+00:00,2026-11-17 21:11:25.000000+00:00,,False,False,0,,,,,,,[],0,,,5
 9602936,32,Recuperar PIN de repartidor,"Como Operario, quiero regenerar el PIN de un repartidor para recuperar su acceso si lo olvidó o si fue comprometido.
 
 *   Reglas
@@ -287,3 +283,25 @@ id,ref,subject,description,sprint_id,sprint,sprint_estimated_start,sprint_estima
          El repartidor autenticado accede a la sección ""Historial de entregas"" habiendo realizado viajes previos. El sistema lista cronológicamente todos sus pedidos finalizados en estado ""Entregado"", ""Fallido"" o ""Cancelado"", exponiendo para cada uno el comercio de origen, dirección de destino, estado de cierre y fecha/hora. 
     *   ESCENARIO 2: Historial vacío sin viajes finalizados  
          El repartidor accede a la sección ""Historial de entregas"" sin haber completado ni registrado viajes finalizados en su cuenta. El sistema muestra la pantalla limpia con el mensaje: ""Aún no tienes entregas registradas en tu historial"".",532933,Sprint 1,2026-10-09,2026-10-30,lucioo15,Lucio Persano,sai21,Simon,sai21,Simon,Done,False,,2.0,0.0,0.0,0.0,2.0,1792149579198656,17,1793413514389255,2026-10-16 11:19:39.218869+00:00,2026-10-31 02:25:14.391945+00:00,,False,False,0,,,,,,,[],0,,,6
+9717088,41,Asignación automática de repartidor,"Como Operario quiero asignar automáticamente un pedido a un repartidor al registrar un nuevo pedido para agilizar el despacho de viajes sin tener que seleccionarlo manualmente.
+
+*   Reglas
+    *   Al cargar un pedido, el selector de repartidor ofrece la opción predeterminada ""Automático"".
+    *   La asignación automática selecciona únicamente repartidores activos, en estado ""Disponible""  y cuyo vehículo sea el requerido del pedido.
+    *   Entre los candidatos que cumplen las condiciones, se prioriza por orden FIFO a quien lleve más tiempo esperando disponible sin viaje.
+    *   Si un repartidor asignado rechaza el viaje o deja vencer el tiempo de respuesta, el sistema reintenta la asignación automáticamente en cascada con el siguiente candidato disponible en la cola.
+*   Criterios
+    *   ESCENARIO 1: Asignación automática exitosa al registrar un pedido  
+        El operario registra un pedido dejando la opción predeterminada ""Automático"". El sistema asigna el pedido al repartidor que lleva más tiempo esperando disponible, cambia el estado a ""Asignado"" y registra el evento en el historial.
+    *   ESCENARIO 2: Reasignación automática en cascada ante rechazo o expiración  
+        Un repartidor asignado rechaza el pedido o deja expirar los 5 minutos de tolerancia, habiendo otro repartidor disponible con el mismo vehículo en espera. El sistema libera la asignación anterior, asigna automáticamente el pedido al siguiente repartidor de la cola y registra ambos movimientos en el historial.",532934,Sprint 2,2026-10-30,2026-11-20,sai21,Simon,sai21,Simon,sai21,Simon,Ready for test,False,,8.0,0.0,0.0,0.0,8.0,1794867955690336,12,1794949895970145,2026-11-16 22:25:55.772580+00:00,2026-11-17 21:11:35.342173+00:00,,False,False,0,,,,,,,[],0,,,
+9717120,42,Reintentar asignación de pedido,"Como Operario quiero relanzar manualmente la búsqueda automática de repartidor sobre un pedido pendiente para asignarlo a un repartidor disponible.
+
+*   Reglas
+    *   La opción de reintentar asignación solo está habilitada para pedidos que se encuentren en estado ""Registrado"" sin repartidor asignado. 
+    *   El reintento aplica los mismos criterios de compatibilidad de vehículo y prioridad por tiempo de espera (FIFO) que la asignación automática.
+*   Criterios
+    *   ESCENARIO 1: Reintento de asignación exitoso  
+        El operario presiona ""Reintentar asignación"" sobre un pedido en estado ""Registrado"" sin repartidor (desde el panel principal o desde el detalle del pedido) cuando ya hay un repartidor disponible compatible. El sistema le asigna el pedido, cambia su estado a ""Asignado"" y registra la asignación en el historial.
+    *   ESCENARIO 2: Reintento sin repartidores disponibles  
+        El operario presiona ""Reintentar asignación"" sobre un pedido afectado, pero continúa sin haber repartidores disponibles que coincidan con el vehículo requerido. El sistema mantiene el pedido en estado ""Registrado"" y conserva el aviso ""Pedido sin repartidor disponible"".",532934,Sprint 2,2026-10-30,2026-11-20,sai21,Simon,sai21,Simon,sai21,Simon,Ready for test,False,,3.0,0.0,0.0,0.0,3.0,1794869040100194,13,1794949904823289,2026-11-16 22:44:00.000000+00:00,2026-11-17 21:11:44.000000+00:00,,False,False,0,,,,,,,[],0,,,
