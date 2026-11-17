@@ -1,0 +1,85 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Historial general de pedidos</h2>
+
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-5">
+            <label for="comercio" class="form-label">
+                Nombre del comercio
+            </label>
+            <input
+                type="text"
+                class="form-control"
+                id="comercio"
+                name="comercio"
+                value="{{ comercio_buscado }}"
+                placeholder="Buscar comercio"
+            >
+        </div>
+
+        <div class="col-md-4">
+            <label for="estado" class="form-label">
+                Estado del pedido
+            </label>
+            <select
+                class="form-select"
+                id="estado"
+                name="estado"
+            >
+                <option value="">Todos los estados</option>
+                {% for valor, nombre in estados %}
+                    <option value="{{ valor }}"
+                        {% if estado_seleccionado == valor %}selected{% endif %}>
+                        {{ nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">
+                Buscar
+            </button>
+        </div>
+    </form>
+
+    {% if pedidos %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Comercio</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                        <tr>
+                            <td>{{ pedido.codigo }}</td>
+                            <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
+                            <td>{{ pedido.get_estado_display }}</td>
+                            <td>
+                                <a
+                                    href="{% url 'operario:detalle_pedido' pedido.pk %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Ver historial
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No se encontraron pedidos que coincidan con los filtros ingresados
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
