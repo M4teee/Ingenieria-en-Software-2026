@@ -1928,7 +1928,7 @@ class EntregasFallidasTests(TestCase):
         pedido = self._pedido('FALLA-CON-FOTO')
         evento = self._evento_falla(pedido, repartidor, 'No respondió.')
 
-        with tempfile.TemporaryDirectory() as media_root:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as media_root:
             with override_settings(MEDIA_ROOT=media_root):
                 evento.fotografia.save(
                     'evidencia.jpg', ContentFile(b'evidencia privada'), save=True,
@@ -1938,7 +1938,10 @@ class EntregasFallidasTests(TestCase):
                 self.assertContains(listado, ruta_foto)
 
                 foto_operario = self.client.get(ruta_foto)
-                self.assertEqual(foto_operario.status_code, 200)
+                try:
+                    self.assertEqual(foto_operario.status_code, 200)
+                finally:
+                    foto_operario.close()
 
                 self.client.force_login(self.sin_rol)
                 self.assertEqual(self.client.get(ruta_foto).status_code, 404)
