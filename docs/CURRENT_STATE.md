@@ -1,12 +1,13 @@
 # Estado actual
 
-Actualizado: 2026-11-16. Contrasta el código de la rama `main` a partir del commit `41352f4`, incluidos los cambios locales de HU #30 y el ajuste de disponibilidad descrito abajo, con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
+Actualizado: 2026-11-17. Contrasta el código de la rama `main` en `a9731a1` (después del pull fast-forward), la cobertura de pruebas y las fuentes disponibles. Se revisó el cierre de HU 33; no se consultó Taiga en vivo.
 
 ## Implementación observada
 
 - `Backend/` contiene el backend Django en Python 3.14; `requirements.txt` fija Django 6.1.2 y las dependencias de formularios e imágenes. SQLite es la base predeterminada, reemplazada si `.env` define `DATABASE_URL`. `Frontend/` es un marcador, no una aplicación frontend aparte.
 - `main.homePage` deriva las visitas anónimas de `/` al formulario público de seguimiento; `/clienteFinal/` mantiene la misma consulta. Las sesiones `is_operario` se dirigen a `/operario/` y las sesiones con perfil activo de repartidor a `/repartidor/`. La navegación compartida muestra accesos de login por rol cuando no hay sesión y opciones del propio rol cuando la hay.
 - `main.operario` mantiene comercios y gestiona pedidos desde plantillas Django. El operario registra pedidos asociados a comercios activos; la vista vuelve a validar el comercio durante la escritura. El alta es idempotente por clave de solicitud, genera un código seguro y registra `Registrado` en el historial dentro de una transacción.
+- El detalle operativo de HU 33 presenta comercio emisor (nombre, dirección y contacto), datos del destinatario, dirección de destino, tamaño del paquete, vehículo requerido, especificaciones, fecha estimada, estado, código, repartidor o “Sin asignar” e historial. El detalle es de solo lectura salvo acciones disponibles según el estado; HU 13 ofrece cancelar solo pedidos `registrado` o `asignado`. El acceso requiere `is_operario=True`.
 - El formulario de pedidos también captura como texto libre los datos del destinatario y el tamaño del paquete para HU33. El vehículo requerido dejó de ser texto libre: `Pedido.vehiculo_requerido` es un `CharField` con las opciones de `Repartidor.VEHICULOS` (`bicicleta`, `moto`, `auto`, `camion`) y `PedidoForm` lo presenta como un selector `form-select` que solo admite esas opciones. El detalle muestra la etiqueta legible del vehículo y conserva la compatibilidad con pedidos antiguos: valores de texto libre previos se muestran tal como están y los vacíos se presentan como “No informado”. El formulario requiere los tres datos de texto y un vehículo válido para pedidos nuevos; no define atributos del destinatario, categorías, unidades ni catálogos de vehículos adicionales. Para la fecha estimada, el navegador sugiere como mínimo la hora actual y la validación del servidor rechaza fechas más de diez minutos anteriores al momento actual.
 - Todas las páginas de `/operario/` requieren sesión activa con `is_operario=True`; `is_staff` ya no autoriza el módulo. `is_operario` es un campo del usuario editable desde Django Admin. La migración inicial copia a ese campo el `is_staff` existente para preservar el acceso previo; ambos atributos luego se administran por separado.
 - `main.operario` permite listar los comercios en `/operario/comercios/` y darlos de alta en `/operario/comercios/nuevo/`; ambas páginas requieren `is_operario`. El formulario exige nombre único, dirección, contacto y una selección explícita de estado activo o inactivo.
@@ -51,6 +52,15 @@ Actualizado: 2026-11-16. Contrasta el código de la rama `main` a partir del com
 - `DEBUG=True`, clave de desarrollo, almacenamiento local y servicio `runserver` hacen que esta configuración sea solo de desarrollo.
 
 ## Verificaciones de esta revisión
+
+Para el cierre de HU 33 después del pull del 2026-11-17:
+
+- Se agregó una prueba que verifica en el detalle los valores concretos de comercio, destinatario, destino, tamaño, vehículo requerido, especificaciones, código, estado y “Sin asignar”. Las pruebas existentes cubren el timeline, el repartidor asignado, comercio/dirección ausentes y permisos.
+- `../.venv/bin/python manage.py test --settings=config.settings_test`: 150 pruebas aprobadas; Django reportó el chequeo del sistema sin problemas. Se usó SQLite en memoria; no se conectó a Neon.
+- `../.venv/bin/python manage.py check --settings=config.settings_test`: aprobado.
+- `../.venv/bin/python manage.py makemigrations --check --dry-run --settings=config.settings_test`: “No changes detected”.
+- `../.venv/bin/python -m pip check`: sin dependencias incompatibles; `python3 scripts/check_docs.py .`: 44 enlaces verificados; `git diff --check`: aprobado.
+- La importación inicial de dependencias fue lenta en este entorno; luego el chequeo y la suite completaron correctamente. No se modificaron datos de desarrollo.
 
 Para el ajuste de disponibilidad del 2026-11-16, se inspeccionó el código y se buscó referencias ejecutables a `User.disponible`; las aserciones que quedaban en `main.repartidor.tests` se cambiaron para comprobar `Repartidor.disponible`. No se ejecutó la suite de pruebas en este ajuste.
 
