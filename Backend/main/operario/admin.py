@@ -1,6 +1,6 @@
 from django.contrib import admin
 from main.users.models import User
-from main.operario.models import Comercio
+from main.operario.models import Comercio, Devolucion
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin
 
@@ -28,3 +28,20 @@ class ComercioAdmin(admin.ModelAdmin):
     list_filter = ('fecha_creacion',)
     readonly_fields = ('fecha_creacion',)
     date_hierarchy = 'fecha_creacion'
+
+
+@admin.register(Devolucion)
+class DevolucionAdmin(admin.ModelAdmin):
+    list_display = ('pedido', 'usuario', 'fecha')
+    search_fields = ('pedido__codigo', 'usuario__username')
+    readonly_fields = ('pedido', 'usuario', 'fecha')
+    date_hierarchy = 'fecha'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
