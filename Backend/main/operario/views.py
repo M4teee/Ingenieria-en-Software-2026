@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
+from django.db.models import F, OuterRef, Prefetch, Subquery
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -16,7 +17,7 @@ from main.despacho import (
     despacho_automatico as _despacho_automatico,
     procesar_asignaciones_vencidas,
 )
-from main.operario.models import Comercio
+from main.operario.models import Comercio, Devolucion
 from main.repartidor.models import HistorialEstado, Pedido, Repartidor
 from main.users.models import User
 
@@ -73,6 +74,75 @@ def inicio(request):
         'pedidos': pedidos,
         'pedidos_sin_repartidor': _pedidos_sin_repartidor(pedidos),
     })
+
+
+@login_required
+def entregas_fallidas(request):
+    _exigir_operario(request)
+
+    eventos_falla = HistorialEstado.objects.filter(
+        pedido_id=OuterRef('pk'),
+        estado_nuevo='fallido',
+    ).order_by('-fecha', '-pk')
+    eventos_falla_prefetch = (
+        HistorialEstado.objects.filter(estado_nuevo='fallido')
+        .select_related('usuario')
+        .order_by('-fecha', '-pk')
+    )
+    pedidos = (
+        Pedido.objects.filter(estado='fallido')
+        .select_related('comercio')
+        .annotate(fecha_falla=Subquery(eventos_falla.values('fecha')[:1]))
+        .prefetch_related(
+            Prefetch(
+                'historial',
+                queryset=eventos_falla_prefetch,
+                to_attr='eventos_falla',
+            ),
+            Prefetch(
+                'devolucion_confirmada',
+                queryset=Devolucion.objects.select_related('usuario'),
+                to_attr='evento_devolucion_hu34',
+            ),
+        )
+        .order_by(F('fecha_falla').asc(nulls_last=True), 'pk')
+    )
+
+    entregas = []
+    for pedido in pedidos:
+        eventos = pedido.eventos_falla
+        entregas.append({
+            'pedido': pedido,
+            # Si hubiera varios eventos de falla, se muestra el último intento.
+            'evento': eventos[0] if eventos else None,
+            'devolucion': pedido.evento_devolucion_hu34,
+        })
+
+    return render(request, 'operario/entregas_fallidas.html', {
+        'entregas': entregas,
+    })
+
+
+@login_required
+@require_POST
+@transaction.atomic
+def confirmar_devolucion(request, pedido_id):
+    _exigir_operario(request)
+    pedido = get_object_or_404(
+        Pedido.objects.select_for_update(),
+        pk=pedido_id,
+    )
+    if pedido.estado != 'fallido':
+        return HttpResponseBadRequest(
+            'Solo se puede confirmar la devolución de un pedido Fallido.'
+        )
+
+    Devolucion.objects.get_or_create(
+        pedido=pedido,
+        defaults={'usuario': request.user},
+    )
+    messages.success(request, 'Devolución registrada')
+    return redirect('operario:entregas_fallidas')
 
 @login_required
 def buscar_pedido(request):
