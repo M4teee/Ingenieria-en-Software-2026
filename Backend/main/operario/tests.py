@@ -703,6 +703,79 @@ class CargarPedidoValidacionesTests(TestCase):
         self.assertEqual(Pedido.objects.count(), 1)
         self.assertEqual(HistorialEstado.objects.count(), 1)
 
+    def test_regreso_historial_con_datos_nuevos_crea_nuevo_pedido_con_nuevo_codigo(self):
+        datos_originales = self._datos_formulario()
+        primera = self.client.post(self.url, datos_originales)
+        self.assertEqual(primera.status_code, 302)
+        pedido_original = Pedido.objects.get()
+
+        # Al volver atrás con el navegador en historial/caché, el formulario conserva
+        # la clave de idempotencia anterior pero el usuario ingresa datos diferentes.
+        datos_modificados = {
+            **datos_originales,
+            'direccion_destino': 'Calle Modificada 999',
+            'datos_destinatario': 'Nuevo Destinatario',
+        }
+        segunda = self.client.post(self.url, datos_modificados)
+
+        self.assertEqual(segunda.status_code, 302)
+        self.assertNotEqual(segunda.url, primera.url)
+        self.assertEqual(Pedido.objects.count(), 2)
+
+        pedido_nuevo = Pedido.objects.exclude(pk=pedido_original.pk).get()
+        self.assertEqual(segunda.url, reverse('operario:pedido_registrado', args=[pedido_nuevo.pk]))
+        self.assertNotEqual(pedido_nuevo.codigo, pedido_original.codigo)
+        self.assertNotEqual(pedido_nuevo.clave_idempotencia, pedido_original.clave_idempotencia)
+        self.assertEqual(pedido_nuevo.direccion_destino, 'Calle Modificada 999')
+        self.assertEqual(pedido_nuevo.datos_destinatario, 'Nuevo Destinatario')
+
+    def test_regreso_historial_con_formulario_vacio_falla_validacion_y_no_redirige_a_pedido_anterior(self):
+        datos_originales = self._datos_formulario()
+        primera = self.client.post(self.url, datos_originales)
+        self.assertEqual(primera.status_code, 302)
+        self.assertEqual(Pedido.objects.count(), 1)
+        pedido_original = Pedido.objects.get()
+
+        # Al volver atrás con el navegador y vaciar todos los campos obligatorios
+        # conservando la clave de idempotencia anterior en caché:
+        datos_vacios = {
+            'clave_idempotencia': datos_originales['clave_idempotencia'],
+            'comercio': '',
+            'direccion_destino': '',
+            'datos_destinatario': '',
+            'tamano_paquete': '',
+            'vehiculo_requerido': '',
+            'especificaciones_traslado': '',
+            'fecha_hora_estimada_entrega': '',
+        }
+        segunda = self.client.post(self.url, datos_vacios)
+
+        # Debe responder 200 con el formulario mostrando errores de validación,
+        # NUNCA redirigir como si se hubiera registrado el pedido anterior.
+        self.assertEqual(segunda.status_code, 200)
+        self.assertTrue(segunda.context['form'].errors)
+        self.assertIn('direccion_destino', segunda.context['form'].errors)
+        self.assertIn('comercio', segunda.context['form'].errors)
+        self.assertEqual(Pedido.objects.count(), 1)
+        # La clave en el formulario debe renovarse para no colisionar en un próximo envío válido
+        clave_renovada = segunda.context['form']['clave_idempotencia'].value()
+        self.assertNotEqual(str(clave_renovada), datos_originales['clave_idempotencia'])
+
+    def test_cargar_pedido_incluye_encabezados_never_cache(self):
+        respuesta = self.client.get(self.url)
+        self.assertEqual(respuesta.status_code, 200)
+        cache_control = respuesta.headers.get('Cache-Control', '')
+        self.assertIn('no-cache', cache_control)
+        self.assertIn('no-store', cache_control)
+        self.assertIn('must-revalidate', cache_control)
+
+    def test_cargar_pedido_template_incluye_script_bfcache_renovacion_clave(self):
+        respuesta = self.client.get(self.url)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'pageshow')
+        self.assertContains(respuesta, 'renovarClaveIdempotencia')
+        self.assertContains(respuesta, 'sessionStorage')
+
     def test_colision_de_codigo_se_reintenta(self):
         Pedido.objects.create(codigo='CODIGO-COLISION')
 

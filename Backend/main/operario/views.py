@@ -9,6 +9,7 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
 
@@ -194,6 +195,7 @@ def cambiar_estado_comercio(request):
 
 
 @login_required
+@never_cache
 def nuevo_comercio(request):
     _exigir_operario(request)
 
@@ -262,6 +264,7 @@ def cambiar_estado_repartidor(request):
 
 
 @login_required
+@never_cache
 def nuevo_repartidor(request):
     _exigir_operario(request)
 
@@ -474,6 +477,39 @@ def _codigo_de_solicitud(request):
         return None
 
 
+def _datos_coinciden_con_pedido(pedido, datos):
+    if pedido.comercio_id != datos['comercio'].pk:
+        return False
+    if pedido.direccion_destino != datos['direccion_destino']:
+        return False
+    if pedido.datos_destinatario != datos['datos_destinatario']:
+        return False
+    if pedido.tamano_paquete != datos['tamano_paquete']:
+        return False
+    if pedido.vehiculo_requerido != datos['vehiculo_requerido']:
+        return False
+    if pedido.especificaciones_traslado != datos['especificaciones_traslado']:
+        return False
+
+    fecha_pedido = pedido.fecha_hora_estimada_entrega
+    fecha_datos = datos['fecha_hora_estimada_entrega']
+    if fecha_pedido and fecha_datos:
+        if abs((fecha_pedido - fecha_datos).total_seconds()) > 60:
+            return False
+    elif fecha_pedido != fecha_datos:
+        return False
+
+    perfil = datos.get('repartidor')
+    if perfil is not None:
+        if pedido.repartidor_id != perfil.user_id:
+            return False
+    else:
+        evento_asig = pedido.historial.filter(estado_nuevo='asignado').order_by('fecha', 'pk').first()
+        if evento_asig and 'Asignado por operario' in (evento_asig.incidencia or ''):
+            return False
+    return True
+
+
 def _crear_pedido(formulario, usuario):
     datos = formulario.cleaned_data
     clave = datos['clave_idempotencia']
@@ -540,24 +576,33 @@ def _crear_pedido(formulario, usuario):
 
 
 @login_required
+@never_cache
 def cargar_pedido(request):
     if not request.user.is_operario:
         raise PermissionDenied
 
     if request.method == 'POST':
-        clave = _codigo_de_solicitud(request)
-        if clave:
-            pedido_existente = Pedido.objects.filter(
-                clave_idempotencia=clave
-            ).first()
-            if pedido_existente:
-                return redirect(
-                    'operario:pedido_registrado',
-                    pedido_id=pedido_existente.pk,
-                )
-
         formulario = PedidoForm(request.POST)
         if formulario.is_valid():
+            clave = formulario.cleaned_data.get('clave_idempotencia')
+            pedido_existente = None
+            if clave:
+                pedido_existente = (
+                    Pedido.objects.filter(clave_idempotencia=clave)
+                    .select_related('comercio', 'repartidor')
+                    .prefetch_related('historial')
+                    .first()
+                )
+
+            if pedido_existente:
+                if _datos_coinciden_con_pedido(pedido_existente, formulario.cleaned_data):
+                    return redirect(
+                        'operario:pedido_registrado',
+                        pedido_id=pedido_existente.pk,
+                    )
+                else:
+                    formulario.cleaned_data['clave_idempotencia'] = uuid4()
+
             try:
                 pedido = _crear_pedido(formulario, request.user)
             except ComercioInactivoError:
@@ -575,6 +620,12 @@ def cargar_pedido(request):
                     'operario:pedido_registrado',
                     pedido_id=pedido.pk,
                 )
+        else:
+            clave = _codigo_de_solicitud(request)
+            if clave and Pedido.objects.filter(clave_idempotencia=clave).exists():
+                data = formulario.data.copy()
+                data['clave_idempotencia'] = str(uuid4())
+                formulario.data = data
     else:
         formulario = PedidoForm(initial={'clave_idempotencia': uuid4()})
 
@@ -600,6 +651,7 @@ def pedido_registrado(request, pedido_id):
     return render(request, 'operario/pedido_registrado.html', {'pedido': pedido})
 
 @login_required
+@never_cache
 @require_http_methods(['GET', 'POST'])
 def editar_comercio(request, comercio_id):
     _exigir_operario(request)
