@@ -29,7 +29,11 @@ from .forms import ActualizarEstadoForm, MAX_FOTOGRAFIA_BYTES
 
 
 def _exigir_repartidor_activo(usuario):
-    if not usuario.is_active or not Repartidor.objects.filter(user=usuario).exists():
+    if not usuario.is_active:
+        raise PermissionDenied
+    try:
+        return usuario.repartidor
+    except (AttributeError, Repartidor.DoesNotExist):
         raise PermissionDenied
 
 
@@ -53,15 +57,22 @@ def login_pin(req):
 
 @login_required(login_url='repartidor_login_pin')
 def home(req):
-    repartidor = Repartidor.objects.filter(user=req.user).first()
-    if repartidor is None or not req.user.is_active:
-        raise PermissionDenied
-    asignado = Pedido.objects.filter(
+    repartidor = _exigir_repartidor_activo(req.user)
+    pedido_activo = Pedido.objects.filter(
         repartidor=req.user,
-        estado='asignado',
-        fecha_hora_asignacion__isnull=False,
-        fecha_hora_aceptacion__isnull=True,
-    ).order_by('fecha_hora_asignacion').first()
+        estado__in=['asignado', 'retirado', 'en_viaje']
+    ).select_related('comercio').first()
+
+    asignado = (
+        pedido_activo
+        if (
+            pedido_activo
+            and pedido_activo.estado == 'asignado'
+            and pedido_activo.fecha_hora_asignacion is not None
+            and pedido_activo.fecha_hora_aceptacion is None
+        )
+        else None
+    )
     expirado_actual = False
     if asignado and expirado(asignado):
         with transaction.atomic():
@@ -72,12 +83,10 @@ def home(req):
             if pedido and expirado(pedido):
                 liberar_asignacion_vencida(pedido, req.user)
         expirado_actual = True
+        pedido_activo = None
+        asignado = None
         repartidor.refresh_from_db()
 
-    pedido_activo = Pedido.objects.filter(
-        repartidor=req.user,
-        estado__in=['asignado', 'retirado', 'en_viaje']
-    ).first()
     pedidos_cerrados = Pedido.objects.filter(
         repartidor=req.user,
         estado__in=['entregado', 'fallido', 'cancelado'],
@@ -250,11 +259,7 @@ def rechazar(req, pedido_id):
 @login_required(login_url='repartidor_login_pin')
 @require_POST
 def toggle_disponibilidad(req):
-    _exigir_repartidor_activo(req.user)
-    repartidor = Repartidor.objects.filter(user=req.user).first()
-    if repartidor is None:
-        messages.error(req, 'No se encontró tu perfil de repartidor.')
-        return redirect('repartidor')
+    repartidor = _exigir_repartidor_activo(req.user)
 
     tiene_pedido_activo = Pedido.objects.filter(
         repartidor=req.user,

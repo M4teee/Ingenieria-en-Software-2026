@@ -118,7 +118,17 @@ class Pedido(models.Model):
         verbose_name = 'Pedido'
         verbose_name_plural = 'Pedidos'
         ordering = ['-fecha_creacion']
-
+        indexes = [
+            # Consulta más frecuente: pedidos en curso (inicio, estado_pedidos)
+            models.Index(fields=['estado', 'fecha_creacion'], name='pedido_estado_creacion_idx'),
+            # procesar_asignaciones_vencidas y detección de pedidos asignados
+            models.Index(
+                fields=['estado', 'fecha_hora_asignacion', 'fecha_hora_aceptacion'],
+                name='pedido_asig_vcto_idx',
+            ),
+            # candidato_repartidor: pedidos activos por repartidor
+            models.Index(fields=['repartidor', 'estado'], name='pedido_rep_estado_idx'),
+        ]
     def puede_cambiar_a(self, nuevo_estado):
         return nuevo_estado in self.TRANSICIONES_PERMITIDAS.get(
             self.estado,
@@ -225,6 +235,13 @@ class Repartidor(models.Model):
     class Meta:
         verbose_name = 'Repartidor'
         verbose_name_plural = 'Repartidores'
+        indexes = [
+            # candidato_repartidor: filtro por disponible + vehiculo
+            models.Index(
+                fields=['disponible', 'vehiculo'],
+                name='rep_disponible_vehiculo_idx',
+            ),
+        ]
 
     def save(self, *args, **kwargs):
         if self.disponible:

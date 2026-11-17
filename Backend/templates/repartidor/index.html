@@ -32,6 +32,7 @@
   // no hay formularios ni file inputs, así que es imposible interrumpir una
   // subida de foto o un motivo de fallo. Con pedido activo no hay refresh.
   setInterval(function () {
+    if (window._submittingForm) return;
     var active = document.activeElement;
     var isEditing = active && active.matches && active.matches('input, textarea, select');
     if (!isEditing && document.visibilityState === 'visible') {
@@ -61,7 +62,8 @@
             <h2 id="disponibilidad-heading" class="h6 mb-1">Disponibilidad</h2>
             <p class="mb-0">Estado actual: <strong>{% if disponible %}Disponible{% else %}No disponible{% endif %}</strong></p>
         </div>
-        <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}">
+        <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}"
+              onsubmit="window._submittingForm = true; var b = this.querySelector('button[type=submit]'); if (b) { setTimeout(function(){ b.disabled = true; }, 0); }">
             {% csrf_token %}
             {% if disponible %}
                 <button type="submit" class="btn btn-sm btn-app-outline">Marcarme no disponible</button>

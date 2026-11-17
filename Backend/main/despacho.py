@@ -95,13 +95,28 @@ def liberar_asignacion_vencida(pedido, usuario):
 
 
 def procesar_asignaciones_vencidas(usuario):
-    """Libera y reintenta en cascada las asignaciones que superaron los 5 minutos."""
-    vencidas = Pedido.objects.filter(
+    """Libera y reintenta en cascada las asignaciones que superaron los 5 minutos.
+
+    Realiza un exists() liviano antes del loop para evitar abrir transacciones
+    cuando no haya pedidos candidatos a vencer (caso más frecuente en producción).
+    """
+    limite = timezone.now() - timedelta(seconds=Pedido.LIMITE_ACEPTACION_SEGUNDOS)
+    hay_candidatos = Pedido.objects.filter(
         estado='asignado',
-        fecha_hora_asignacion__isnull=False,
+        fecha_hora_asignacion__lte=limite,
         fecha_hora_aceptacion__isnull=True,
+    ).exists()
+    if not hay_candidatos:
+        return
+
+    candidatos_pk = list(
+        Pedido.objects.filter(
+            estado='asignado',
+            fecha_hora_asignacion__isnull=False,
+            fecha_hora_aceptacion__isnull=True,
+        ).values_list('pk', flat=True)
     )
-    for pk in list(vencidas.values_list('pk', flat=True)):
+    for pk in candidatos_pk:
         with transaction.atomic():
             pedido = Pedido.objects.select_for_update().filter(
                 pk=pk, estado='asignado', fecha_hora_aceptacion__isnull=True,

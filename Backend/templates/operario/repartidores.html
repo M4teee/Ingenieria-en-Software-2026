@@ -77,7 +77,11 @@
             const tabla = document.querySelector('[data-disponibilidad-url]');
             if (!tabla) return;
 
+            let enCurso = false;
             const actualizar = async () => {
+                // Evita solapar llamadas y no satura conexiones con la pestaña oculta.
+                if (enCurso || document.hidden) return;
+                enCurso = true;
                 try {
                     const respuesta = await fetch(tabla.dataset.disponibilidadUrl, {
                         headers: {'Accept': 'application/json'},
@@ -99,6 +103,8 @@
                     }
                 } catch (_) {
                     // Si la conexión falla, se conserva el último estado mostrado.
+                } finally {
+                    enCurso = false;
                 }
             };
 

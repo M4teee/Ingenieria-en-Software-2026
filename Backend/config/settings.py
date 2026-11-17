@@ -82,12 +82,53 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
 
-if DATABASE_URL:
-    # Postgres en Neon
+if DATABASE_URL and DATABASE_URL.startswith(('postgres://', 'postgresql://')):
+    # Habilitar pool de conexiones entre hilos para desarrollo en Windows
+    from config.pool import enable_connection_pooling
+    enable_connection_pooling()
+
+    # Con pool activado, Django requiere conn_max_age=0 para que al finalizar
+    # cada request la conexión vuelva inmediatamente al pool y quede disponible
+    # para el próximo request en cualquier hilo, evitando reconexiones SSL.
+    db_config = dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=0,
+        conn_health_checks=True,
+    )
+    options = db_config.setdefault('OPTIONS', {})
+    options.update({
+        # Acota la espera del intento TCP a 5 s por IP
+        'connect_timeout': 5,
+        # TCP keepalives: detectan sockets half-open sin esperar el timeout del
+        # SO de Windows (~2 h).
+        'keepalives': 1,
+        'keepalives_idle': 30,      # iniciar sondeos tras 30 s de inactividad
+        'keepalives_interval': 10,  # re-sondear cada 10 s
+        'keepalives_count': 3,      # 3 sondeos fallidos = socket muerto
+        'pool': {'min_size': 1, 'max_size': 5, 'timeout': 10.0},
+    })
+
+    # En Windows, getaddrinfo para el host de Neon devuelve primero direcciones IPv6
+    # (AWS). Si el ISP/red no tiene ruteo IPv6 funcional, cada nueva conexión TCP
+    # (incluidos los workers/hilos de runserver) espera 3 x 5s = 15 s de timeout
+    # antes de probar IPv4. Al resolver la IP IPv4 y pasarla como 'hostaddr',
+    # libpq conecta directamente por IPv4 en ~1s, manteniendo 'host' para SNI y TLS.
+    host = db_config.get('HOST')
+    if host:
+        try:
+            import socket
+            ipv4_candidates = [
+                addr[4][0] for addr in socket.getaddrinfo(host, 5432, socket.AF_INET)
+            ]
+            if ipv4_candidates:
+                options['hostaddr'] = ipv4_candidates[0]
+        except Exception:
+            pass
+
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
+        'default': db_config,
     }
 else:
     # Desarrollo local con SQLite
@@ -97,6 +138,20 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+# Cache y sesiones en memoria local con respaldo en DB (cached_db):
+# Evita un round-trip SQL a la base remota en cada request para leer la sesión.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'sgr-cache',
+    }
+}
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
+AUTHENTICATION_BACKENDS = [
+    'main.users.backends.CachedModelBackend',
+]
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 

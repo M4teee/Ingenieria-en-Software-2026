@@ -9,14 +9,35 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <style>
+        #page-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            z-index: 99999;
+            transition: width 0.2s ease, opacity 0.3s ease;
+            pointer-events: none;
+            opacity: 0;
+        }
+        #page-progress-bar.loading {
+            opacity: 1;
+            width: 75%;
+            transition: width 0.8s cubic-bezier(0.1, 0.5, 0.1, 1);
+        }
+    </style>
     {% block extrastyle %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
+    <div id="page-progress-bar" aria-hidden="true"></div>
     <nav class="navbar navbar-expand-lg navbar-app" aria-label="Navegación principal">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'root' %}">
@@ -67,7 +88,51 @@
         <small>SGR · Sistema de Gestión de Repartos</small>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script>
+      (function () {
+        var prefetched = new Set();
+        function prefetch(url) {
+          if (!url || prefetched.has(url)) return;
+          try {
+            var u = new URL(url, window.location.href);
+            if (u.origin !== window.location.origin) return;
+            if (u.pathname === window.location.pathname) return;
+            if (u.pathname.includes('logout') || u.pathname.includes('estado')) return;
+            prefetched.add(url);
+            var link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = url;
+            link.as = 'document';
+            document.head.appendChild(link);
+          } catch (e) {}
+        }
+        var hoverTimer = null;
+        document.addEventListener('mouseover', function (e) {
+          var a = e.target.closest('a');
+          if (!a || !a.href) return;
+          hoverTimer = setTimeout(function () { prefetch(a.href); }, 65);
+        }, { passive: true });
+        document.addEventListener('mouseout', function () {
+          if (hoverTimer) clearTimeout(hoverTimer);
+        }, { passive: true });
+        document.addEventListener('touchstart', function (e) {
+          var a = e.target.closest('a');
+          if (a && a.href) prefetch(a.href);
+        }, { passive: true });
+        document.addEventListener('click', function (e) {
+          var a = e.target.closest('a');
+          if (!a || !a.href || a.target === '_blank' || a.hasAttribute('download')) return;
+          try {
+            var u = new URL(a.href, window.location.href);
+            if (u.origin === window.location.origin && u.pathname !== window.location.pathname) {
+              var bar = document.getElementById('page-progress-bar');
+              if (bar) bar.classList.add('loading');
+            }
+          } catch (e) {}
+        }, { passive: true });
+      })();
+    </script>
     {% block extrascript %}{% endblock %}
 </body>
 </html>

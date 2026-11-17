@@ -265,11 +265,16 @@ def detalle_pedido(request, pedido_id):
     formulario = (
         AsignarPedidoForm(pedido=pedido) if pedido.estado == 'registrado' else None
     )
+    pedidos_sin_repartidor = list(
+        Pedido.objects.filter(estado='registrado', repartidor__isnull=True)
+        .select_related('comercio')
+        .order_by('fecha_creacion', 'pk')
+    )
     return render(request, 'operario/detalle_pedido.html', {
         'pedido': pedido,
         'historial': pedido.historial.all(),
         'formulario_asignacion': formulario,
-        'pedidos_sin_repartidor': _pedidos_sin_repartidor(_pedidos_en_curso()),
+        'pedidos_sin_repartidor': pedidos_sin_repartidor,
     })
 
 

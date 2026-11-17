@@ -183,7 +183,10 @@
     const repartidorInicial = {{ pedido.repartidor_id|default_if_none:"null" }};
     const urlEstado = "{% url 'operario:estado_pedidos' %}";
 
+    let enCurso = false;
     const verificar = async () => {
+        if (enCurso || document.hidden) return;
+        enCurso = true;
         try {
             const respuesta = await fetch(urlEstado, {
                 headers: {'Accept': 'application/json'},
@@ -201,6 +204,8 @@
             }
         } catch (_) {
             // Si la conexión falla, se conserva la vista actual.
+        } finally {
+            enCurso = false;
         }
     };
 

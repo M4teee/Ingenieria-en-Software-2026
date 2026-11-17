@@ -154,7 +154,12 @@
         alerta.hidden = false;
     };
 
+    let enCurso = false;
     const actualizar = async () => {
+        // Evita solapar llamadas: si la anterior sigue esperando respuesta de
+        // Neon, o si la pestaña está oculta, no se dispara otra.
+        if (enCurso || document.hidden) return;
+        enCurso = true;
         try {
             const respuesta = await fetch(tabla.dataset.statusUrl, {
                 headers: {'Accept': 'application/json'},
@@ -215,6 +220,8 @@
             }
         } catch (_) {
             // Si la conexión falla, se conserva el último estado mostrado.
+        } finally {
+            enCurso = false;
         }
     };
 
