@@ -16,6 +16,11 @@ urlpatterns = [
     path('comercios/nuevo/', views.nuevo_comercio, name='nuevo_comercio'),
     path('repartidores/', views.repartidores, name='repartidores'),
     path(
+        'repartidores/<int:repartidor_id>/regenerar-pin/',
+        views.regenerar_pin_repartidor,
+        name='regenerar_pin_repartidor',
+    ),
+    path(
         'repartidores/estado/',
         views.cambiar_estado_repartidor,
         name='cambiar_estado_repartidor',
