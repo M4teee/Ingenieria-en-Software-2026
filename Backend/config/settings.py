@@ -104,10 +104,16 @@ if DATABASE_URL and DATABASE_URL.startswith(('postgres://', 'postgresql://')):
         # TCP keepalives: detectan sockets half-open sin esperar el timeout del
         # SO de Windows (~2 h).
         'keepalives': 1,
-        'keepalives_idle': 30,      # iniciar sondeos tras 30 s de inactividad
-        'keepalives_interval': 10,  # re-sondear cada 10 s
+        'keepalives_idle': 15,      # iniciar sondeos tras 15 s de inactividad
+        'keepalives_interval': 5,   # re-sondear cada 5 s
         'keepalives_count': 3,      # 3 sondeos fallidos = socket muerto
-        'pool': {'min_size': 1, 'max_size': 5, 'timeout': 10.0},
+        'pool': {
+            'min_size': 1,
+            'max_size': 5,
+            'timeout': 10.0,
+            'max_idle': 20.0,
+            'max_idle_seconds': 20.0,
+        },
     })
 
     # En Windows, getaddrinfo para el host de Neon devuelve primero direcciones IPv6
