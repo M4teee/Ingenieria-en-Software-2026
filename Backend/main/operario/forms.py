@@ -262,6 +262,14 @@ class ComercioForm(forms.ModelForm):
             'nombre': {'unique': MENSAJE_COMERCIO_DUPLICADO},
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.activo is not None:
+            if 'activo' not in kwargs.get('initial', {}):
+                self.initial['activo'] = 'true' if self.instance.activo else 'false'
+            elif isinstance(self.initial.get('activo'), bool):
+                self.initial['activo'] = 'true' if self.initial['activo'] else 'false'
+
     def clean_nombre(self):
         nombre = self.cleaned_data['nombre']
         duplicados = Comercio.objects.filter(nombre__iexact=nombre)

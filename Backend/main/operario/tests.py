@@ -10,6 +10,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from django.urls import reverse
 
+from main.operario.forms import ComercioForm
 from main.operario.models import Comercio, Devolucion
 from main.repartidor.models import HistorialEstado, Pedido
 from main.repartidor.models import Repartidor
@@ -1308,6 +1309,60 @@ class ComerciosOperarioTests(TestCase):
         for nombre in ('operario:comercios', 'operario:nuevo_comercio'):
             with self.subTest(nombre=nombre):
                 self.assertEqual(self.client.get(reverse(nombre)).status_code, 403)
+
+    def test_formulario_comercio_preselecciona_estado_al_editar_y_permite_guardar(self):
+        comercio_activo = Comercio.objects.create(
+            nombre='Comercio Activo',
+            direccion='Calle Activa 123',
+            contacto='11-1111-1111',
+            activo=True,
+        )
+        comercio_inactivo = Comercio.objects.create(
+            nombre='Comercio Inactivo',
+            direccion='Calle Inactiva 456',
+            contacto='11-2222-2222',
+            activo=False,
+        )
+
+        # 1. Comercio activo preselecciona 'true'
+        form_activo = ComercioForm(instance=comercio_activo)
+        self.assertEqual(form_activo.initial.get('activo'), 'true')
+        html_activo = str(form_activo['activo'])
+        self.assertIn('<option value="true" selected>Activo</option>', html_activo)
+        self.assertNotIn('<option value="false" selected>', html_activo)
+
+        # 2. Comercio inactivo preselecciona 'false'
+        form_inactivo = ComercioForm(instance=comercio_inactivo)
+        self.assertEqual(form_inactivo.initial.get('activo'), 'false')
+        html_inactivo = str(form_inactivo['activo'])
+        self.assertIn('<option value="false" selected>Inactivo</option>', html_inactivo)
+        self.assertNotIn('<option value="true" selected>', html_inactivo)
+
+        # 3. Alta nueva no preselecciona ningún estado
+        form_nuevo = ComercioForm()
+        self.assertNotIn('activo', form_nuevo.initial)
+        html_nuevo = str(form_nuevo['activo'])
+        self.assertIn('<option value="" selected>Seleccioná un estado</option>', html_nuevo)
+
+        # 4. GET a la vista de edición renderiza el campo con la opción preseleccionada
+        url_editar = reverse('operario:editar_comercio', kwargs={'comercio_id': comercio_activo.pk})
+        respuesta_get = self.client.get(url_editar)
+        self.assertEqual(respuesta_get.status_code, 200)
+        self.assertContains(respuesta_get, '<option value="true" selected>Activo</option>')
+
+        # 5. Edición de otros campos enviando el estado preseleccionado
+        respuesta_post = self.client.post(url_editar, {
+            'nombre': 'Comercio Activo Renombrado',
+            'direccion': 'Nueva Dirección 789',
+            'contacto': '11-3333-3333',
+            'activo': form_activo.initial['activo'],
+        })
+        self.assertRedirects(respuesta_post, url_editar)
+        comercio_activo.refresh_from_db()
+        self.assertEqual(comercio_activo.nombre, 'Comercio Activo Renombrado')
+        self.assertEqual(comercio_activo.direccion, 'Nueva Dirección 789')
+        self.assertEqual(comercio_activo.contacto, '11-3333-3333')
+        self.assertTrue(comercio_activo.activo)
 
 
 class OperarioRoleAuthorizationTests(TestCase):
