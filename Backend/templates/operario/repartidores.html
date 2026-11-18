@@ -22,10 +22,10 @@
     {% endfor %}
 {% endif %}
 
-{% if pin_regenerado %}
+{% if pin_actualizado or pin_regenerado %}
     <div class="alert alert-success" role="status">
-        <strong>PIN regenerado para {{ repartidor_pin.user.username }}:</strong>
-        <output class="fs-4 font-monospace user-select-all">{{ pin_regenerado }}</output>
+        <strong>PIN actualizado exitosamente para {{ repartidor_pin.user.username }}:</strong>
+        <output class="fs-4 font-monospace user-select-all">{{ pin_actualizado|default:pin_regenerado }}</output>
         <p class="mb-0">Transmití este PIN al repartidor. El PIN anterior ya no permite ingresar.</p>
     </div>
 {% endif %}
@@ -66,10 +66,49 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}">
-                                        {% csrf_token %}
-                                        <button class="btn btn-outline-primary btn-sm" type="submit">Regenerar PIN</button>
-                                    </form>
+                                    <button class="btn btn-outline-primary btn-sm"
+                                            type="button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalPin{{ perfil.pk }}">
+                                        Regenerar PIN
+                                    </button>
+
+                                    <div class="modal fade" id="modalPin{{ perfil.pk }}" tabindex="-1" aria-labelledby="modalPinLabel{{ perfil.pk }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="modalPinLabel{{ perfil.pk }}">Regenerar PIN - {{ perfil.user.username }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="text-secondary small mb-3">
+                                                            Ingresá un nuevo PIN numérico de 4 dígitos disponible para <strong>{{ perfil.user.username }}</strong>. Al confirmar, el PIN anterior quedará invalidado inmediatamente.
+                                                        </p>
+                                                        <div class="mb-3 text-start">
+                                                            <label for="pinInput{{ perfil.pk }}" class="form-label">Nuevo PIN (4 dígitos numéricos)</label>
+                                                            <input type="text"
+                                                                   class="form-control font-monospace text-center fs-4"
+                                                                   id="pinInput{{ perfil.pk }}"
+                                                                   name="pin"
+                                                                   maxlength="4"
+                                                                   minlength="4"
+                                                                   pattern="\d{4}"
+                                                                   inputmode="numeric"
+                                                                   required
+                                                                   placeholder="0000"
+                                                                   autocomplete="off">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Confirmar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}

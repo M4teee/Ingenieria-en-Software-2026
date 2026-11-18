@@ -31,6 +31,7 @@ from .forms import (
     MENSAJE_COMERCIO_DUPLICADO,
     MENSAJE_VEHICULO_INCOMPATIBLE,
     PedidoForm,
+    RegenerarPinForm,
     RepartidorForm,
 )
 
@@ -265,45 +266,42 @@ def repartidores(request):
 def regenerar_pin_repartidor(request, repartidor_id):
     _exigir_operario(request)
 
+    perfiles = Repartidor.objects.select_related('user').order_by('user__username')
+
     with transaction.atomic():
         perfil = get_object_or_404(
             Repartidor.objects.select_for_update(of=('self',)),
             pk=repartidor_id,
         )
-        pin_regenerado = None
-        for _ in range(10):
-            ocupados = set(
-                Repartidor.objects.exclude(pk=perfil.pk)
-                .values_list('pin', flat=True)
-            )
-            disponibles = [
-                f'{numero:04d}' for numero in range(10000)
-                if f'{numero:04d}' not in ocupados
-            ]
-            if not disponibles:
-                break
 
-            pin_candidato = _pin_aleatorio(disponibles)
-            try:
-                # El savepoint permite reintentar si otra transacción ganó
-                # la carrera por el mismo PIN único.
-                with transaction.atomic():
-                    perfil.pin = pin_candidato
-                    perfil.save(update_fields=['pin'])
-                pin_regenerado = pin_candidato
-                break
-            except IntegrityError:
-                continue
+        formulario = RegenerarPinForm(request.POST, repartidor=perfil)
+        if not formulario.is_valid():
+            error_msg = formulario.errors['pin'][0]
+            messages.error(request, error_msg)
+            return render(request, 'operario/repartidores.html', {
+                'repartidores': perfiles,
+                'error_pin': error_msg,
+                'repartidor_error_id': perfil.pk,
+            })
 
-    if pin_regenerado is None:
-        return HttpResponseBadRequest(
-            'No se pudo generar un PIN único. Intentá nuevamente.'
-        )
+        nuevo_pin = formulario.cleaned_data['pin']
+        try:
+            with transaction.atomic():
+                perfil.pin = nuevo_pin
+                perfil.save(update_fields=['pin'])
+        except IntegrityError:
+            error_msg = 'Ese PIN ya está asignado a otro repartidor.'
+            messages.error(request, error_msg)
+            return render(request, 'operario/repartidores.html', {
+                'repartidores': perfiles,
+                'error_pin': error_msg,
+                'repartidor_error_id': perfil.pk,
+            })
 
-    perfiles = Repartidor.objects.select_related('user').order_by('user__username')
     return render(request, 'operario/repartidores.html', {
         'repartidores': perfiles,
-        'pin_regenerado': pin_regenerado,
+        'pin_actualizado': nuevo_pin,
+        'pin_regenerado': nuevo_pin,
         'repartidor_pin': perfil,
     })
 

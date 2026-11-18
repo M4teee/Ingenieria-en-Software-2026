@@ -232,6 +232,51 @@ class RepartidorForm(forms.Form):
         return pin
 
 
+class RegenerarPinForm(forms.Form):
+    pin = forms.CharField(
+        max_length=4,
+        min_length=4,
+        label='Nuevo PIN',
+        error_messages={
+            'required': 'El PIN debe ser numérico y de exactamente 4 dígitos.',
+            'max_length': 'El PIN debe ser numérico y de exactamente 4 dígitos.',
+            'min_length': 'El PIN debe ser numérico y de exactamente 4 dígitos.',
+        },
+        validators=[RegexValidator(
+            regex=r'^\d{4}$',
+            message='El PIN debe ser numérico y de exactamente 4 dígitos.',
+        )],
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control font-monospace text-center fs-4',
+                'inputmode': 'numeric',
+                'maxlength': '4',
+                'minlength': '4',
+                'pattern': r'\d{4}',
+                'placeholder': '0000',
+                'autocomplete': 'off',
+            },
+        ),
+    )
+
+    def __init__(self, *args, repartidor=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.repartidor = repartidor
+
+    def clean_pin(self):
+        pin = self.cleaned_data['pin'].strip()
+        if not pin.isdigit() or len(pin) != 4:
+            raise ValidationError('El PIN debe ser numérico y de exactamente 4 dígitos.')
+        consulta = Repartidor.objects.filter(pin=pin)
+        if self.repartidor:
+            consulta = consulta.exclude(pk=self.repartidor.pk)
+            if pin == self.repartidor.pin:
+                raise ValidationError('El nuevo PIN debe ser diferente al actual.')
+        if consulta.exists():
+            raise ValidationError('Ese PIN ya está asignado a otro repartidor.')
+        return pin
+
+
 class ComercioForm(forms.ModelForm):
     activo = forms.TypedChoiceField(
         choices=[
