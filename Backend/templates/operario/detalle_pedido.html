@@ -143,15 +143,17 @@
                                     {% if evento.fotografia %}
                                         <a
                                             href="{% url 'repartidor_fotografia' evento.pk %}"
-                                            target="_blank"
-                                            rel="noopener"
+                                            class="btn-ampliar-evidencia d-inline-block"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEvidencia"
+                                            data-img-url="{% url 'repartidor_fotografia' evento.pk %}"
                                             aria-label="Ampliar fotografía del historial"
                                         >
                                             <img
                                                 src="{% url 'repartidor_fotografia' evento.pk %}"
                                                 alt="Fotografía de evidencia del pedido"
                                                 class="img-thumbnail"
-                                                style="width: 80px; height: 80px; object-fit: cover;"
+                                                style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
                                                 loading="lazy"
                                             >
                                         </a>
@@ -172,9 +174,42 @@
     </div>
 </section>
 
- {% endblock %}
+<!-- Modal para ampliar fotografía (HU #14) -->
+<div class="modal fade" id="modalEvidencia" tabindex="-1" aria-labelledby="modalEvidenciaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEvidenciaLabel">Evidencia fotográfica</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center p-2">
+                <img id="imgEvidenciaModal" src="" alt="Fotografía de evidencia ampliada" class="img-fluid rounded" style="max-height: 75vh;">
+            </div>
+            <div class="modal-footer">
+                <a id="linkEvidenciaNuevaPestana" href="" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">Abrir en pestaña nueva</a>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
 
 {% block extrascript %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.btn-ampliar-evidencia').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = btn.dataset.imgUrl;
+            const modalImg = document.getElementById('imgEvidenciaModal');
+            const modalLink = document.getElementById('linkEvidenciaNuevaPestana');
+            if (modalImg) modalImg.src = url;
+            if (modalLink) modalLink.href = url;
+        });
+    });
+});
+</script>
 {% if pedido.estado == 'asignado' %}
 <script>
 (() => {

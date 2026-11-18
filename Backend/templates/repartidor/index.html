@@ -139,7 +139,10 @@
                         <h3 class="h5">Pedido {{ pedido_activo.codigo }}</h3>
                         <dl class="order-details">
                             <dt>Comercio</dt><dd>{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
-                            {% if pedido_activo.comercio %}<dt>Contacto</dt><dd>{{ pedido_activo.comercio.contacto }}</dd>{% endif %}
+                            {% if pedido_activo.comercio %}
+                                <dt>Dirección de retiro</dt><dd>{{ pedido_activo.comercio.direccion }}</dd>
+                                <dt>Contacto</dt><dd>{{ pedido_activo.comercio.contacto }}</dd>
+                            {% endif %}
                             <dt>Destino</dt><dd>{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
                             <dt>Especificaciones</dt><dd>{{ pedido_activo.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
                         </dl>
@@ -217,3 +220,63 @@
     {% endif %}
 </section>
 {% endblock content %}
+
+{% block extrascript %}
+{{ block.super }}
+<script>
+(function() {
+    function optimizarInputFotografia(input) {
+        input.addEventListener('change', function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    let width = img.width;
+                    let height = img.height;
+                    const maxLado = 1280;
+
+                    if (width > maxLado || height > maxLado) {
+                        if (width > height) {
+                            height = Math.round((height * maxLado) / width);
+                            width = maxLado;
+                        } else {
+                            width = Math.round((width * maxLado) / height);
+                            height = maxLado;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(function(blob) {
+                        if (!blob) return;
+                        const nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                        try {
+                            const archivoComprimido = new File([blob], nuevoNombre, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            const dt = new DataTransfer();
+                            dt.items.add(archivoComprimido);
+                            input.files = dt.files;
+                        } catch (err) {
+                            // Si el navegador no permite sobreescribir files por DataTransfer, se conserva el original y comprime el backend
+                        }
+                    }, 'image/jpeg', 0.75);
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    document.querySelectorAll('input[type="file"][name="fotografia"]').forEach(optimizarInputFotografia);
+})();
+</script>
+{% endblock extrascript %}

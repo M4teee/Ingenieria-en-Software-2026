@@ -25,3 +25,8 @@ node_modules/
 dist/
 build/
 .project-init/context/
+
+# Application logs
+logs/
+Backend/logs/
+*.log

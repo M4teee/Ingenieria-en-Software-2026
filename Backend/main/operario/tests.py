@@ -252,7 +252,8 @@ class PanelOperarioTests(TestCase):
         self.assertContains(response, 'class="img-thumbnail"')
         self.assertContains(response, f'src="{url_fotografia}"')
         self.assertContains(response, f'href="{url_fotografia}"')
-        self.assertContains(response, 'target="_blank"')
+        self.assertContains(response, 'data-bs-target="#modalEvidencia"')
+        self.assertContains(response, 'id="modalEvidencia"')
 
     def test_detalle_muestra_repartidor_asignado_y_no_indica_sin_asignar(self):
         repartidor = User.objects.create_user(
@@ -1204,12 +1205,41 @@ class ComerciosOperarioTests(TestCase):
         )
         url = reverse('operario:cambiar_estado_comercio')
 
+        # Deshabilitar comercio
         respuesta = self.client.post(url, {'nombre': comercio.nombre, 'activo': 'false'})
-
         self.assertEqual(respuesta.status_code, 200)
-        self.assertEqual(respuesta.json(), {'nombre': comercio.nombre, 'activo': False})
+        self.assertEqual(respuesta.json(), {
+            'nombre': comercio.nombre,
+            'activo': False,
+            'mensaje': 'Comercio deshabilitado exitosamente',
+        })
         comercio.refresh_from_db()
         self.assertFalse(comercio.activo)
+
+        # Reactivar comercio
+        respuesta_reactivar = self.client.post(url, {'nombre': comercio.nombre, 'activo': 'true'})
+        self.assertEqual(respuesta_reactivar.status_code, 200)
+        self.assertEqual(respuesta_reactivar.json(), {
+            'nombre': comercio.nombre,
+            'activo': True,
+            'mensaje': 'Comercio reactivado exitosamente',
+        })
+        comercio.refresh_from_db()
+        self.assertTrue(comercio.activo)
+
+    def test_lista_comercios_incluye_filtros_rapidos_y_contenedor_mensajes(self):
+        Comercio.objects.create(
+            nombre='Comercio para filtros',
+            direccion='Calle 1',
+            contacto='123',
+            activo=True,
+        )
+        respuesta = self.client.get(reverse('operario:comercios'))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'data-filtro-estado="todos"')
+        self.assertContains(respuesta, 'data-filtro-estado="activos"')
+        self.assertContains(respuesta, 'data-filtro-estado="inactivos"')
+        self.assertContains(respuesta, 'id="mensaje-estado-comercio"')
 
     def test_cambiar_estado_rechaza_datos_invalidos_o_comercio_inexistente(self):
         url = reverse('operario:cambiar_estado_comercio')

@@ -223,7 +223,16 @@ def cambiar_estado_comercio(request):
     comercio = get_object_or_404(Comercio, nombre=nombre)
     comercio.activo = activo == 'true'
     comercio.save(update_fields=['activo'])
-    return JsonResponse({'nombre': comercio.nombre, 'activo': comercio.activo})
+    mensaje = (
+        'Comercio reactivado exitosamente'
+        if comercio.activo
+        else 'Comercio deshabilitado exitosamente'
+    )
+    return JsonResponse({
+        'nombre': comercio.nombre,
+        'activo': comercio.activo,
+        'mensaje': mensaje,
+    })
 
 
 @login_required

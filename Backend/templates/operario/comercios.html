@@ -22,13 +22,22 @@
     {% endfor %}
 {% endif %}
 
+<div id="mensaje-estado-comercio" class="alert alert-success d-none" role="status"></div>
+
 <section class="app-section" aria-labelledby="comercios-heading">
     <div class="app-section-body">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
             <h2 id="comercios-heading" class="h5 mb-0">Comercios registrados</h2>
             {% if comercios %}
-                <div class="w-100" style="max-width: 24rem;">
-                    <input type="search" id="buscar-comercio" class="form-control" placeholder="Buscar por nombre" autocomplete="off">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Filtrar por estado">
+                        <button type="button" class="btn btn-outline-secondary active" data-filtro-estado="todos">Todos</button>
+                        <button type="button" class="btn btn-outline-secondary" data-filtro-estado="activos">Activos</button>
+                        <button type="button" class="btn btn-outline-secondary" data-filtro-estado="inactivos">Inactivos</button>
+                    </div>
+                    <div style="min-width: 15rem;">
+                        <input type="search" id="buscar-comercio" class="form-control form-control-sm" placeholder="Buscar por nombre" autocomplete="off">
+                    </div>
                 </div>
             {% endif %}
         </div>

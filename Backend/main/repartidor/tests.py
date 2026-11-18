@@ -268,6 +268,18 @@ class AsignacionConRespuestaTests(TestCase):
         self.assertContains(response, 'Marcar como Retirado')
         self.assertNotContains(response, 'Aceptar viaje')
 
+    def test_panel_pedido_activo_muestra_direccion_de_retiro_comercio(self):
+        pedido = self.crear_pedido_asignado()
+        self.client.post(reverse('repartidor_aceptar', args=[pedido.pk]))
+
+        response = self.client.get(reverse('repartidor'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Dirección de retiro')
+        self.assertContains(response, self.comercio.direccion)
+        self.assertContains(response, self.comercio.nombre)
+        self.assertContains(response, self.comercio.contacto)
+
     def test_rechazo_libera_pedido_y_registra_historial_de_estado(self):
         pedido = self.crear_pedido_asignado()
 
