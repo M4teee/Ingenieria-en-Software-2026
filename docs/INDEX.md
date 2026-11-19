@@ -8,6 +8,7 @@ Leé primero el estado para conocer qué existe en el código y qué sigue pendi
 - [`SOURCE_INDEX.md`](SOURCE_INDEX.md): ubicación y utilidad de las fuentes académicas originales.
 - [`context/README.md`](context/README.md): procedencia y tratamiento de las exportaciones de Taiga incluidas en `context/`.
 - [`CURRENT_STATE.md`](CURRENT_STATE.md): implementación observada, verificaciones y pendientes.
+- [`INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md`](INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md): trazabilidad de las 31 HUs del snapshot, resultados de pruebas, hallazgo de configuración y pendientes de demo.
 - [`GUIA-EJECUCION-Y-PRUEBAS.md`](GUIA-EJECUCION-Y-PRUEBAS.md): preparación del entorno, pruebas y recorrido manual reproducible.
 - [`MANUAL-DE-USO.md`](MANUAL-DE-USO.md): procedimientos reales para operario, repartidor, cliente y administrador.
 - [`TOUR-APLICACION.md`](TOUR-APLICACION.md): mapa de módulos y recorrido del flujo de pedidos en código y base de datos.

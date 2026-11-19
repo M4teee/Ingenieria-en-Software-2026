@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,7 +85,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
 
-if DATABASE_URL and DATABASE_URL.startswith(('postgres://', 'postgresql://')):
+if DATABASE_URL and not DATABASE_URL.startswith(('postgres://', 'postgresql://')):
+    raise ImproperlyConfigured(
+        'DATABASE_URL debe usar el esquema postgres:// o postgresql://; '
+        'dejala vacía para usar SQLite local.'
+    )
+
+if DATABASE_URL:
     # Habilitar pool de conexiones entre hilos para desarrollo en Windows
     from config.pool import enable_connection_pooling
     enable_connection_pooling()
