@@ -548,7 +548,7 @@
     "model": "repartidor.pedido",
     "pk": 10,
     "fields": {
-      "codigo": "DEMO20010",
+      "codigo": "DEMO20010foto",
       "clave_idempotencia": null,
       "comercio": 1,
       "direccion_destino": "Calle de destino 10 nro. 100",
