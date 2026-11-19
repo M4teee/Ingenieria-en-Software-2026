@@ -1,6 +1,6 @@
 # Brief del proyecto
 
-Actualizado: 2026-11-17. Síntesis de las fuentes originales listadas en [`SOURCE_INDEX.md`](SOURCE_INDEX.md); no sustituye esas fuentes ni el tablero vigente.
+Actualizado: 2026-11-19. Síntesis de las fuentes originales listadas en [`SOURCE_INDEX.md`](SOURCE_INDEX.md); no sustituye esas fuentes ni el tablero vigente.
 
 ## Propósito y actores
 
@@ -14,14 +14,14 @@ Los requisitos no funcionales piden interfaces web diferenciadas para escritorio
 
 ## Base técnica observada
 
-El repositorio fija Python 3.14 en `.python-version` y Django 6.1.2 en `requirements.txt`. La configuración actual usa SQLite. `Frontend/` no tiene una aplicación implementada. El estado funcional está descrito en [`CURRENT_STATE.md`](CURRENT_STATE.md); las decisiones abiertas están en [`DECISIONS.md`](DECISIONS.md).
+El repositorio fija la serie Python 3.14 en `.python-version` y Django 6.1.2 en `requirements.txt`. Sin `DATABASE_URL`, la configuración usa SQLite; con una URL `postgres://` o `postgresql://`, usa PostgreSQL, compatible con Neon. `Frontend/` no tiene una aplicación implementada. El estado funcional está descrito en [`CURRENT_STATE.md`](CURRENT_STATE.md); las decisiones abiertas están en [`DECISIONS.md`](DECISIONS.md).
 
 ## Diferencia entre requisitos y producto actual
 
-El backend mantiene modelos persistentes `Pedido` e `HistorialEstado`. En la rama actual, el operario registra pedidos asociados a comercios activos, con estado inicial `registrado`, código seguro, datos del destinatario, tamaño del paquete, vehículo requerido, fecha estimada y evento de historial. HU 33 presenta esos datos, los del comercio, el estado, el código, el repartidor y el historial en un detalle operativo protegido por rol. El panel permite asignar manualmente o dejar que HU 30 asigne según vehículo, disponibilidad, cola FIFO y ausencia de otro pedido activo; la cercanía de HU 22 no está implementada. La consulta pública busca pedidos por el código persistido. El repartidor puede avanzar un pedido previamente asignado y guardar los cambios en el historial, con fotografía opcional al retirar, entregar o registrar una falla. HU 13 permite al operario cancelar pedidos `registrado` o `asignado` desde el detalle.
+El backend mantiene modelos persistentes `Pedido` e `HistorialEstado`. El operario registra pedidos asociados a comercios activos, con estado inicial `registrado`, código seguro, datos del destinatario, tamaño del paquete, vehículo requerido, fecha estimada y evento de historial. HU 33 presenta esos datos, los del comercio, el estado, el código, el repartidor y el historial en un detalle operativo protegido por rol. HU 41 ofrece despacho automático FIFO compatible por vehículo, disponibilidad y ausencia de otro pedido activo; el panel conserva la selección manual. HU 30 presenta una alerta cuando no hay candidato y HU 42 permite reintentar. No se calcula cercanía geográfica. La consulta pública busca pedidos por el código persistido. El repartidor puede avanzar un pedido previamente asignado y guardar los cambios en el historial, con fotografía opcional al retirar, entregar o registrar una falla. HU 13 permite al operario cancelar pedidos `registrado` o `asignado` desde el detalle.
 
-Las entrevistas describen siete estados y reglas de cancelación antes del retiro; el modelo contempla esos estados y HU 13 implementa la cancelación desde la interfaz antes del retiro. HU 30 implementa asignación automática con criterios acotados que no incluyen cercanía, por lo que HU 22 no debe considerarse cubierta por completo. Los requisitos no funcionales listados arriba tampoco están implementados ni verificados íntegramente. Las historias fuera del alcance implementado no deben presentarse como funcionalidades disponibles.
+Las entrevistas describen siete estados y reglas de cancelación antes del retiro; el modelo contempla esos estados y HU 13 implementa la cancelación desde la interfaz antes del retiro. El snapshot de Taiga del 19/11/2026 contiene 31 HUs, todas con estado `Done`; no representa Taiga en vivo ni acredita por sí solo el cumplimiento. HU 18 no envía una notificación activa al operario y la expiración se evalúa de forma perezosa al consultar o responder. Los requisitos no funcionales no están implementados ni verificados íntegramente; el modo offline y las condiciones de producción siguen fuera de la evidencia actual. El informe de auditoría pre-demo registra pruebas y límites.
 
 ## Plan académico
 
-El PGP, revisión 1.0 del 4 de octubre de 2026, propone dos sprints y una entrega final el 20 de noviembre de 2026. Es planificación documental, no comprobación del progreso. El export de Taiga disponible registra 28 historias y 7 épicas; una nota anterior decía 29 historias. Confirmar la cantidad y el estado actuales en Taiga.
+El PGP, revisión 1.0 del 4 de octubre de 2026, propone dos sprints y una entrega final el 20 de noviembre de 2026. Es planificación documental, no comprobación del progreso. El snapshot sanitizado de Taiga registra 31 historias, 7 épicas y 2 hitos; no se consultó el tablero en vivo. Consultá `docs/context/README.md` y `docs/SOURCE_INDEX.md` para conocer su procedencia y límites.
