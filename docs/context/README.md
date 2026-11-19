@@ -4,7 +4,7 @@ Esta carpeta contiene el material usado para comprender el alcance académico de
 
 ## Exportación CSV de historias de usuario
 
-[`userstories.csv`](userstories.csv) es el resultado de sincronizar las historias de usuario con la exportación de Taiga del 18/11/2026 (31 historias). Es un snapshot, no una conexión con Taiga en vivo. El archivo contiene campos de propietario, asignación, watchers y votantes; verificá la autorización del equipo antes de compartirlo fuera de este repositorio.
+[`userstories.csv`](userstories.csv) es el resultado de sincronizar las historias de usuario con la exportación de Taiga del 19/11/2026 (31 historias). Es un snapshot, no una conexión con Taiga en vivo. El archivo contiene campos de propietario, asignación, watchers y votantes; verificá la autorización del equipo antes de compartirlo fuera de este repositorio.
 
 ## Exportación de Taiga
 
