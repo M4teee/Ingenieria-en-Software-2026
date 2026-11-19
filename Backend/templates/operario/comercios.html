@@ -21,6 +21,7 @@
         <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
     {% endfor %}
 {% endif %}
+<div id="mensaje-estado-comercio" class="alert alert-success" role="status" aria-live="polite" hidden></div>
 
 <section class="app-section" aria-labelledby="comercios-heading">
     <div class="app-section-body">

@@ -1,6 +1,6 @@
 # Estado actual
 
-Actualizado: 2026-11-16. Contrasta el código de la rama `main` a partir del commit `41352f4`, incluidos los cambios locales de HU #30 y el ajuste de disponibilidad descrito abajo, con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
+Actualizado: 2026-11-19. Contrasta el código de la rama `main` a partir del commit `41352f4`, incluidos los cambios locales de HU #30, el ajuste de disponibilidad y la confirmación de cambio de estado de comercios descritos abajo, con la configuración, las pruebas y las fuentes disponibles. No se consultó Taiga en vivo.
 
 ## Implementación observada
 
@@ -11,7 +11,7 @@ Actualizado: 2026-11-16. Contrasta el código de la rama `main` a partir del com
 - Todas las páginas de `/operario/` requieren sesión activa con `is_operario=True`; `is_staff` ya no autoriza el módulo. `is_operario` es un campo del usuario editable desde Django Admin. La migración inicial copia a ese campo el `is_staff` existente para preservar el acceso previo; ambos atributos luego se administran por separado.
 - `main.operario` permite listar los comercios en `/operario/comercios/` y darlos de alta en `/operario/comercios/nuevo/`; ambas páginas requieren `is_operario`. El formulario exige nombre único, dirección, contacto y una selección explícita de estado activo o inactivo.
 - La lista de comercios permite filtrar localmente por nombre mientras se escribe, sin volver a consultar el servidor; la búsqueda ignora mayúsculas y tildes y muestra un aviso si no hay coincidencias.
-- La lista de comercios puede cambiar el campo `activo` mediante `POST /operario/comercios/estado/`, enviando `nombre` y `activo` (`true`/`false`); la vista exige sesión y `is_operario=True` y responde JSON.
+- La lista de comercios puede cambiar el campo `activo` mediante `POST /operario/comercios/estado/`, enviando `nombre` y `activo` (`true`/`false`); la vista exige sesión y `is_operario=True` y responde JSON. Antes de enviar el cambio, el frontend solicita confirmación para reactivar o deshabilitar; si se cancela, revierte el interruptor. Al confirmar el servidor la operación, muestra “Comercio reactivado exitosamente” o “Comercio deshabilitado exitosamente”, según el estado resultante (HU 27 y HU 16).
 - `main.operario` ofrece `/operario/comercios/<id>/editar/` para modificar los datos del comercio existente, incluida su selección explícita de estado activo o inactivo. La vista requiere sesión e `is_operario=True` y mantiene la unicidad del nombre ignorando mayúsculas y minúsculas.
 - `main.operario` ofrece `/operario/repartidores/`, una lista protegida para `is_operario` con usuario, vehículo y disponibilidad; y `/operario/repartidores/nuevo/`, que crea en una transacción un usuario sin contraseña utilizable y su perfil con PIN ingresado de cuatro dígitos. Nombre, apellido y correo son opcionales; el DNI es obligatorio, debe contener ocho dígitos numéricos y ser único; el vehículo es obligatorio y se elige entre las opciones del modelo. Los perfiles nuevos empiezan no disponibles.
 - La lista de repartidores incluye un interruptor por fila (mismo patrón visual que comercios) que llama a `POST /operario/repartidores/estado/` con `username` y `activo`; la vista exige sesión e `is_operario`. HU 29 (deshabilitar repartidor): desactivar reutiliza `User.is_active` como borrado lógico (sin campo nuevo en el modelo) y se rechaza con 400 y el mensaje `"El repartidor tiene pedidos en curso"` si el repartidor tiene un pedido en estado `asignado`, `retirado` o `en_viaje`; si no lo tiene, se desactiva y su PIN deja de autenticar en `/repartidor/login-pin/` de inmediato porque esa vista ya filtraba por `user__is_active=True`. Reactivar no exige esa validación.
@@ -51,6 +51,10 @@ Actualizado: 2026-11-16. Contrasta el código de la rama `main` a partir del com
 - `DEBUG=True`, clave de desarrollo, almacenamiento local y servicio `runserver` hacen que esta configuración sea solo de desarrollo.
 
 ## Verificaciones de esta revisión
+
+Para la confirmación frontend de HU 16 y HU 27 (2026-11-16), se revisó el flujo de cambio de estado en `comercios.js` y el template del panel. `git diff --check` fue aprobado y `python scripts/check_docs.py .` verificó 44 enlaces Markdown locales. No se ejecutaron pruebas automatizadas ni una verificación visual en navegador.
+
+Para solicitar confirmación antes del cambio de estado de comercios (2026-11-19), `git diff --check` fue aprobado y `python scripts/check_docs.py .` verificó 44 enlaces Markdown locales. No se ejecutaron pruebas automatizadas ni una verificación visual en navegador.
 
 Para el ajuste de disponibilidad del 2026-11-16, se inspeccionó el código y se buscó referencias ejecutables a `User.disponible`; las aserciones que quedaban en `main.repartidor.tests` se cambiaron para comprobar `Repartidor.disponible`. No se ejecutó la suite de pruebas en este ajuste.
 

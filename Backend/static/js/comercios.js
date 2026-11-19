@@ -9,6 +9,7 @@ toggles.forEach((toggle) => {
 const campoBusqueda = document.getElementById("buscar-comercio");
 const filasComercios = document.querySelectorAll(".app-table tbody tr");
 const mensajeSinResultados = document.getElementById("sin-resultados-comercios");
+const mensajeEstadoComercio = document.getElementById("mensaje-estado-comercio");
 
 campoBusqueda.addEventListener("input", () => {
     const busqueda = campoBusqueda.value
@@ -34,8 +35,14 @@ campoBusqueda.addEventListener("input", () => {
             
 
 async function cambiarEstadoComercio(toggle) {
-    toggle.disabled = true;
     const estadoSolicitado = toggle.checked;
+    const accion = estadoSolicitado ? 'reactivar' : 'deshabilitar';
+    if (!window.confirm(`¿Está seguro de que desea ${accion} este comercio?`)) {
+        toggle.checked = !estadoSolicitado;
+        return;
+    }
+
+    toggle.disabled = true;
     const fila = toggle.closest('tr');
     const spinner = document.createElement('div');
     spinner.classList.add('loader');
@@ -60,6 +67,10 @@ async function cambiarEstadoComercio(toggle) {
         }
 
         fila.classList.toggle('activo', resultado.activo);
+        mensajeEstadoComercio.textContent = resultado.activo
+            ? 'Comercio reactivado exitosamente'
+            : 'Comercio deshabilitado exitosamente';
+        mensajeEstadoComercio.hidden = false;
     } catch (error) {
         toggle.checked = !estadoSolicitado;
         window.alert(error.message || 'No se pudo cambiar el estado del comercio por un error del servidor.');
