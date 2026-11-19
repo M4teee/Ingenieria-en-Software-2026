@@ -1,0 +1,2147 @@
+[
+  {
+    "model": "operario.comercio",
+    "pk": 1,
+    "fields": {
+      "nombre": "Comercio 1",
+      "direccion": "Avenida 1 nro. 1111",
+      "contacto": "221 111-1111",
+      "activo": true,
+      "fecha_creacion": "2026-10-01T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 2,
+    "fields": {
+      "nombre": "Comercio 2",
+      "direccion": "Avenida 2 nro. 2222",
+      "contacto": "221 222-2222",
+      "activo": true,
+      "fecha_creacion": "2026-10-02T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 3,
+    "fields": {
+      "nombre": "Comercio 3",
+      "direccion": "Avenida 3 nro. 3333",
+      "contacto": "221 333-3333",
+      "activo": true,
+      "fecha_creacion": "2026-10-03T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 4,
+    "fields": {
+      "nombre": "Comercio 4",
+      "direccion": "Avenida 4 nro. 4444",
+      "contacto": "221 444-4444",
+      "activo": true,
+      "fecha_creacion": "2026-10-04T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 5,
+    "fields": {
+      "nombre": "Comercio 5",
+      "direccion": "Avenida 5 nro. 5555",
+      "contacto": "221 555-5555",
+      "activo": true,
+      "fecha_creacion": "2026-10-05T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 6,
+    "fields": {
+      "nombre": "Comercio 6",
+      "direccion": "Avenida 6 nro. 6666",
+      "contacto": "221 666-6666",
+      "activo": true,
+      "fecha_creacion": "2026-10-06T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 7,
+    "fields": {
+      "nombre": "Comercio 7",
+      "direccion": "Avenida 7 nro. 7777",
+      "contacto": "221 777-7777",
+      "activo": true,
+      "fecha_creacion": "2026-10-07T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 8,
+    "fields": {
+      "nombre": "Comercio 8",
+      "direccion": "Avenida 8 nro. 8888",
+      "contacto": "221 888-8888",
+      "activo": true,
+      "fecha_creacion": "2026-10-08T12:00:00Z"
+    }
+  },
+  {
+    "model": "operario.comercio",
+    "pk": 9,
+    "fields": {
+      "nombre": "Comercio 9",
+      "direccion": "Avenida 9 nro. 9999",
+      "contacto": "221 999-9999",
+      "activo": true,
+      "fecha_creacion": "2026-10-09T12:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$AeiCPyXd5DlXTlcJfGGMQh$mtIM7lLurUGLce5RD1MUEwrtRjkk0wXZvUkmdmZsz3w=",
+      "last_login": "2026-11-19T20:46:19.682Z",
+      "is_superuser": false,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "bicicleta1",
+      "first_name": "Bicicleta",
+      "last_name": "Uno",
+      "email": "bicicletauno@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "bicicleta2",
+      "first_name": "Bicicleta",
+      "last_name": "Dos",
+      "email": "bicicletados@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "bicicleta3",
+      "first_name": "Bicicleta",
+      "last_name": "Tres",
+      "email": "bicicletatres@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 5,
+    "fields": {
+      "password": "!",
+      "last_login": "2026-11-19T20:48:10.017Z",
+      "is_superuser": false,
+      "username": "moto1",
+      "first_name": "Moto",
+      "last_name": "Uno",
+      "email": "motouno@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 6,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "moto2",
+      "first_name": "Moto",
+      "last_name": "Dos",
+      "email": "motodos@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 7,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "moto3",
+      "first_name": "Moto",
+      "last_name": "Tres",
+      "email": "mototres@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 8,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "auto1",
+      "first_name": "Auto",
+      "last_name": "Uno",
+      "email": "autouno@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 9,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "auto2",
+      "first_name": "Auto",
+      "last_name": "Dos",
+      "email": "autodos@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 10,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "auto3",
+      "first_name": "Auto",
+      "last_name": "Tres",
+      "email": "autotres@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 11,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "camion1",
+      "first_name": "Camion",
+      "last_name": "Uno",
+      "email": "camionuno@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 12,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "camion2",
+      "first_name": "Camion",
+      "last_name": "Dos",
+      "email": "camiondos@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 13,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "camion3",
+      "first_name": "Camion",
+      "last_name": "Tres",
+      "email": "camiontres@mail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-10-01T12:00:00Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 14,
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$5yehbOer4lRdGn7XNFEoiQ$GC+Hd33RNTTJAh4ELwJc31JpcvrQgoXRnDpDnWFsJtc=",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "lucio",
+      "first_name": "",
+      "last_name": "",
+      "email": "l@m.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-11-19T20:52:18.233Z",
+      "is_operario": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 1,
+    "fields": {
+      "codigo": "DEMO20001",
+      "clave_idempotencia": null,
+      "comercio": 1,
+      "direccion_destino": "Calle de destino 1 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 1",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "bicicleta",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-01T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 2,
+      "fecha_creacion": "2026-10-01T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 2,
+    "fields": {
+      "codigo": "DEMO20002",
+      "clave_idempotencia": null,
+      "comercio": 2,
+      "direccion_destino": "Calle de destino 2 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 2",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "bicicleta",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-02T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 3,
+      "fecha_creacion": "2026-10-02T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 3,
+    "fields": {
+      "codigo": "DEMO20003",
+      "clave_idempotencia": null,
+      "comercio": 3,
+      "direccion_destino": "Calle de destino 3 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 3",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "bicicleta",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-03T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 4,
+      "fecha_creacion": "2026-10-03T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 4,
+    "fields": {
+      "codigo": "DEMO20004",
+      "clave_idempotencia": null,
+      "comercio": 4,
+      "direccion_destino": "Calle de destino 4 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 4",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "moto",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-04T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 5,
+      "fecha_creacion": "2026-10-04T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 5,
+    "fields": {
+      "codigo": "DEMO20005",
+      "clave_idempotencia": null,
+      "comercio": 5,
+      "direccion_destino": "Calle de destino 5 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 5",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "moto",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-05T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 6,
+      "fecha_creacion": "2026-10-05T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 6,
+    "fields": {
+      "codigo": "DEMO20006",
+      "clave_idempotencia": null,
+      "comercio": 6,
+      "direccion_destino": "Calle de destino 6 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 6",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "moto",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-06T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 7,
+      "fecha_creacion": "2026-10-06T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 7,
+    "fields": {
+      "codigo": "DEMO20007",
+      "clave_idempotencia": null,
+      "comercio": 7,
+      "direccion_destino": "Calle de destino 7 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 7",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "auto",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-07T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 8,
+      "fecha_creacion": "2026-10-07T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 8,
+    "fields": {
+      "codigo": "DEMO20008",
+      "clave_idempotencia": null,
+      "comercio": 8,
+      "direccion_destino": "Calle de destino 8 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 8",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "auto",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-08T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 9,
+      "fecha_creacion": "2026-10-08T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 9,
+    "fields": {
+      "codigo": "DEMO20009",
+      "clave_idempotencia": null,
+      "comercio": 9,
+      "direccion_destino": "Calle de destino 9 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 9",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "auto",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-09T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 10,
+      "fecha_creacion": "2026-10-09T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 10,
+    "fields": {
+      "codigo": "DEMO20010foto",
+      "clave_idempotencia": null,
+      "comercio": 1,
+      "direccion_destino": "Calle de destino 10 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 10",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "camion",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-10T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 11,
+      "fecha_creacion": "2026-10-10T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 11,
+    "fields": {
+      "codigo": "DEMO20011",
+      "clave_idempotencia": null,
+      "comercio": 2,
+      "direccion_destino": "Calle de destino 11 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 11",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "camion",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-11T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "entregado",
+      "repartidor": 12,
+      "fecha_creacion": "2026-10-11T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 12,
+    "fields": {
+      "codigo": "DEMO20012",
+      "clave_idempotencia": null,
+      "comercio": 3,
+      "direccion_destino": "Calle de destino 12 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 12",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "camion",
+      "especificaciones_traslado": "Pedido de demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-12T15:00:00Z",
+      "fecha_hora_asignacion": null,
+      "fecha_hora_aceptacion": null,
+      "estado": "fallido",
+      "repartidor": 13,
+      "fecha_creacion": "2026-10-12T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.pedido",
+    "pk": 13,
+    "fields": {
+      "codigo": "DEMO20013",
+      "clave_idempotencia": null,
+      "comercio": 4,
+      "direccion_destino": "Calle de destino 13 nro. 100",
+      "datos_destinatario": "Destinatario de ejemplo 13",
+      "tamano_paquete": "Mediano",
+      "vehiculo_requerido": "moto",
+      "especificaciones_traslado": "Pedido en curso para la demostraci�n",
+      "fecha_hora_estimada_entrega": "2026-10-20T18:00:00Z",
+      "fecha_hora_asignacion": "2026-10-20T12:30:00Z",
+      "fecha_hora_aceptacion": "2026-10-20T12:35:00Z",
+      "estado": "en_viaje",
+      "repartidor": 5,
+      "fecha_creacion": "2026-10-20T12:00:00Z"
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 1,
+    "fields": {
+      "pedido": 1,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-01T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 2,
+    "fields": {
+      "pedido": 2,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-02T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 3,
+    "fields": {
+      "pedido": 3,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-03T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 4,
+    "fields": {
+      "pedido": 4,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-04T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 5,
+    "fields": {
+      "pedido": 5,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-05T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 6,
+    "fields": {
+      "pedido": 6,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-06T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 7,
+    "fields": {
+      "pedido": 7,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-07T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 8,
+    "fields": {
+      "pedido": 8,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-08T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 9,
+    "fields": {
+      "pedido": 9,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-09T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 10,
+    "fields": {
+      "pedido": 10,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-10T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 11,
+    "fields": {
+      "pedido": 11,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-11T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 12,
+    "fields": {
+      "pedido": 12,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-12T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 106,
+    "fields": {
+      "pedido": 1,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 2,
+      "fecha": "2026-10-01T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 107,
+    "fields": {
+      "pedido": 1,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 2,
+      "fecha": "2026-10-01T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 108,
+    "fields": {
+      "pedido": 1,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 2,
+      "fecha": "2026-10-01T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 109,
+    "fields": {
+      "pedido": 1,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 2,
+      "fecha": "2026-10-01T16:00:00Z",
+      "fotografia": "entregas/demo2-bicicleta1.jpg",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 111,
+    "fields": {
+      "pedido": 2,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 3,
+      "fecha": "2026-10-02T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 112,
+    "fields": {
+      "pedido": 2,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 3,
+      "fecha": "2026-10-02T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 113,
+    "fields": {
+      "pedido": 2,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 3,
+      "fecha": "2026-10-02T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 114,
+    "fields": {
+      "pedido": 2,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 3,
+      "fecha": "2026-10-02T16:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 116,
+    "fields": {
+      "pedido": 3,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 4,
+      "fecha": "2026-10-03T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 117,
+    "fields": {
+      "pedido": 3,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 4,
+      "fecha": "2026-10-03T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 118,
+    "fields": {
+      "pedido": 3,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 4,
+      "fecha": "2026-10-03T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 119,
+    "fields": {
+      "pedido": 3,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 4,
+      "fecha": "2026-10-03T16:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 121,
+    "fields": {
+      "pedido": 4,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 5,
+      "fecha": "2026-10-04T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 122,
+    "fields": {
+      "pedido": 4,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 5,
+      "fecha": "2026-10-04T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 123,
+    "fields": {
+      "pedido": 4,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 5,
+      "fecha": "2026-10-04T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 124,
+    "fields": {
+      "pedido": 4,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 5,
+      "fecha": "2026-10-04T16:00:00Z",
+      "fotografia": "entregas/demo2-moto1.jpg",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 126,
+    "fields": {
+      "pedido": 5,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 6,
+      "fecha": "2026-10-05T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 127,
+    "fields": {
+      "pedido": 5,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 6,
+      "fecha": "2026-10-05T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 128,
+    "fields": {
+      "pedido": 5,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 6,
+      "fecha": "2026-10-05T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 129,
+    "fields": {
+      "pedido": 5,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 6,
+      "fecha": "2026-10-05T16:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 131,
+    "fields": {
+      "pedido": 6,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 7,
+      "fecha": "2026-10-06T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 132,
+    "fields": {
+      "pedido": 6,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 7,
+      "fecha": "2026-10-06T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 133,
+    "fields": {
+      "pedido": 6,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 7,
+      "fecha": "2026-10-06T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 134,
+    "fields": {
+      "pedido": 6,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 7,
+      "fecha": "2026-10-06T16:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 136,
+    "fields": {
+      "pedido": 7,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 8,
+      "fecha": "2026-10-07T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 137,
+    "fields": {
+      "pedido": 7,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 8,
+      "fecha": "2026-10-07T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 138,
+    "fields": {
+      "pedido": 7,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 8,
+      "fecha": "2026-10-07T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 139,
+    "fields": {
+      "pedido": 7,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 8,
+      "fecha": "2026-10-07T16:00:00Z",
+      "fotografia": "entregas/demo2-auto1.jpg",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 141,
+    "fields": {
+      "pedido": 8,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 9,
+      "fecha": "2026-10-08T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 142,
+    "fields": {
+      "pedido": 8,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 9,
+      "fecha": "2026-10-08T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 143,
+    "fields": {
+      "pedido": 8,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 9,
+      "fecha": "2026-10-08T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 144,
+    "fields": {
+      "pedido": 8,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 9,
+      "fecha": "2026-10-08T16:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 146,
+    "fields": {
+      "pedido": 9,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 10,
+      "fecha": "2026-10-09T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 147,
+    "fields": {
+      "pedido": 9,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 10,
+      "fecha": "2026-10-09T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 148,
+    "fields": {
+      "pedido": 9,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 10,
+      "fecha": "2026-10-09T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 149,
+    "fields": {
+      "pedido": 9,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 10,
+      "fecha": "2026-10-09T16:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 151,
+    "fields": {
+      "pedido": 10,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 11,
+      "fecha": "2026-10-10T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 152,
+    "fields": {
+      "pedido": 10,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 11,
+      "fecha": "2026-10-10T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 153,
+    "fields": {
+      "pedido": 10,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 11,
+      "fecha": "2026-10-10T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 154,
+    "fields": {
+      "pedido": 10,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 11,
+      "fecha": "2026-10-10T16:00:00Z",
+      "fotografia": "entregas/demo2-camion1.jpg",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 156,
+    "fields": {
+      "pedido": 11,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 12,
+      "fecha": "2026-10-11T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 157,
+    "fields": {
+      "pedido": 11,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 12,
+      "fecha": "2026-10-11T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 158,
+    "fields": {
+      "pedido": 11,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 12,
+      "fecha": "2026-10-11T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 159,
+    "fields": {
+      "pedido": 11,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "entregado",
+      "usuario": 12,
+      "fecha": "2026-10-11T16:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 161,
+    "fields": {
+      "pedido": 12,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 13,
+      "fecha": "2026-10-12T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 162,
+    "fields": {
+      "pedido": 12,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 13,
+      "fecha": "2026-10-12T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 163,
+    "fields": {
+      "pedido": 12,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 13,
+      "fecha": "2026-10-12T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 164,
+    "fields": {
+      "pedido": 12,
+      "estado_anterior": "en_viaje",
+      "estado_nuevo": "fallido",
+      "usuario": 13,
+      "fecha": "2026-10-12T16:00:00Z",
+      "fotografia": "entregas/demo2-camion3.jpg",
+      "incidencia": "No se pudo completar la entrega"
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 200,
+    "fields": {
+      "pedido": 13,
+      "estado_anterior": "",
+      "estado_nuevo": "registrado",
+      "usuario": 1,
+      "fecha": "2026-10-20T12:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 201,
+    "fields": {
+      "pedido": 13,
+      "estado_anterior": "registrado",
+      "estado_nuevo": "asignado",
+      "usuario": 5,
+      "fecha": "2026-10-20T13:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 202,
+    "fields": {
+      "pedido": 13,
+      "estado_anterior": "asignado",
+      "estado_nuevo": "retirado",
+      "usuario": 5,
+      "fecha": "2026-10-20T14:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.historialestado",
+    "pk": 203,
+    "fields": {
+      "pedido": 13,
+      "estado_anterior": "retirado",
+      "estado_nuevo": "en_viaje",
+      "usuario": 5,
+      "fecha": "2026-10-20T15:00:00Z",
+      "fotografia": "",
+      "incidencia": ""
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 1,
+    "fields": {
+      "user": 2,
+      "pin": "1111",
+      "disponible": true,
+      "disponible_desde": "2026-10-01T12:00:00Z",
+      "dni": "01000001",
+      "vehiculo": "bicicleta"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 2,
+    "fields": {
+      "user": 3,
+      "pin": "1222",
+      "disponible": true,
+      "disponible_desde": "2026-10-01T12:00:00Z",
+      "dni": "01000002",
+      "vehiculo": "bicicleta"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 3,
+    "fields": {
+      "user": 4,
+      "pin": "1333",
+      "disponible": false,
+      "disponible_desde": null,
+      "dni": "01000003",
+      "vehiculo": "bicicleta"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 4,
+    "fields": {
+      "user": 5,
+      "pin": "2111",
+      "disponible": false,
+      "disponible_desde": null,
+      "dni": "02000001",
+      "vehiculo": "moto"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 5,
+    "fields": {
+      "user": 6,
+      "pin": "2222",
+      "disponible": true,
+      "disponible_desde": "2026-10-01T12:00:00Z",
+      "dni": "02000002",
+      "vehiculo": "moto"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 6,
+    "fields": {
+      "user": 7,
+      "pin": "2333",
+      "disponible": false,
+      "disponible_desde": null,
+      "dni": "02000003",
+      "vehiculo": "moto"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 7,
+    "fields": {
+      "user": 8,
+      "pin": "3111",
+      "disponible": true,
+      "disponible_desde": "2026-10-01T12:00:00Z",
+      "dni": "03000001",
+      "vehiculo": "auto"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 8,
+    "fields": {
+      "user": 9,
+      "pin": "3222",
+      "disponible": true,
+      "disponible_desde": "2026-10-01T12:00:00Z",
+      "dni": "03000002",
+      "vehiculo": "auto"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 9,
+    "fields": {
+      "user": 10,
+      "pin": "3333",
+      "disponible": false,
+      "disponible_desde": null,
+      "dni": "03000003",
+      "vehiculo": "auto"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 10,
+    "fields": {
+      "user": 11,
+      "pin": "4111",
+      "disponible": false,
+      "disponible_desde": null,
+      "dni": "04000001",
+      "vehiculo": "camion"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 11,
+    "fields": {
+      "user": 12,
+      "pin": "4222",
+      "disponible": false,
+      "disponible_desde": null,
+      "dni": "04000002",
+      "vehiculo": "camion"
+    }
+  },
+  {
+    "model": "repartidor.repartidor",
+    "pk": 12,
+    "fields": {
+      "user": 13,
+      "pin": "4333",
+      "disponible": false,
+      "disponible_desde": null,
+      "dni": "04000003",
+      "vehiculo": "camion"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 1,
+    "fields": {
+      "name": "Can add log entry",
+      "content_type": 1,
+      "codename": "add_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 2,
+    "fields": {
+      "name": "Can change log entry",
+      "content_type": 1,
+      "codename": "change_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 3,
+    "fields": {
+      "name": "Can delete log entry",
+      "content_type": 1,
+      "codename": "delete_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 4,
+    "fields": {
+      "name": "Can view log entry",
+      "content_type": 1,
+      "codename": "view_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 5,
+    "fields": {
+      "name": "Can add permission",
+      "content_type": 3,
+      "codename": "add_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 6,
+    "fields": {
+      "name": "Can change permission",
+      "content_type": 3,
+      "codename": "change_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 7,
+    "fields": {
+      "name": "Can delete permission",
+      "content_type": 3,
+      "codename": "delete_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 8,
+    "fields": {
+      "name": "Can view permission",
+      "content_type": 3,
+      "codename": "view_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 9,
+    "fields": {
+      "name": "Can add group",
+      "content_type": 2,
+      "codename": "add_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 10,
+    "fields": {
+      "name": "Can change group",
+      "content_type": 2,
+      "codename": "change_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 11,
+    "fields": {
+      "name": "Can delete group",
+      "content_type": 2,
+      "codename": "delete_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 12,
+    "fields": {
+      "name": "Can view group",
+      "content_type": 2,
+      "codename": "view_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 13,
+    "fields": {
+      "name": "Can add content type",
+      "content_type": 4,
+      "codename": "add_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 14,
+    "fields": {
+      "name": "Can change content type",
+      "content_type": 4,
+      "codename": "change_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 15,
+    "fields": {
+      "name": "Can delete content type",
+      "content_type": 4,
+      "codename": "delete_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 16,
+    "fields": {
+      "name": "Can view content type",
+      "content_type": 4,
+      "codename": "view_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 17,
+    "fields": {
+      "name": "Can add session",
+      "content_type": 5,
+      "codename": "add_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 18,
+    "fields": {
+      "name": "Can change session",
+      "content_type": 5,
+      "codename": "change_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 19,
+    "fields": {
+      "name": "Can delete session",
+      "content_type": 5,
+      "codename": "delete_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 20,
+    "fields": {
+      "name": "Can view session",
+      "content_type": 5,
+      "codename": "view_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 21,
+    "fields": {
+      "name": "Can add Comercio",
+      "content_type": 6,
+      "codename": "add_comercio"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 22,
+    "fields": {
+      "name": "Can change Comercio",
+      "content_type": 6,
+      "codename": "change_comercio"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 23,
+    "fields": {
+      "name": "Can delete Comercio",
+      "content_type": 6,
+      "codename": "delete_comercio"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 24,
+    "fields": {
+      "name": "Can view Comercio",
+      "content_type": 6,
+      "codename": "view_comercio"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+      "name": "Can add Devoluci�n confirmada",
+      "content_type": 7,
+      "codename": "add_devolucion"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+      "name": "Can change Devoluci�n confirmada",
+      "content_type": 7,
+      "codename": "change_devolucion"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+      "name": "Can delete Devoluci�n confirmada",
+      "content_type": 7,
+      "codename": "delete_devolucion"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+      "name": "Can view Devoluci�n confirmada",
+      "content_type": 7,
+      "codename": "view_devolucion"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 29,
+    "fields": {
+      "name": "Can add Pedido",
+      "content_type": 9,
+      "codename": "add_pedido"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 30,
+    "fields": {
+      "name": "Can change Pedido",
+      "content_type": 9,
+      "codename": "change_pedido"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 31,
+    "fields": {
+      "name": "Can delete Pedido",
+      "content_type": 9,
+      "codename": "delete_pedido"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 32,
+    "fields": {
+      "name": "Can view Pedido",
+      "content_type": 9,
+      "codename": "view_pedido"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 33,
+    "fields": {
+      "name": "Can add Historial de estado",
+      "content_type": 8,
+      "codename": "add_historialestado"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 34,
+    "fields": {
+      "name": "Can change Historial de estado",
+      "content_type": 8,
+      "codename": "change_historialestado"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 35,
+    "fields": {
+      "name": "Can delete Historial de estado",
+      "content_type": 8,
+      "codename": "delete_historialestado"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 36,
+    "fields": {
+      "name": "Can view Historial de estado",
+      "content_type": 8,
+      "codename": "view_historialestado"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 37,
+    "fields": {
+      "name": "Can add Repartidor",
+      "content_type": 10,
+      "codename": "add_repartidor"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 38,
+    "fields": {
+      "name": "Can change Repartidor",
+      "content_type": 10,
+      "codename": "change_repartidor"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 39,
+    "fields": {
+      "name": "Can delete Repartidor",
+      "content_type": 10,
+      "codename": "delete_repartidor"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 40,
+    "fields": {
+      "name": "Can view Repartidor",
+      "content_type": 10,
+      "codename": "view_repartidor"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 41,
+    "fields": {
+      "name": "Can add vehiculo",
+      "content_type": 12,
+      "codename": "add_vehiculo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 42,
+    "fields": {
+      "name": "Can change vehiculo",
+      "content_type": 12,
+      "codename": "change_vehiculo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 43,
+    "fields": {
+      "name": "Can delete vehiculo",
+      "content_type": 12,
+      "codename": "delete_vehiculo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 44,
+    "fields": {
+      "name": "Can view vehiculo",
+      "content_type": 12,
+      "codename": "view_vehiculo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 45,
+    "fields": {
+      "name": "Can add Usuario",
+      "content_type": 11,
+      "codename": "add_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 46,
+    "fields": {
+      "name": "Can change Usuario",
+      "content_type": 11,
+      "codename": "change_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 47,
+    "fields": {
+      "name": "Can delete Usuario",
+      "content_type": 11,
+      "codename": "delete_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 48,
+    "fields": {
+      "name": "Can view Usuario",
+      "content_type": 11,
+      "codename": "view_user"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 1,
+    "fields": {
+      "app_label": "admin",
+      "model": "logentry"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 2,
+    "fields": {
+      "app_label": "auth",
+      "model": "group"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 3,
+    "fields": {
+      "app_label": "auth",
+      "model": "permission"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 4,
+    "fields": {
+      "app_label": "contenttypes",
+      "model": "contenttype"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 5,
+    "fields": {
+      "app_label": "sessions",
+      "model": "session"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 6,
+    "fields": {
+      "app_label": "operario",
+      "model": "comercio"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 7,
+    "fields": {
+      "app_label": "operario",
+      "model": "devolucion"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 8,
+    "fields": {
+      "app_label": "repartidor",
+      "model": "historialestado"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 9,
+    "fields": {
+      "app_label": "repartidor",
+      "model": "pedido"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 10,
+    "fields": {
+      "app_label": "repartidor",
+      "model": "repartidor"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 11,
+    "fields": {
+      "app_label": "users",
+      "model": "user"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 12,
+    "fields": {
+      "app_label": "users",
+      "model": "vehiculo"
+    }
+  },
+  {
+    "model": "sessions.session",
+    "pk": "w2qi9oc1h3knbb1rritju1btu6qykowu",
+    "fields": {
+      "session_data": ".eJxVy7sOwjAMheF38Ywq59amHWHmGSLHdpQKKFJDJ8S7o0odYP3-c96QaHvVtDVd0ywwQYDTr2Ximy57eNC8dLu17sDWXYiryvUpej8fw793pVZhgmgCIjt16uIgngsFZkUu2EuwFk0Uqz4OMmax2Whkh6WwVbSjku_h8wUnRDcg:1xU93C:vqDP3YSNqlgR0oap8Dfcgo8zAsoV8mh2ckCjOTwbsew",
+      "expire_date": "2026-12-03T20:48:10.194Z"
+    }
+  },
+  {
+    "model": "sessions.session",
+    "pk": "y039h29j19xkhqthozkwe2bj4tt2xhqi",
+    "fields": {
+      "session_data": ".eJxVzDsOwjAMBuC7ZEZV7IQ6YYSZM0RpbCsVUKSGToi7o0gdYP3-x9ukvL1q2pqsaWZzMmAOvzblcpOlB488L0O3NuzYhksuVfj6ZLmf9-LfuuZW-6dVoSDsdArEaNFFYEEXkGSkcqRQMHphArUEPhYHRUf0qAqioObzBRKFNn4:1xU91P:J-YsrLQgnq3Ruh6L3gcB63otBqjPbKSS5zCK66NuezI",
+      "expire_date": "2026-12-03T20:46:19.864Z"
+    }
+  }
+]
