@@ -42,6 +42,12 @@ Las 31 historias del backlog (exportación de Taiga del 19/11/2026, ver [fuentes
 | Carga de `demo/datos-demo.json` sobre una base en memoria | Correcta (13 pedidos). |
 | `python3 scripts/check_docs.py .` | Enlaces locales correctos. |
 
+## Rendimiento (20/11/2026)
+
+Se evitó reconstruir la tabla del panel de operario si el sondeo devuelve los mismos datos y se fijó el centrado vertical del input público de seguimiento. La auditoría, los límites de medición y QA están en [performance](performance/audit.md). No se obtuvieron métricas Core Web Vitals ni capturas por una limitación de conexión del navegador local; no se presentan resultados visuales como verificados.
+
+La suite completa se intentó: 182 pruebas de aplicación no reportaron fallos de aserción, pero el comando terminó con error de importación del test auxiliar `test_demo2_playwright.py` porque `playwright` no está instalado en el entorno. Las 29 pruebas relevantes de seguimiento y panel sí pasaron; ver [informe de QA](performance/qa-report.md).
+
 La conexión real a Neon no forma parte de la suite.
 
 ## Limitaciones conocidas
