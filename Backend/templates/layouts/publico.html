@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load sgr_ui %}
+{% block body %}
+<header class="pub-cabecera trama">
+    <div class="pub-barra">
+        <a class="marca" href="{% url 'root' %}">{% include "components/marca.html" %}</a>
+        <nav class="pub-accesos" aria-label="Acceso del personal">
+            {% if not user.is_authenticated %}
+                <a class="btn" data-variant="outline" data-size="sm" href="{% url 'login' %}?next={% url 'operario:inicio' %}">Iniciar sesión como operario</a>
+                <a class="btn" data-variant="outline" data-size="sm" href="{% url 'repartidor_login_pin' %}">Iniciar sesión como repartidor</a>
+            {% elif user.is_operario %}
+                <a class="btn" data-variant="outline" data-size="sm" href="{% url 'operario:inicio' %}">Ir al panel</a>
+            {% elif user.repartidor %}
+                <a class="btn" data-variant="outline" data-size="sm" href="{% url 'repartidor' %}">Ir a mi jornada</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% block hero %}{% endblock %}
+</header>
+<main id="content" tabindex="-1">
+    {% block content %}{% endblock %}
+</main>
+<footer class="pub-pie">SGR, sistema de gestión de repartos</footer>
+{% endblock %}

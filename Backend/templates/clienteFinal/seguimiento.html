@@ -1,38 +1,59 @@
-{% extends "base.html" %}
+{% extends "layouts/publico.html" %}
+{% load sgr_ui %}
 
-{% block title %}Seguimiento de pedido{% endblock %}
+{% block title %}{{ estado }}: seguimiento de pedido{% endblock %}
+
+{% block hero %}
+<section class="seg-hero" aria-labelledby="estado-titulo">
+    <p class="seg-codigo">Seguimiento de tu pedido{% if comercio %}, enviado por <strong style="color:#fff">{{ comercio }}</strong>{% endif %}</p>
+    <h1 id="estado-titulo" class="display">{{ estado_clase|titulo_publico:estado }}</h1>
+    <p class="bajada">{{ estado_clase|descripcion_publica }}</p>
+    {% if mostrar_tiempo %}
+        <p class="llegada">{% icon 'clock' %}<span>Llegada estimada: <span class="num">{{ llegada_estimada|time:"H:i" }}</span> aprox.</span></p>
+    {% endif %}
+</section>
+{% endblock %}
 
 {% block content %}
-    <div class="card shadow-sm mx-auto" style="max-width: 28rem;">
-        <div class="card-body p-4">
-            <h1 class="h4 mb-4">Seguimiento de tu pedido</h1>
+<div class="seg-cuerpo">
+    <section class="panel seg-recorrido" aria-label="Etapas del pedido">
+        {% include "components/recorrido.html" with clave=estado_clase adaptable=True %}
+    </section>
 
-            <p class="text-secondary mb-1">Estado</p>
-            <p>
-                <span class="status-badge status-{{ estado_clase }} fs-6">{{ estado }}</span>
-            </p>
+    <div class="seg-rejilla">
+        <section class="panel" aria-labelledby="historial-titulo">
+            <div class="panel-cabecera">
+                <h2 id="historial-titulo" class="subtitulo">Historial de estados</h2>
+                <span class="conteo">Lo más reciente primero</span>
+            </div>
+            <div class="panel-cuerpo">
+                {% if historial %}
+                    <ol class="cronologia">
+                        {% for paso in historial reversed %}
+                            <li>
+                                <span class="marcador" data-estado="{{ paso.clase }}">{% icon paso.clase|icono_estado %}</span>
+                                <div>
+                                    <div class="evento-cabecera">
+                                        <strong>{{ paso.etiqueta }}</strong>
+                                        <time datetime="{{ paso.fecha|date:'c' }}">{{ paso.fecha|date:"d/m/Y H:i" }}</time>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <p class="tenue">Todavía no hay movimientos registrados.</p>
+                {% endif %}
+            </div>
+        </section>
 
-            <p class="text-secondary mb-1">Enviado por</p>
-            <p class="fw-semibold">{{ comercio }}</p>
-
-            {% if mostrar_tiempo %}
-                <p class="text-secondary mb-1">Llegada estimada</p>
-                <p class="fw-semibold mb-0">
-                    <i class="bi bi-clock"></i>
-                    Llega aprox. a las {{ llegada_estimada|time:"H:i" }}
-                </p>
-            {% endif %}
-
-            <hr class="my-4">
-            <h2 class="h6 text-secondary mb-3">Historial de estados</h2>
-            <ul class="list-unstyled mb-0">
-                {% for paso in historial %}
-                    <li class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="status-badge status-{{ paso.clase }}">{{ paso.etiqueta }}</span>
-                        <span class="text-secondary small">{{ paso.fecha|date:"d/m/Y H:i" }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+        <aside class="panel" aria-labelledby="otro-titulo">
+            <div class="panel-cuerpo" style="display:grid;gap:1rem">
+                <h2 id="otro-titulo" class="subtitulo">¿Dudas con tu envío?</h2>
+                <p class="tenue">Comunicate con {% if comercio %}{{ comercio }}{% else %}el comercio{% endif %}: es quien tiene los datos de tu compra y puede coordinar cambios.</p>
+                <a class="btn" data-variant="outline" href="{% url 'root' %}">{% icon 'search' %}Consultar otro código</a>
+            </div>
+        </aside>
     </div>
+</div>
 {% endblock content %}

@@ -1,85 +1,72 @@
+{% extends 'layouts/operario.html' %}
+{% load sgr_ui %}
 
-{% extends 'base.html' %}
+{% block title %}Historial de pedidos{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Historial general de pedidos</h2>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Historial general de pedidos</h1>
+        <p class="bajada">Todos los pedidos, del último registrado al primero. Filtrá por comercio o por estado.</p>
+    </div>
+</div>
 
-    <form method="get" class="row g-3 mb-4">
-        <div class="col-md-5">
-            <label for="comercio" class="form-label">
-                Nombre del comercio
-            </label>
-            <input
-                type="text"
-                class="form-control"
-                id="comercio"
-                name="comercio"
-                value="{{ comercio_buscado }}"
-                placeholder="Buscar comercio"
-            >
+<section class="panel" aria-labelledby="resultados-heading">
+    <form method="get" class="filtros" role="search" aria-label="Filtrar pedidos">
+        <div role="group" class="field">
+            <label for="comercio">Nombre del comercio</label>
+            <input type="search" id="comercio" name="comercio" value="{{ comercio_buscado }}" placeholder="Buscar comercio…" autocomplete="off">
         </div>
-
-        <div class="col-md-4">
-            <label for="estado" class="form-label">
-                Estado del pedido
-            </label>
-            <select
-                class="form-select"
-                id="estado"
-                name="estado"
-            >
+        <div role="group" class="field angosto">
+            <label for="estado">Estado del pedido</label>
+            <select id="estado" name="estado">
                 <option value="">Todos los estados</option>
                 {% for valor, nombre in estados %}
-                    <option value="{{ valor }}"
-                        {% if estado_seleccionado == valor %}selected{% endif %}>
-                        {{ nombre }}
-                    </option>
+                    <option value="{{ valor }}"{% if estado_seleccionado == valor %} selected{% endif %}>{{ nombre }}</option>
                 {% endfor %}
             </select>
         </div>
-
-        <div class="col-md-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">
-                Buscar
-            </button>
+        <div style="display:flex;gap:.5rem">
+            <button type="submit" class="btn" data-variant="primary" style="min-height:2.75rem">{% icon 'search' %}Buscar</button>
+            {% if comercio_buscado or estado_seleccionado %}
+                <a class="btn" data-variant="ghost" style="min-height:2.75rem" href="{% url 'operario:historial_pedidos' %}">Limpiar filtros</a>
+            {% endif %}
         </div>
     </form>
-
+    <div class="panel-cabecera" style="border-bottom:0;padding-bottom:.5rem">
+        <h2 id="resultados-heading" class="subtitulo">Resultados</h2>
+        <span class="conteo">{{ pedidos|length }} pedido{{ pedidos|length|pluralize }}{% if comercio_buscado %} de “{{ comercio_buscado }}”{% endif %}</span>
+    </div>
     {% if pedidos %}
-        <div class="table-responsive">
-            <table class="table table-striped">
+        <div class="tabla-wrap">
+            <table class="tabla apilable">
                 <thead>
                     <tr>
-                        <th>Código</th>
-                        <th>Comercio</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
+                        <th scope="col">Código</th>
+                        <th scope="col">Comercio y destino</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Creado</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for pedido in pedidos %}
                         <tr>
-                            <td>{{ pedido.codigo }}</td>
-                            <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
-                            <td>{{ pedido.get_estado_display }}</td>
-                            <td>
-                                <a
-                                    href="{% url 'operario:detalle_pedido' pedido.pk %}"
-                                    class="btn btn-sm btn-outline-primary"
-                                >
-                                    Ver historial
-                                </a>
-                            </td>
+                            <td data-primaria><a class="fila-enlace codigo" href="{% url 'operario:detalle_pedido' pedido.pk %}">{{ pedido.codigo }}</a></td>
+                            <td><span class="celda-doble"><span>{{ pedido.comercio.nombre|default:"Sin comercio" }}</span><small>{% icon 'map-pin' 'sm' %} {{ pedido.direccion_destino|default:"Sin destino" }}</small></span></td>
+                            <td data-lado>{% include "components/estado.html" with clave=pedido.estado etiqueta=pedido.get_estado_display %}</td>
+                            <td data-label="Creado" class="num">{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     {% else %}
-        <div class="alert alert-info">
-            No se encontraron pedidos que coincidan con los filtros ingresados
+        <div class="vacio">
+            <span class="vacio-icono">{% icon 'search' 'lg' %}</span>
+            <h3>No se encontraron pedidos que coincidan con los filtros ingresados</h3>
+            <p>Revisá el nombre del comercio o elegí otro estado.</p>
+            {% if comercio_buscado or estado_seleccionado %}<a class="btn" data-variant="outline" href="{% url 'operario:historial_pedidos' %}">Limpiar filtros</a>{% endif %}
         </div>
     {% endif %}
-</div>
+</section>
 {% endblock %}

@@ -1,34 +1,45 @@
-{% extends "base.html" %}
+{% extends "layouts/operario.html" %}
+{% load sgr_ui %}
 
 {% block title %}Nuevo repartidor{% endblock %}
 
 {% block content %}
-<div class="page-heading">
-    <h1 class="h2">Dar de alta un repartidor</h1>
-    <p>Creá el usuario y su perfil de acceso con PIN.</p>
+<p style="margin-bottom:1rem"><a class="enlace-volver" href="{% url 'operario:repartidores' %}">{% icon 'chevron-left' 'sm' %}Repartidores</a></p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Dar de alta un repartidor</h1>
+        <p class="bajada">Creá el usuario y su perfil de acceso con PIN.</p>
+    </div>
 </div>
 
-<form method="post" class="card shadow-sm p-4" novalidate>
+<form method="post" class="panel formulario" novalidate style="max-width:56rem">
     {% csrf_token %}
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger" role="alert">
-            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+    {% if form.errors %}<div style="padding:1.25rem 1.5rem 0">{% include "components/resumen_errores.html" %}</div>{% endif %}
+    <section class="formulario-seccion" aria-labelledby="sec-persona">
+        <header><h2 id="sec-persona">Persona</h2><p>El nombre se muestra al operario y en el historial de cada pedido.</p></header>
+        <div class="formulario-campos dos">
+            {% include "components/campo.html" with field=form.nombre %}
+            {% include "components/campo.html" with field=form.apellido %}
+            {% include "components/campo.html" with field=form.dni ayuda="8 dígitos, sin puntos." %}
+            {% include "components/campo.html" with field=form.email %}
         </div>
-    {% endif %}
-
-    {% for field in form.visible_fields %}
-        <div class="mb-3">
-            {{ field.label_tag }}
-            {{ field }}
-            {% for error in field.errors %}
-                <div class="invalid-feedback d-block">{{ error }}</div>
-            {% endfor %}
+    </section>
+    <section class="formulario-seccion" aria-labelledby="sec-reparto">
+        <header><h2 id="sec-reparto">Reparto</h2><p>Solo recibe pedidos que requieren este vehículo.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.vehiculo %}
         </div>
-    {% endfor %}
-
-    <div class="d-flex flex-wrap gap-2">
-        <button type="submit" class="btn btn-app">Crear repartidor</button>
-        <a class="btn btn-app-outline" href="{% url 'operario:repartidores' %}">Cancelar</a>
+    </section>
+    <section class="formulario-seccion" aria-labelledby="sec-acceso">
+        <header><h2 id="sec-acceso">Acceso</h2><p>El repartidor ingresa desde su teléfono solo con el PIN. Comunicáselo en persona.</p></header>
+        <div class="formulario-campos dos">
+            {% include "components/campo.html" with field=form.usuario %}
+            {% include "components/campo.html" with field=form.pin ayuda="4 dígitos que no use otro repartidor." %}
+        </div>
+    </section>
+    <div class="formulario-pie">
+        <a class="btn" data-variant="ghost" href="{% url 'operario:repartidores' %}">Cancelar</a>
+        <button type="submit" class="btn" data-variant="primary">{% icon 'check' %}Crear repartidor</button>
     </div>
 </form>
 {% endblock %}

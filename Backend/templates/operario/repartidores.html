@@ -1,134 +1,119 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "layouts/operario.html" %}
+{% load static sgr_ui %}
 
 {% block title %}Repartidores{% endblock %}
 
-{% block extrastyle %}
-<link rel="stylesheet" href="{% static 'css/repartidores.css' %}">
-{% endblock extrastyle %}
-
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div class="page-heading mb-0">
-        <h1 class="h2">Repartidores</h1>
-        <p>Consultá los usuarios, vehículos y disponibilidad de los repartidores.</p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Repartidores</h1>
+        <p class="bajada">Usuarios, vehículos y disponibilidad. La disponibilidad la marca cada repartidor desde su teléfono y se actualiza sola.</p>
     </div>
-    <a class="btn btn-app" href="{% url 'operario:nuevo_repartidor' %}">Nuevo repartidor</a>
+    <div class="encabezado-acciones">
+        <a class="btn" data-variant="primary" href="{% url 'operario:nuevo_repartidor' %}">{% icon 'plus' %}Nuevo repartidor</a>
+    </div>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-
 {% if pin_actualizado or pin_regenerado %}
-    <div class="alert alert-success" role="status">
-        <strong>PIN actualizado exitosamente para {{ repartidor_pin.user.username }}:</strong>
-        <output class="fs-4 font-monospace user-select-all">{{ pin_actualizado|default:pin_regenerado }}</output>
-        <p class="mb-0">Transmití este PIN al repartidor. El PIN anterior ya no permite ingresar.</p>
+    <div class="aviso" data-tono="exito" role="status" style="margin-bottom:1.25rem;align-items:center">
+        {% icon 'key-round' 'lg' %}
+        <div style="flex:1;display:grid;gap:.25rem">
+            <p><strong>PIN actualizado exitosamente para {{ repartidor_pin.user.username }}:</strong></p>
+            <p>Transmití este PIN al repartidor. El PIN anterior ya no permite ingresar.</p>
+        </div>
+        <output class="codigo" style="font-size:2rem;letter-spacing:.25em;background:#fff;border:1px solid #B7DEC4;border-radius:10px;padding:.25rem .75rem;user-select:all">{{ pin_actualizado|default:pin_regenerado }}</output>
     </div>
 {% endif %}
 
-<section class="app-section" aria-labelledby="repartidores-heading">
-    <div class="app-section-body">
-        <h2 id="repartidores-heading" class="h5">Personal de reparto</h2>
-        {% if repartidores %}
-            <form id="csrf-form" hidden>{% csrf_token %}</form>
-            <div class="table-responsive">
-                <table class="table app-table align-middle" data-disponibilidad-url="{% url 'operario:estado_repartidores' %}">
-                    <thead>
-                        <tr>
-                            <th scope="col">Usuario</th>
-                            <th scope="col">Vehículo</th>
-                            <th scope="col">Disponible</th>
-                            <th scope="col">Activo</th>
-                            <th scope="col">Acceso</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for perfil in repartidores %}
-                            <tr{% if perfil.user.is_active %} class="activo"{% endif %}>
-                                <td class="repartidor-usuario">{{ perfil.user.username }}</td>
-                                <td class="repartidor-vehiculo">{{ perfil.get_vehiculo_display }}</td>
-                                <td class="repartidor-disponible" data-username="{{ perfil.user.username }}">
-                                    {% if perfil.disponible %}
-                                        <span class="badge text-bg-success">Disponible</span>
-                                    {% else %}
-                                        <span class="badge text-bg-secondary">No disponible</span>
-                                    {% endif %}
-                                </td>
-                                <td class="repartidor-estado">
-                                    <div class="toggle-container">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" data-username="{{ perfil.user.username }}" aria-label="Activar o desactivar {{ perfil.user.username }}"{% if perfil.user.is_active %} checked{% endif %}>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="btn btn-outline-primary btn-sm"
-                                            type="button"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalPin{{ perfil.pk }}">
-                                        Regenerar PIN
-                                    </button>
-
-                                    <div class="modal fade" id="modalPin{{ perfil.pk }}" tabindex="-1" aria-labelledby="modalPinLabel{{ perfil.pk }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}">
-                                                    {% csrf_token %}
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalPinLabel{{ perfil.pk }}">Regenerar PIN - {{ perfil.user.username }}</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <p class="text-secondary small mb-3">
-                                                            Ingresá un nuevo PIN numérico de 4 dígitos disponible para <strong>{{ perfil.user.username }}</strong>. Al confirmar, el PIN anterior quedará invalidado inmediatamente.
-                                                        </p>
-                                                        <div class="mb-3 text-start">
-                                                            <label for="pinInput{{ perfil.pk }}" class="form-label">Nuevo PIN (4 dígitos numéricos)</label>
-                                                            <input type="text"
-                                                                   class="form-control font-monospace text-center fs-4"
-                                                                   id="pinInput{{ perfil.pk }}"
-                                                                   name="pin"
-                                                                   maxlength="4"
-                                                                   minlength="4"
-                                                                   pattern="\d{4}"
-                                                                   inputmode="numeric"
-                                                                   required
-                                                                   placeholder="0000"
-                                                                   autocomplete="off">
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" class="btn btn-primary btn-sm">Confirmar</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="text-secondary mb-0">Todavía no hay repartidores registrados.</p>
-        {% endif %}
+<section class="panel" aria-labelledby="repartidores-heading">
+    <div class="panel-cabecera">
+        <h2 id="repartidores-heading" class="subtitulo">Personal de reparto</h2>
+        {% if repartidores %}<span class="vivo" id="estado-disponibilidad"><span class="punto"></span><span>Disponibilidad en vivo</span></span>{% endif %}
     </div>
+    {% if repartidores %}
+        <form id="csrf-form" hidden>{% csrf_token %}</form>
+        <div class="tabla-wrap">
+            <table class="tabla apilable" data-disponibilidad-url="{% url 'operario:estado_repartidores' %}">
+                <thead>
+                    <tr>
+                        <th scope="col">Repartidor</th>
+                        <th scope="col">Vehículo</th>
+                        <th scope="col">Disponibilidad</th>
+                        <th scope="col">Activo</th>
+                        <th scope="col">Acceso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for perfil in repartidores %}
+                        <tr{% if perfil.user.is_active %} class="activo"{% endif %}>
+                            <td data-primaria class="repartidor-usuario">
+                                <span class="persona" data-activo="{{ perfil.user.is_active|yesno:'true,false' }}">
+                                    <span class="avatar" aria-hidden="true">{{ perfil.user|iniciales }}</span>
+                                    <span class="celda-doble"><span style="font-weight:650">{{ perfil.user.get_full_name|default:perfil.user.username }}</span><small>{{ perfil.user.username }}</small></span>
+                                </span>
+                            </td>
+                            <td data-label="Vehículo" class="repartidor-vehiculo"><span style="display:inline-flex;gap:.4rem;align-items:center">{% icon perfil.vehiculo|icono_vehiculo 'sm' %}{{ perfil.get_vehiculo_display }}</span></td>
+                            <td data-lado class="repartidor-disponible">
+                                <span class="disponibilidad" data-username="{{ perfil.user.username }}" data-disponible="{{ perfil.disponible|yesno:'true,false' }}"><span class="punto"></span><span>{% if perfil.disponible %}Disponible{% else %}No disponible{% endif %}</span></span>
+                            </td>
+                            <td data-label="Activo" class="repartidor-estado">
+                                <label class="interruptor">
+                                    <input class="input" type="checkbox" role="switch" data-username="{{ perfil.user.username }}" aria-label="Cuenta de {{ perfil.user.username }} activa"{% if perfil.user.is_active %} checked{% endif %}>
+                                    <span class="interruptor-texto" aria-hidden="true">{% if perfil.user.is_active %}Activo{% else %}Inactivo{% endif %}</span>
+                                </label>
+                            </td>
+                            <td class="acciones">
+                                <button class="btn" data-variant="outline" data-size="sm" type="button" data-bs-toggle="modal" data-bs-target="#modalPin{{ perfil.pk }}">{% icon 'key-round' 'sm' %}Regenerar PIN</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p id="error-estado-repartidor" class="aviso" data-tono="error" role="alert" hidden style="margin:1rem 1.25rem"></p>
+
+        {% for perfil in repartidores %}
+            <dialog class="dialog" id="modalPin{{ perfil.pk }}" aria-labelledby="modalPinLabel{{ perfil.pk }}"{% if repartidor_error_id == perfil.pk %} data-abrir-al-cargar{% endif %}>
+                <div>
+                    <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}" id="formPin{{ perfil.pk }}" hidden>{% csrf_token %}</form>
+                        <header>
+                            <h2 id="modalPinLabel{{ perfil.pk }}">Regenerar PIN de {{ perfil.user.username }}</h2>
+                            <p>Ingresá un PIN nuevo de 4 dígitos que no use otro repartidor. Al confirmar, el PIN anterior deja de funcionar de inmediato.</p>
+                        </header>
+                        <section>
+                            <div role="group" class="field"{% if repartidor_error_id == perfil.pk %} data-invalid="true"{% endif %}>
+                                <label for="pinInput{{ perfil.pk }}">Nuevo PIN</label>
+                                <input type="text" class="pin-campo" id="pinInput{{ perfil.pk }}" name="pin" form="formPin{{ perfil.pk }}" maxlength="4" minlength="4" pattern="\d{4}" inputmode="numeric" required placeholder="0000" autocomplete="off"{% if repartidor_error_id == perfil.pk %} aria-invalid="true" aria-describedby="pinError{{ perfil.pk }}"{% endif %}>
+                                {% if repartidor_error_id == perfil.pk %}<p class="error-campo" id="pinError{{ perfil.pk }}" role="alert">{% icon 'circle-alert' 'sm' %}<span>{{ error_pin }}</span></p>{% endif %}
+                            </div>
+                        </section>
+                        <footer>
+                            <button type="button" class="btn" data-variant="outline" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" form="formPin{{ perfil.pk }}" class="btn" data-variant="primary">Confirmar nuevo PIN</button>
+                        </footer>
+                    <button type="button" aria-label="Cerrar" data-bs-dismiss="modal">{% icon 'x' %}</button>
+                </div>
+            </dialog>
+        {% endfor %}
+    {% else %}
+        <div class="vacio">
+            <span class="vacio-icono">{% icon 'users' 'lg' %}</span>
+            <h3>Todavía no hay repartidores registrados.</h3>
+            <p>Creá el primero con su usuario, vehículo y PIN de acceso.</p>
+            <a class="btn" data-variant="primary" href="{% url 'operario:nuevo_repartidor' %}">{% icon 'plus' %}Nuevo repartidor</a>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}
 
 {% block extrascript %}
     {{ block.super }}
     {% if repartidores %}
-        <script src="{% static 'js/repartidores.js' %}" data-endpoint="{% url 'operario:cambiar_estado_repartidor' %}"></script>
+        <script src="{% static 'js/repartidores.js' %}" data-endpoint="{% url 'operario:cambiar_estado_repartidor' %}" defer></script>
         <script>
         (() => {
             const tabla = document.querySelector('[data-disponibilidad-url]');
+            const vivo = document.getElementById('estado-disponibilidad');
             if (!tabla) return;
 
             let enCurso = false;
@@ -141,22 +126,21 @@
                         headers: {'Accept': 'application/json'},
                         credentials: 'same-origin',
                     });
-                    if (!respuesta.ok) return;
+                    if (!respuesta.ok) throw new Error(String(respuesta.status));
                     const datos = await respuesta.json();
                     for (const repartidor of datos.repartidores) {
-                        const celda = tabla.querySelector(
-                            `.repartidor-disponible[data-username="${repartidor.username}"]`
-                        );
-                        if (!celda) continue;
-                        const etiqueta = document.createElement('span');
-                        etiqueta.className = repartidor.disponible
-                            ? 'badge text-bg-success'
-                            : 'badge text-bg-secondary';
-                        etiqueta.textContent = repartidor.disponible ? 'Disponible' : 'No disponible';
-                        celda.replaceChildren(etiqueta);
+                        const etiqueta = tabla.querySelector(`.disponibilidad[data-username="${CSS.escape(repartidor.username)}"]`);
+                        if (!etiqueta) continue;
+                        etiqueta.dataset.disponible = String(repartidor.disponible);
+                        etiqueta.lastElementChild.textContent = repartidor.disponible ? 'Disponible' : 'No disponible';
                     }
+                    delete vivo.dataset.sinConexion;
+                    vivo.lastElementChild.textContent = 'Disponibilidad en vivo';
+                    vivo.removeAttribute('data-latido'); void vivo.offsetWidth; vivo.setAttribute('data-latido', '');
                 } catch (_) {
                     // Si la conexión falla, se conserva el último estado mostrado.
+                    vivo.dataset.sinConexion = 'true';
+                    vivo.lastElementChild.textContent = 'Sin conexión; se muestra el último estado';
                 } finally {
                     enCurso = false;
                 }

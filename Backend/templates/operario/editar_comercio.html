@@ -1,22 +1,37 @@
-{% extends "base.html" %}
-{% load crispy_forms_tags %}
+{% extends "layouts/operario.html" %}
+{% load sgr_ui %}
 
 {% block title %}Editar comercio{% endblock %}
 
 {% block content %}
-    <div class="auth-card">
-        <h1 class="h3 mb-1">Editar comercio</h1>
-        <p class="text-secondary mb-4">{{ nombre_original }}</p>
-
-        {% for mensaje in messages %}
-            <div class="alert alert-{% if mensaje.level_tag == 'error' %}danger{% else %}{{ mensaje.level_tag }}{% endif %}" role="status">{{ mensaje }}</div>
-        {% endfor %}
-
-        <form method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <button type="submit" class="btn btn-app w-100 mt-2">Guardar cambios</button>
-            <a href="{% url 'operario:comercios' %}" class="btn btn-app-outline w-100 mt-2">Cancelar</a>
-        </form>
+<p style="margin-bottom:1rem"><a class="enlace-volver" href="{% url 'operario:comercios' %}">{% icon 'chevron-left' 'sm' %}Comercios</a></p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Editar comercio</h1>
+        <p class="bajada">{{ nombre_original }}</p>
     </div>
+</div>
+
+<form method="post" class="panel formulario" novalidate style="max-width:56rem">
+    {% csrf_token %}
+    {% if form.errors %}<div style="padding:1.25rem 1.5rem 0">{% include "components/resumen_errores.html" %}</div>{% endif %}
+    <section class="formulario-seccion" aria-labelledby="sec-datos">
+        <header><h2 id="sec-datos">Datos del comercio</h2><p>Los cambios se reflejan en los pedidos nuevos y en el detalle de los existentes.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.nombre %}
+            {% include "components/campo.html" with field=form.direccion %}
+            {% include "components/campo.html" with field=form.contacto %}
+        </div>
+    </section>
+    <section class="formulario-seccion" aria-labelledby="sec-estado">
+        <header><h2 id="sec-estado">Estado</h2><p>Un comercio inactivo no puede recibir pedidos nuevos.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.activo %}
+        </div>
+    </section>
+    <div class="formulario-pie">
+        <a href="{% url 'operario:comercios' %}" class="btn" data-variant="ghost">Cancelar</a>
+        <button type="submit" class="btn" data-variant="primary">{% icon 'check' %}Guardar cambios</button>
+    </div>
+</form>
 {% endblock %}

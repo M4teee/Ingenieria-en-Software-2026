@@ -1,0 +1,6 @@
+{% load sgr_ui %}<div role="group" class="field{% if clase %} {{ clase }}{% endif %}"{% if field.errors %} data-invalid="true"{% endif %}>
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="opcional">(opcional)</span>{% endif %}</label>
+    {{ field }}
+    {% if ayuda %}<p class="ayuda" id="{{ field.auto_id }}_ayuda">{{ ayuda }}</p>{% elif field.help_text %}<p class="ayuda">{{ field.help_text }}</p>{% endif %}
+    {% if field.errors %}<div id="{{ field.auto_id }}_error">{% for error in field.errors %}<p class="error-campo" role="alert">{% icon 'circle-alert' 'sm' %}<span>{{ error }}</span></p>{% endfor %}</div>{% endif %}
+</div>

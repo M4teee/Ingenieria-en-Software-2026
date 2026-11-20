@@ -40,6 +40,7 @@ El backlog versionado del 19/11/2026 contiene 31 historias; todas figuran como �
 - Python 3.14 y Django 6.1.
 - SQLite para desarrollo local; PostgreSQL/Neon si se configura `DATABASE_URL` con un URL `postgres://` o `postgresql://`.
 - Plantillas Django para las interfaces web; `Frontend/` no contiene una aplicación frontend independiente.
+- Interfaz (rediseño 2026-11): layouts por rol en `Backend/templates/layouts/`, sistema de diseño en `Backend/static/sgr/` y Basecoat UI 1.1.0 vendorizado en `Backend/static/vendor/`; sin paso de build ni Node. Detalle en [`docs/redesign/architecture.md`](docs/redesign/architecture.md).
 - Pillow para validar y procesar fotografías.
 - Aplicaciones Django separadas por responsabilidad: `operario`, `repartidor`, `clienteFinal`, `homePage` y `users`.
 

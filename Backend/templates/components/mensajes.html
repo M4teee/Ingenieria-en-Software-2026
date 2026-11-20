@@ -1,0 +1,13 @@
+{% load sgr_ui %}{% if messages %}
+<div class="mensajes" aria-live="polite">
+    {% for message in messages %}
+        {% with tono=message.tags|default:'info' %}
+        <div class="mensaje" role="{% if tono == 'error' %}alert{% else %}status{% endif %}" data-tono="{% if tono == 'success' %}exito{% elif tono == 'error' %}error{% elif tono == 'warning' %}atencion{% else %}info{% endif %}">
+            {% if tono == 'success' %}{% icon 'circle-check' %}{% elif tono == 'error' %}{% icon 'circle-alert' %}{% else %}{% icon 'info' %}{% endif %}
+            <p>{{ message }}</p>
+            <button type="button" aria-label="Cerrar mensaje">{% icon 'x' 'sm' %}</button>
+        </div>
+        {% endwith %}
+    {% endfor %}
+</div>
+{% endif %}

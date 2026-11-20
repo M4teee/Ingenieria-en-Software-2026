@@ -16,6 +16,7 @@ Leé primero el estado para conocer qué existe en el código y qué sigue pendi
 - [`KNOWLEDGE_BASE.md`](KNOWLEDGE_BASE.md): resumen de contexto y discrepancias entre fuentes.
 - [`TASK_TEMPLATE.md`](TASK_TEMPLATE.md): guía para describir una tarea y sus criterios de aceptación.
 - [`DOCUMENTATION_WORKFLOW.md`](DOCUMENTATION_WORKFLOW.md): revisión posterior a `git pull` y previa a `git push`.
+- [`redesign/architecture.md`](redesign/architecture.md) y [`redesign/design-direction.md`](redesign/design-direction.md): arquitectura e identidad visual del frontend rediseñado.
 - [`../scripts/check_docs.py`](../scripts/check_docs.py): comprobación mecánica local de enlaces y rutas.
 
 ## Mantenimiento

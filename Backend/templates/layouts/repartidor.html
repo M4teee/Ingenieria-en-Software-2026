@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load sgr_ui %}
+{% block body_class %}rp{% endblock %}
+{% block body %}
+<header class="rp-barra trama">
+    <a class="marca" href="{% url 'repartidor' %}">{% include "components/marca.html" with solo_sigla=True %}</a>
+    <nav aria-label="Repartidor" style="display:flex;gap:.25rem;align-items:center">
+        <a class="btn" data-variant="ghost" data-size="sm" href="{% url 'historial_entregas' %}"{% if request.resolver_match.url_name == 'historial_entregas' %} aria-current="page"{% endif %}>{% icon 'history' %}<span>Historial</span></a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn" data-variant="ghost" data-size="sm">{% icon 'log-out' %}<span>Salir</span></button>
+        </form>
+    </nav>
+</header>
+<main id="content" class="rp-contenido" tabindex="-1">
+    {% block content %}{% endblock %}
+</main>
+{% endblock %}

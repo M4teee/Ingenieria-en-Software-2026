@@ -1,0 +1,10 @@
+{% if form.errors %}
+<div class="resumen-errores" role="alert" aria-labelledby="resumen-errores-titulo">
+    <h2 id="resumen-errores-titulo">Revisá {% if form.errors|length == 1 %}el campo marcado{% else %}los {{ form.errors|length }} campos marcados{% endif %}</h2>
+    <ul>
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        {% for field in form.visible_fields %}{% for error in field.errors %}<li><a href="#{{ field.id_for_label }}">{{ field.label }}</a>: {{ error }}</li>{% endfor %}{% endfor %}
+        {% for field in form.hidden_fields %}{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}{% endfor %}
+    </ul>
+</div>
+{% endif %}

@@ -112,6 +112,8 @@ class PedidoForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['comercio'].widget.attrs['class'] = 'form-select'
+        # Django 6.1 muestra la opción vacía en inglés; texto de UI en castellano.
+        self.fields['comercio'].empty_label = 'Seleccioná un comercio'
         # El navegador no sugiere fechas/horas anteriores al momento actual
         ahora = timezone.localtime(timezone.now())
         self.fields['fecha_hora_estimada_entrega'].widget.attrs['min'] = (

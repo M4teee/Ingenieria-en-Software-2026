@@ -1,0 +1,22 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Error del servidor | SGR</title>
+    <link rel="icon" href="{% static 'sgr/favicon.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'vendor/basecoat/1.1.0/basecoat.cdn.min.css' %}">
+    <link rel="stylesheet" href="{% static 'sgr/sgr.css' %}">
+</head>
+<body>
+    <header class="pub-cabecera trama">
+        <div class="pub-barra"><a class="marca" href="/">{% include "components/marca.html" %}</a></div>
+        <section class="seg-hero">
+            <p class="seg-codigo">Error 500</p>
+            <h1 class="display">Algo falló de nuestro lado</h1>
+            <p class="bajada">No se completó la operación. Volvé a intentarlo en unos minutos; si se repite, avisá al equipo de soporte con la hora del error.</p>
+        </section>
+    </header>
+    <main class="seg-cuerpo"><div class="panel panel-cuerpo"><a class="btn" data-variant="signal" href="/">Ir al inicio</a></div></main>
+</body>
+</html>

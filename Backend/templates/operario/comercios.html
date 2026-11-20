@@ -1,91 +1,93 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "layouts/operario.html" %}
+{% load static sgr_ui %}
 
 {% block title %}Comercios{% endblock %}
 
-{% block extrastyle %}
-<link rel="stylesheet" href="{% static 'css/comercios.css' %}">
-{% endblock extrastyle %}
-
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div class="page-heading mb-0">
-        <h1 class="h2">Comercios</h1>
-        <p>Consultá los comercios registrados y su estado.</p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Comercios</h1>
+        <p class="bajada">Los comercios activos pueden recibir pedidos nuevos. Deshabilitar uno no afecta los pedidos ya registrados. Abrí un comercio para editar sus datos.</p>
     </div>
-    <a class="btn btn-app" href="{% url 'operario:nuevo_comercio' %}">Nuevo comercio</a>
+    <div class="encabezado-acciones">
+        <a class="btn" data-variant="primary" href="{% url 'operario:nuevo_comercio' %}">{% icon 'plus' %}Nuevo comercio</a>
+    </div>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
-    {% endfor %}
-{% endif %}
+<div id="mensaje-estado-comercio" class="aviso" data-tono="exito" role="status" hidden style="margin-bottom:1rem">
+    {% icon 'circle-check' 'icono-exito' %}{% icon 'circle-alert' 'icono-error' %}<p data-texto></p>
+</div>
 
-<div id="mensaje-estado-comercio" class="alert alert-success d-none" role="status"></div>
-
-<section class="app-section" aria-labelledby="comercios-heading">
-    <div class="app-section-body">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-            <h2 id="comercios-heading" class="h5 mb-0">Comercios registrados</h2>
-            {% if comercios %}
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <div class="btn-group btn-group-sm" role="group" aria-label="Filtrar por estado">
-                        <button type="button" class="btn btn-outline-secondary active" data-filtro-estado="todos">Todos</button>
-                        <button type="button" class="btn btn-outline-secondary" data-filtro-estado="activos">Activos</button>
-                        <button type="button" class="btn btn-outline-secondary" data-filtro-estado="inactivos">Inactivos</button>
-                    </div>
-                    <div style="min-width: 15rem;">
-                        <input type="search" id="buscar-comercio" class="form-control form-control-sm" placeholder="Buscar por nombre" autocomplete="off">
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-        {% if comercios %}
-            <form id="csrf-form" hidden>{% csrf_token %}</form>
-            <div class="table-responsive">
-                <table class="table app-table align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Dirección</th>
-                            <th scope="col">Contacto</th>
-                            <th scope="col">Activo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for comercio in comercios %}
-                            <tr{% if comercio.activo %} class="activo" {% endif %}>
-                                <td class="comercio-nombre">
-                                    <a href="{% url 'operario:editar_comercio' comercio_id=comercio.pk %}">
-                                        {{ comercio.nombre }}
-                                    </a>
-                                </td>
-                                <td class="comercio-direccion">{{ comercio.direccion }}</td>
-                                <td class="comercio-contacto">{{ comercio.contacto }}</td>
-                                <td class="comercio-estado">                                    
-                                    <div class="toggle-container">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" data-nombre="{{ comercio.nombre }}" aria-label="Activar o desactivar {{ comercio.nombre }}"{% if comercio.activo %} checked{% endif %}>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <p id="sin-resultados-comercios" class="text-secondary m-2 mt-4 text-center" role="status" hidden>No se encontraron comercios con ese nombre.</p>
-        {% else %}
-            <p class="text-secondary mb-0">Todavía no hay comercios registrados.</p>
-        {% endif %}
+<section class="panel" aria-labelledby="comercios-heading">
+    <div class="panel-cabecera">
+        <h2 id="comercios-heading" class="subtitulo">Comercios registrados</h2>
+        {% if comercios %}<span class="conteo" id="conteo-comercios" aria-live="polite">{{ comercios|length }} comercio{{ comercios|length|pluralize }}</span>{% endif %}
     </div>
+    {% if comercios %}
+        <div class="filtros">
+            <div class="segmentado" role="group" aria-label="Filtrar por estado">
+                <button type="button" class="active" aria-pressed="true" data-filtro-estado="todos">Todos</button>
+                <button type="button" aria-pressed="false" data-filtro-estado="activos">Activos</button>
+                <button type="button" aria-pressed="false" data-filtro-estado="inactivos">Inactivos</button>
+            </div>
+            <div class="buscador field" style="flex:0 1 20rem;margin-left:auto">
+                <label for="buscar-comercio" class="sr-only">Buscar comercio por nombre</label>
+                {% icon 'search' %}
+                <input type="search" id="buscar-comercio" placeholder="Buscar por nombre…" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+        <form id="csrf-form" hidden>{% csrf_token %}</form>
+        <div class="tabla-wrap">
+            <table class="tabla apilable" id="tabla-comercios">
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Dirección</th>
+                        <th scope="col">Contacto</th>
+                        <th scope="col">Activo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comercio in comercios %}
+                        <tr data-fila-comercio{% if comercio.activo %} class="activo"{% endif %}>
+                            <td data-primaria class="comercio-nombre">
+                                <span class="persona" data-activo="{{ comercio.activo|yesno:'true,false' }}">
+                                    <span class="avatar" aria-hidden="true">{{ comercio.nombre|iniciales }}</span>
+                                    <a class="fila-enlace" href="{% url 'operario:editar_comercio' comercio_id=comercio.pk %}">{{ comercio.nombre }}</a>
+                                </span>
+                            </td>
+                            <td data-label="Dirección" class="comercio-direccion">{{ comercio.direccion }}</td>
+                            <td data-label="Contacto" class="comercio-contacto num">{{ comercio.contacto }}</td>
+                            <td data-lado class="comercio-estado">
+                                <label class="interruptor">
+                                    <input class="input" type="checkbox" role="switch" data-nombre="{{ comercio.nombre }}" aria-label="Comercio {{ comercio.nombre }} activo"{% if comercio.activo %} checked{% endif %}>
+                                    <span class="interruptor-texto" aria-hidden="true">{% if comercio.activo %}Activo{% else %}Inactivo{% endif %}</span>
+                                </label>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="vacio" id="sin-resultados-comercios" role="status" hidden>
+            <span class="vacio-icono">{% icon 'search' 'lg' %}</span>
+            <h3>No se encontraron comercios con ese nombre.</h3>
+            <p>Probá con otra parte del nombre o cambiá el filtro de estado.</p>
+        </div>
+    {% else %}
+        <div class="vacio">
+            <span class="vacio-icono">{% icon 'store' 'lg' %}</span>
+            <h3>Todavía no hay comercios registrados.</h3>
+            <p>Dá de alta el primero para poder cargar pedidos a su nombre.</p>
+            <a class="btn" data-variant="primary" href="{% url 'operario:nuevo_comercio' %}">{% icon 'plus' %}Nuevo comercio</a>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}
 
 {% block extrascript %}
     {{ block.super }}
     {% if comercios %}
-        <script src="{% static 'js/comercios.js' %}" data-endpoint="{% url 'operario:cambiar_estado_comercio' %}"></script>
+        <script src="{% static 'js/comercios.js' %}" data-endpoint="{% url 'operario:cambiar_estado_comercio' %}" defer></script>
     {% endif %}
 {% endblock extrascript %}
