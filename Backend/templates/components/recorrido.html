@@ -1,0 +1,9 @@
+{% load sgr_ui %}{% pasos_estado clave as pasos %}
+<ol class="recorrido{% if adaptable %} adaptable{% endif %}" aria-label="Recorrido del pedido">
+    {% for paso in pasos %}
+        <li data-condicion="{{ paso.condicion }}" data-clave="{{ paso.clave }}" data-final="{{ paso.final|yesno:'true,false' }}"{% if paso.condicion == 'actual' %} aria-current="step"{% endif %}>
+            <span class="nodo">{% if paso.condicion == 'hecho' %}{% icon 'check' %}{% elif paso.clave == 'fallido' %}{% icon 'x' %}{% elif paso.clave == 'cancelado' %}{% icon 'ban' %}{% elif paso.clave == 'entregado' and paso.condicion == 'actual' %}{% icon 'check' %}{% endif %}</span>
+            <span class="paso-texto">{{ paso.etiqueta }}{% if paso.condicion == 'actual' %}<span class="sr-only"> (estado actual)</span>{% elif paso.condicion == 'hecho' %}<span class="sr-only"> (completado)</span>{% endif %}</span>
+        </li>
+    {% endfor %}
+</ol>

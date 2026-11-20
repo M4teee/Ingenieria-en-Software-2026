@@ -1,44 +1,54 @@
-{% extends "base.html" %}
-
-{% load static %}
+{% extends "layouts/publico.html" %}
+{% load sgr_ui %}
 
 {% block title %}Seguimiento{% endblock %}
 
-{% block extrastyle %}
-    <link rel="stylesheet" href="{% static 'css/tracking_card.css' %}">
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-{% endblock extrastyle %}
+{% block hero %}
+<section class="pub-hero" aria-labelledby="customer-title">
+    <div>
+        <h1 id="customer-title" class="display">Tu envío, en cada etapa.</h1>
+        <p class="bajada">Ingresá el código que te compartió el comercio para consultar el estado y el historial de tu pedido.</p>
+    </div>
+</section>
+{% endblock %}
 
 {% block content %}
-    <section class="customer-hero" aria-labelledby="customer-title">
-        <div class="customer-copy">
-            <p class="eyebrow">Seguimiento de pedidos</p>
-            <h1 id="customer-title">Tu envío, en cada etapa.</h1>
-            <p>Ingresá el código que te compartió el comercio para consultar el estado y el historial de tu pedido.</p>
+<div class="pub-cuerpo">
+    <form method="get" action="{% url 'clienteFinal' %}" class="panel consulta" aria-label="Buscar un pedido">
+        <label for="codigo-seguimiento">Código de seguimiento</label>
+        <input
+            type="text"
+            id="codigo-seguimiento"
+            name="codigo"
+            class="campo-codigo"
+            placeholder="Ej.: el código de 20 letras y números"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            translate="no"
+            value="{{ codigo }}"
+            {% if error %}aria-invalid="true" aria-describedby="codigo-error"{% endif %}
+            required
+        >
+        {% if error %}
+            <p class="error-campo" id="codigo-error" role="alert">{% icon 'circle-alert' 'sm' %}<span>{{ error }}</span></p>
+        {% endif %}
+        <button type="submit" class="btn bloque" data-variant="signal" data-size="xl">{% icon 'search' %}Consultar pedido</button>
+        <p class="pub-pie-consulta">{% icon 'shield-check' 'sm' %}No necesitás crear una cuenta.</p>
+    </form>
+
+    <section class="etapas" aria-labelledby="etapas-titulo">
+        <div>
+            <h2 id="etapas-titulo" class="titulo">Qué significa cada estado</h2>
+            <p>Tu pedido avanza por estas etapas. Si algo impide la entrega, el estado lo indica.</p>
         </div>
-        <form method="get" action="{% url 'clienteFinal' %}" class="tracking-card" aria-label="Buscar un pedido">
-            <label for="codigo-seguimiento" class="form-label">Código de seguimiento</label>
-            {% if error %}
-                <div class="alert alert-danger" id="codigo-error" role="alert">{{ error }}</div>
-            {% endif %}
-            <div class="input-group">
-                <span class="input-group-text" aria-hidden="true"><i class="bi bi-upc-scan"></i></span>
-                <input
-                    type="text"
-                    id="codigo-seguimiento"
-                    name="codigo"
-                    class="form-control"
-                    placeholder="Ingresá tu código"
-                    autocomplete="off"
-                    value="{{ codigo }}"
-                    {% if error %}aria-describedby="codigo-error"{% endif %}
-                    required
-                >
-            </div>
-            <button type="submit" class="btn btn-app w-100 mt-3">
-                <i class="bi bi-search" aria-hidden="true"></i> Consultar pedido
-            </button>
-            <p class="tracking-help">No necesitás crear una cuenta.</p>
-        </form>
+        <ol>
+            <li><span class="num-etapa">1</span>{% include "components/estado.html" with clave='registrado' etiqueta='Registrado' %}<p>El comercio cargó tu pedido.</p></li>
+            <li><span class="num-etapa">2</span>{% include "components/estado.html" with clave='asignado' etiqueta='Asignado' %}<p>Un repartidor lo tomó.</p></li>
+            <li><span class="num-etapa">3</span>{% include "components/estado.html" with clave='retirado' etiqueta='Retirado' %}<p>Ya salió del comercio.</p></li>
+            <li><span class="num-etapa">4</span>{% include "components/estado.html" with clave='en_viaje' etiqueta='En viaje' %}<p>Va camino a tu dirección.</p></li>
+            <li><span class="num-etapa">5</span>{% include "components/estado.html" with clave='entregado' etiqueta='Entregado' %}<p>Llegó a destino.</p></li>
+        </ol>
     </section>
+</div>
 {% endblock %}

@@ -1,22 +1,29 @@
-{% extends "base.html" %}
-{% load crispy_forms_tags %}
-{% load static %}
+{% extends "layouts/acceso.html" %}
+{% load sgr_ui %}
 
 {% block title %}Iniciar sesión{% endblock %}
-
-{% block extrastyle %}
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-{% endblock extrastyle %}
+{% block lado_titulo %}Panel de operación{% endblock %}
+{% block lado_texto %}Registrá pedidos, asigná repartidores y seguí cada entrega hasta que se cierra.{% endblock %}
 
 {% block content %}
-    <div class="auth-card">
-        <h1 class="h3 mb-1">Iniciar sesión</h1>
-        <p class="text-secondary mb-4">Ingresá con tu usuario y contraseña.</p>
+<div>
+    <h1 class="titulo" style="font-size:var(--t-xl)">Iniciar sesión</h1>
+    <p class="tenue" style="margin-top:.35rem">Ingresá con tu usuario y contraseña de operario.</p>
+</div>
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <button type="submit" class="btn btn-app w-100 mt-2">Iniciar sesión</button>
-        </form>
+{% if form.non_field_errors %}
+    <div class="aviso" data-tono="error" role="alert">
+        {% icon 'circle-alert' %}
+        <div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>
     </div>
+{% endif %}
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% include "components/campo.html" with field=form.username %}
+    {% include "components/campo.html" with field=form.password %}
+    <button type="submit" class="btn bloque" data-variant="primary" data-size="lg">Iniciar sesión</button>
+</form>
+
+<p class="alternativa">¿Sos repartidor? <a href="{% url 'repartidor_login_pin' %}">Ingresá con tu PIN</a>.</p>
 {% endblock %}

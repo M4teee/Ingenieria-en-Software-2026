@@ -1,0 +1,18 @@
+{% extends "layouts/publico.html" %}
+{% load sgr_ui %}
+{% block title %}Página no encontrada{% endblock %}
+{% block hero %}
+<section class="seg-hero" aria-labelledby="error-titulo">
+    <p class="seg-codigo">Error 404</p>
+    <h1 id="error-titulo" class="display">No encontramos esta página</h1>
+    <p class="bajada">El enlace puede estar mal escrito o el pedido ya no existe. Si buscabas un envío, revisá el código de seguimiento.</p>
+</section>
+{% endblock %}
+{% block content %}
+<div class="seg-cuerpo">
+    <div class="panel panel-cuerpo" style="display:flex;flex-wrap:wrap;gap:.5rem">
+        <a class="btn" data-variant="signal" href="{% url 'root' %}">{% icon 'search' %}Consultar un código</a>
+        {% if user.is_authenticated and user.is_operario %}<a class="btn" data-variant="outline" href="{% url 'operario:inicio' %}">Volver al panel</a>{% endif %}
+    </div>
+</div>
+{% endblock %}

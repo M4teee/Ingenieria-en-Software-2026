@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load sgr_ui %}
+{% block body %}
+<div class="op">
+    {% include "components/rail.html" %}
+    <div class="op-principal">
+        <header class="barra">
+            <button type="button" class="btn boton-menu" data-variant="ghost" data-size="icon" data-abrir="#menu-operario" aria-label="Abrir menú">{% icon 'menu' %}</button>
+            <a class="marca marca-movil" href="{% url 'operario:inicio' %}">{% include "components/marca.html" with solo_sigla=True %}</a>
+            <form class="buscar" method="get" action="{% url 'operario:buscar_pedido' %}" role="search">
+                {% icon 'search' %}
+                <label class="sr-only" for="busqueda-global">Buscar pedido por código o número</label>
+                <input id="busqueda-global" type="search" name="q" placeholder="Buscar pedido por código o número…" autocomplete="off" spellcheck="false" required>
+            </form>
+            <div class="barra-acciones">
+                <button type="button" class="btn boton-buscar-movil" data-variant="ghost" data-size="icon" data-mostrar-busqueda aria-label="Buscar pedido">{% icon 'search' %}</button>
+                {% if request.resolver_match.url_name != 'cargar_pedido' %}
+                    <a class="btn" data-variant="signal" href="{% url 'operario:cargar_pedido' %}">{% icon 'plus' %}<span>Cargar pedido</span></a>
+                {% endif %}
+            </div>
+        </header>
+        <main id="content" class="op-contenido" tabindex="-1">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+<dialog id="menu-operario" class="dialog cajon" aria-label="Menú">
+    <div>{% include "components/rail.html" with etiqueta_nav="Menú" %}</div>
+</dialog>
+{% endblock %}

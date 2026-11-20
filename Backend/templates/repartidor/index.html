@@ -1,6 +1,7 @@
-{% extends "base.html" %}
+{% extends "layouts/repartidor.html" %}
+{% load sgr_ui %}
 
-{% block title %}Panel repartidor{% endblock %}
+{% block title %}Mi jornada{% endblock %}
 
 {% block content %}
 {% if pedido_activo %}
@@ -42,181 +43,237 @@
 </script>
 {% endif %}
 
-<header class="page-heading">
-    <p class="eyebrow">Mi jornada</p>
-    <h1>Panel del repartidor</h1>
-    <p>Consultá tu pedido asignado, actualizá su recorrido y revisá tus entregas anteriores.</p>
+<header class="rp-saludo">
+    <h1 class="titulo">Hola, {{ user.first_name|default:user.get_username }}</h1>
+    {% if not pedido_activo %}<p>{% if disponible %}Estás disponible. Te avisamos acá cuando te asignen un pedido.{% else %}No estás recibiendo pedidos.{% endif %}</p>{% endif %}
 </header>
 
-{% if messages %}
-    <div class="message-stack" aria-live="polite">
-        {% for message in messages %}
-            <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}" role="status">{{ message }}</div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-{% if perfil_repartidor %}
-    <section class="availability-bar" aria-labelledby="disponibilidad-heading">
-        <div>
-            <h2 id="disponibilidad-heading" class="h6 mb-1">Disponibilidad</h2>
-            <p class="mb-0">Estado actual: <strong>{% if disponible %}Disponible{% else %}No disponible{% endif %}</strong></p>
+{% if perfil_repartidor and pedido_activo %}
+    <section class="rp-estado" aria-labelledby="disponibilidad-heading" style="justify-content:space-between;width:100%">
+        <h2 id="disponibilidad-heading" class="sr-only">Disponibilidad</h2>
+        <span class="disponibilidad" data-disponible="{{ disponible|yesno:'true,false' }}"><span class="punto"></span>{% if disponible %}Disponible{% else %}No disponible{% endif %}</span>
+        {% if disponible %}
+            <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}" onsubmit="window._submittingForm = true;">
+                {% csrf_token %}
+                <button type="submit" class="btn" data-variant="ghost" data-size="sm" style="min-height:2.75rem">Marcarme no disponible</button>
+            </form>
+        {% endif %}
+    </section>
+{% elif perfil_repartidor %}
+    <section class="panel turno" data-disponible="{{ disponible|yesno:'true,false' }}" aria-labelledby="disponibilidad-heading">
+        <div class="turno-texto">
+            <h2 id="disponibilidad-heading" class="sr-only">Disponibilidad</h2>
+            <strong>{% if disponible %}Disponible{% else %}No disponible{% endif %}</strong>
+            <span>{% if disponible %}Podés recibir asignaciones nuevas.{% elif pedido_activo %}Terminá tu entrega actual para volver a estar disponible.{% else %}Activá para empezar a recibir pedidos.{% endif %}</span>
         </div>
         <form method="post" action="{% url 'repartidor_toggle_disponibilidad' %}"
-              onsubmit="window._submittingForm = true; var b = this.querySelector('button[type=submit]'); if (b) { setTimeout(function(){ b.disabled = true; }, 0); }">
+              onsubmit="window._submittingForm = true;">
             {% csrf_token %}
-            {% if disponible %}
-                <button type="submit" class="btn btn-sm btn-app-outline">Marcarme no disponible</button>
-            {% else %}
-                <button type="submit" class="btn btn-sm btn-app">Marcarme disponible</button>
-            {% endif %}
+            <button type="submit" class="palanca" role="switch" aria-checked="{{ disponible|yesno:'true,false' }}" aria-label="{% if disponible %}Marcarme no disponible{% else %}Marcarme disponible{% endif %}"></button>
         </form>
     </section>
 {% endif %}
 
 {% if expirado %}
-    <div class="alert alert-warning mt-4" role="status">
-        El tiempo de espera se agotó. El pedido fue liberado y tu disponibilidad cambió a <strong>No disponible</strong>.
+    <div class="aviso" data-tono="atencion" role="status">
+        {% icon 'hourglass' %}
+        <p>El tiempo de espera se agotó. El pedido fue liberado y tu disponibilidad cambió a <strong>No disponible</strong>.</p>
     </div>
 {% endif %}
 
-<section class="app-section mt-4" aria-labelledby="active-order-heading">
-    <div class="app-section-heading">
-        <div>
-            {% if esperando_respuesta %}
-                <p class="eyebrow">Asignación pendiente de respuesta</p>
-            {% elif pedido_activo %}
-                <p class="eyebrow">Pedido en curso</p>
-            {% else %}
-                <p class="eyebrow">Sin pedido activo</p>
-            {% endif %}
-            <h2 id="active-order-heading" class="h5 mb-0">Tu pedido actual</h2>
-        </div>
-        {% if pedido_activo %}<span class="status-badge status-{{ pedido_activo.estado }}">{{ pedido_activo.get_estado_display }}</span>{% endif %}
-    </div>
+<section aria-labelledby="active-order-heading">
+    <h2 id="active-order-heading" class="sr-only">Tu pedido actual</h2>
 
-    {% if pedido_activo %}
-        <div class="app-section-body">
-            {% if esperando_respuesta %}
-                <div class="driver-request">
-                    <div>
-                        <h3 class="h5">Nueva asignación</h3>
-                        <p class="text-secondary">Respondé dentro de los cinco minutos para aceptar o liberar este pedido.</p>
-                        <dl class="order-details">
-                            <dt>Comercio</dt><dd>{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
-                            <dt>Destino</dt><dd>{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
-                        </dl>
-                        <p class="countdown mb-0" id="countdown-container">Tiempo para responder: <strong id="countdown-display">{{ segundos_restantes }}</strong> segundos</p>
-                    </div>
-                    <div class="driver-actions" aria-label="Responder asignación">
-                        <form method="post" action="{% url 'repartidor_aceptar' pedido_activo.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-app">Aceptar pedido</button>
-                        </form>
-                        <form method="post" action="{% url 'repartidor_rechazar' pedido_activo.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-app-outline">Rechazar</button>
-                        </form>
-                    </div>
-                </div>
-                <script>
-                    (() => {
-                        const display = document.getElementById('countdown-display');
-                        let seconds = Number(display.textContent);
-                        const timer = window.setInterval(() => {
-                            seconds = Math.max(0, seconds - 1);
-                            display.textContent = seconds;
-                            if (seconds === 0) {
-                                window.clearInterval(timer);
-                                window.setTimeout(() => window.location.reload(), 1000);
-                            }
-                        }, 1000);
-                    })();
-                </script>
-            {% else %}
-                <div class="driver-order">
-                    <div>
-                        <h3 class="h5">Pedido {{ pedido_activo.codigo }}</h3>
-                        <dl class="order-details">
-                            <dt>Comercio</dt><dd>{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</dd>
+    {% if pedido_activo and esperando_respuesta %}
+        <article class="panel ficha oferta">
+            <div class="ficha-cabecera">
+                <span class="estado" data-estado="asignado">{% icon 'user' %}<span>Nueva asignación</span></span>
+                <span class="codigo">{{ pedido_activo.codigo }}</span>
+            </div>
+            <div class="oferta-reloj">
+                <span class="reloj" id="countdown-display" data-segundos="{{ segundos_restantes }}" aria-hidden="true">{{ segundos_restantes }}</span>
+                <p class="tenue" id="countdown-container">Tiempo para responder<span class="sr-only">: <span id="countdown-sr" aria-live="polite">{{ segundos_restantes }} segundos</span></span></p>
+                <div class="barra-tiempo" aria-hidden="true"><span id="countdown-barra"></span></div>
+            </div>
+            <div class="ficha-cuerpo">
+                <ol class="ruta">
+                    <li data-tipo="retiro">
+                        <span class="pin-ruta" aria-hidden="true">A</span>
+                        <div>
+                            <div class="ruta-rotulo">Retiro en</div>
+                            <div class="ruta-lugar">{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</div>
+                        </div>
+                    </li>
+                    <li data-tipo="entrega">
+                        <span class="pin-ruta" aria-hidden="true">B</span>
+                        <div>
+                            <div class="ruta-rotulo">Entrega en</div>
+                            <div class="ruta-lugar">{{ pedido_activo.direccion_destino|default:"Sin destino" }}</div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <div class="oferta-acciones" aria-label="Responder asignación">
+                <form method="post" action="{% url 'repartidor_rechazar' pedido_activo.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn bloque" data-variant="outline" data-size="xl">Rechazar</button>
+                </form>
+                <form method="post" action="{% url 'repartidor_aceptar' pedido_activo.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn bloque" data-variant="signal" data-size="xl">{% icon 'check' %}Aceptar pedido</button>
+                </form>
+            </div>
+        </article>
+        <script>
+            (() => {
+                const display = document.getElementById('countdown-display');
+                const lector = document.getElementById('countdown-sr');
+                const barra = document.getElementById('countdown-barra');
+                const total = 300;
+                let seconds = Number(display.dataset.segundos);
+                const pintar = () => {
+                    const m = Math.floor(seconds / 60);
+                    const s = String(seconds % 60).padStart(2, '0');
+                    display.textContent = `${m}:${s}`;
+                    display.toggleAttribute('data-urgente', seconds <= 60);
+                    barra.style.transform = `scaleX(${Math.max(0, seconds / total)})`;
+                    // Se anuncia al lector de pantalla cada 30 s, no cada segundo.
+                    if (seconds % 30 === 0 || seconds <= 10) lector.textContent = `${m} minutos y ${seconds % 60} segundos`;
+                };
+                pintar();
+                const timer = window.setInterval(() => {
+                    seconds = Math.max(0, seconds - 1);
+                    pintar();
+                    if (seconds === 0) {
+                        window.clearInterval(timer);
+                        window.setTimeout(() => window.location.reload(), 1000);
+                    }
+                }, 1000);
+            })();
+        </script>
+
+    {% elif pedido_activo %}
+        <article class="panel ficha">
+            <div class="ficha-cabecera">
+                {% include "components/estado.html" with clave=pedido_activo.estado etiqueta=pedido_activo.get_estado_display %}
+                <span class="codigo">{{ pedido_activo.codigo }}</span>
+            </div>
+            {% include "components/recorrido.html" with clave=pedido_activo.estado %}
+            <div class="ficha-cuerpo" style="padding-top:1.25rem">
+                <ol class="ruta">
+                    <li data-tipo="retiro">
+                        <span class="pin-ruta" aria-hidden="true">A</span>
+                        <div>
+                            <div class="ruta-rotulo">{% if pedido_activo.comercio %}Dirección de retiro{% else %}Retiro{% endif %}</div>
+                            <div class="ruta-lugar">{% if pedido_activo.comercio %}{{ pedido_activo.comercio.direccion }}{% else %}Sin comercio{% endif %}</div>
+                            <div class="ruta-extra">{{ pedido_activo.comercio.nombre|default:"Sin comercio" }}</div>
                             {% if pedido_activo.comercio %}
-                                <dt>Dirección de retiro</dt><dd>{{ pedido_activo.comercio.direccion }}</dd>
-                                <dt>Contacto</dt><dd>{{ pedido_activo.comercio.contacto }}</dd>
+                                <a href="tel:{{ pedido_activo.comercio.contacto|cut:' '|cut:'-' }}">{% icon 'phone' 'sm' %}<span>Contacto: {{ pedido_activo.comercio.contacto }}</span></a>
                             {% endif %}
-                            <dt>Destino</dt><dd>{{ pedido_activo.direccion_destino|default:"Sin destino" }}</dd>
-                            <dt>Especificaciones</dt><dd>{{ pedido_activo.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
-                        </dl>
-                        <a href="{% url 'repartidor_detalle_pedido' pedido_activo.pk %}">Ver detalle e historial</a>
-                    </div>
-
-                    <div class="driver-actions">
-                        {% if pedido_activo.estado == 'asignado' %}
-                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <input type="hidden" name="estado" value="retirado">
-                                <label for="foto-retirado" class="form-label">Foto de retiro <span class="text-secondary">(opcional)</span></label>
-                                <input type="file" id="foto-retirado" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
-                                <button type="submit" class="btn btn-app mt-3">Marcar como Retirado</button>
-                            </form>
-                        {% elif pedido_activo.estado == 'retirado' %}
-                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="estado" value="en_viaje">
-                                <button type="submit" class="btn btn-app">Iniciar viaje</button>
-                            </form>
-                        {% elif pedido_activo.estado == 'en_viaje' %}
-                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <input type="hidden" name="estado" value="entregado">
-                                <label for="foto-entregado" class="form-label">Foto de entrega <span class="text-secondary">(opcional)</span></label>
-                                <input type="file" id="foto-entregado" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
-                                <button type="submit" class="btn btn-app mt-3">Marcar como entregado</button>
-                            </form>
-                            <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <input type="hidden" name="estado" value="fallido">
-                                <label for="motivo-fallido" class="form-label">Motivo de la entrega fallida</label>
-                                <textarea id="motivo-fallido" name="motivo_fallo" class="form-control" rows="2" required maxlength="500" placeholder="Ej: destinatario ausente, dirección inexistente, etc."></textarea>
-                                <label for="foto-fallido" class="form-label mt-2">Foto de incidencia <span class="text-secondary">(opcional)</span></label>
-                                <input type="file" id="foto-fallido" name="fotografia" class="form-control" accept="image/jpeg,image/png,image/webp">
-                                <button type="submit" class="btn btn-app-outline mt-3">Marcar entrega fallida</button>
-                            </form>
-                        {% endif %}
-                    </div>
+                        </div>
+                    </li>
+                    <li data-tipo="entrega">
+                        <span class="pin-ruta" aria-hidden="true">B</span>
+                        <div>
+                            <div class="ruta-rotulo">Destino</div>
+                            <div class="ruta-lugar">{{ pedido_activo.direccion_destino|default:"Sin destino" }}</div>
+                        </div>
+                    </li>
+                </ol>
+                <div class="nota">
+                    <strong>Especificaciones</strong>
+                    {{ pedido_activo.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}
                 </div>
+                <a class="enlace-volver" href="{% url 'repartidor_detalle_pedido' pedido_activo.pk %}">{% icon 'list' 'sm' %}Ver detalle e historial</a>
+            </div>
+
+            {% if pedido_activo.estado == 'asignado' %}
+                <div class="paso-accion fija">
+                    <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="estado" value="retirado">
+                        <h3>Cuando tengas el paquete</h3>
+                        <label class="archivo" for="foto-retirado">
+                            {% icon 'camera' 'lg' %}
+                            <span class="archivo-texto"><strong>Foto de retiro <span class="opcional">(opcional)</span></strong><span data-archivo-nombre>JPEG, PNG o WebP, hasta 10&nbsp;MB</span></span>
+                            <input type="file" id="foto-retirado" name="fotografia" accept="image/jpeg,image/png,image/webp">
+                        </label>
+                        <button type="submit" class="btn bloque" data-variant="signal" data-size="xl">{% icon 'package' %}Marcar como Retirado</button>
+                    </form>
+                </div>
+            {% elif pedido_activo.estado == 'retirado' %}
+                <div class="paso-accion fija">
+                    <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="estado" value="en_viaje">
+                        <h3>Salí hacia el destino</h3>
+                        <button type="submit" class="btn bloque" data-variant="signal" data-size="xl">{% icon 'truck' %}Iniciar viaje</button>
+                    </form>
+                </div>
+            {% elif pedido_activo.estado == 'en_viaje' %}
+                <div class="paso-accion fija">
+                    <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="estado" value="entregado">
+                        <h3>Al entregar el paquete</h3>
+                        <label class="archivo" for="foto-entregado">
+                            {% icon 'camera' 'lg' %}
+                            <span class="archivo-texto"><strong>Foto de entrega <span class="opcional">(opcional)</span></strong><span data-archivo-nombre>JPEG, PNG o WebP, hasta 10&nbsp;MB</span></span>
+                            <input type="file" id="foto-entregado" name="fotografia" accept="image/jpeg,image/png,image/webp">
+                        </label>
+                        <button type="submit" class="btn bloque" data-variant="signal" data-size="xl">{% icon 'circle-check' %}Marcar como entregado</button>
+                    </form>
+                </div>
+                <details class="falla">
+                    <summary>{% icon 'circle-x' %}No se pudo entregar</summary>
+                    <form method="post" action="{% url 'actualizar_estado' pedido_activo.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="estado" value="fallido">
+                        <div role="group" class="field">
+                            <label for="motivo-fallido">Motivo de la entrega fallida</label>
+                            <textarea id="motivo-fallido" name="motivo_fallo" rows="3" required maxlength="500" placeholder="Ej.: destinatario ausente, dirección inexistente…"></textarea>
+                        </div>
+                        <label class="archivo" for="foto-fallido">
+                            {% icon 'camera' 'lg' %}
+                            <span class="archivo-texto"><strong>Foto de incidencia <span class="opcional">(opcional)</span></strong><span data-archivo-nombre>JPEG, PNG o WebP, hasta 10&nbsp;MB</span></span>
+                            <input type="file" id="foto-fallido" name="fotografia" accept="image/jpeg,image/png,image/webp">
+                        </label>
+                        <button type="submit" class="btn bloque" data-variant="peligro" data-size="xl">Marcar entrega fallida</button>
+                    </form>
+                </details>
             {% endif %}
-        </div>
+        </article>
+
     {% else %}
-        <p class="empty-state">No tenés pedidos asignados o en curso.</p>
+        <div class="panel vacio">
+            <span class="vacio-icono">{% icon 'route' 'lg' %}</span>
+            <h3>No tenés pedidos asignados o en curso.</h3>
+            <p>{% if disponible %}Esta pantalla se actualiza sola cada 15 segundos.{% else %}Marcate disponible para empezar a recibir asignaciones.{% endif %}</p>
+        </div>
     {% endif %}
 </section>
 
-<section class="app-section mt-4" aria-labelledby="history-heading">
-    <div class="app-section-heading">
-        <div>
-            <p class="eyebrow">Pedidos finalizados</p>
-            <h2 id="history-heading" class="h5 mb-0">Historial de tus pedidos</h2>
-        </div>
-        <a class="btn btn-sm btn-app-outline" href="{% url 'historial_entregas' %}">Ver historial de entregas</a>
+<section class="panel" aria-labelledby="history-heading">
+    <div class="panel-cabecera">
+        <h2 id="history-heading" class="subtitulo">Historial de tus pedidos</h2>
+        {% if pedidos_cerrados %}<a class="btn" data-variant="ghost" data-size="sm" href="{% url 'historial_entregas' %}">Ver historial de entregas</a>{% endif %}
     </div>
     {% if pedidos_cerrados %}
-        <div class="table-responsive">
-            <table class="table app-table align-middle mb-0">
-                <thead><tr><th scope="col">Código</th><th scope="col">Comercio</th><th scope="col">Estado</th><th scope="col">Detalle</th></tr></thead>
-                <tbody>
-                    {% for pedido in pedidos_cerrados %}
-                        <tr>
-                            <td>{{ pedido.codigo }}</td>
-                            <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
-                            <td><span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></td>
-                            <td><a class="btn btn-sm btn-app-outline" href="{% url 'repartidor_detalle_pedido' pedido.pk %}">Ver historial</a></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <ul class="lista-entregas">
+            {% for pedido in pedidos_cerrados|slice:":5" %}
+                <li>
+                    <a href="{% url 'repartidor_detalle_pedido' pedido.pk %}">
+                        <span class="le-titulo">{{ pedido.comercio.nombre|default:"Sin comercio" }}</span>
+                        <span class="le-meta"><span class="codigo">{{ pedido.codigo }}</span></span>
+                        {% include "components/estado.html" with clave=pedido.estado etiqueta=pedido.get_estado_display %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     {% else %}
-        <p class="empty-state">Todavía no hay pedidos finalizados en tu historial.</p>
+        <div class="vacio" style="padding-block:2rem">
+            <p>Todavía no hay pedidos finalizados en tu historial.</p>
+        </div>
     {% endif %}
 </section>
 {% endblock content %}

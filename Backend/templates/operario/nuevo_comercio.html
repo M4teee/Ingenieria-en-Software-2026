@@ -1,34 +1,37 @@
-{% extends "base.html" %}
+{% extends "layouts/operario.html" %}
+{% load sgr_ui %}
 
 {% block title %}Nuevo comercio{% endblock %}
 
 {% block content %}
-<div class="page-heading">
-    <h1 class="h2">Dar de alta un comercio</h1>
-    <p>Completá los datos para poder asociar futuros pedidos.</p>
+<p style="margin-bottom:1rem"><a class="enlace-volver" href="{% url 'operario:comercios' %}">{% icon 'chevron-left' 'sm' %}Comercios</a></p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Dar de alta un comercio</h1>
+        <p class="bajada">Completá los datos para poder asociar futuros pedidos.</p>
+    </div>
 </div>
 
-<form method="post" class="card shadow-sm p-4" novalidate>
+<form method="post" class="panel formulario" novalidate style="max-width:56rem">
     {% csrf_token %}
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger" role="alert">
-            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+    {% if form.errors %}<div style="padding:1.25rem 1.5rem 0">{% include "components/resumen_errores.html" %}</div>{% endif %}
+    <section class="formulario-seccion" aria-labelledby="sec-datos">
+        <header><h2 id="sec-datos">Datos del comercio</h2><p>El nombre debe ser único. La dirección es el punto de retiro que ven los repartidores.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.nombre %}
+            {% include "components/campo.html" with field=form.direccion %}
+            {% include "components/campo.html" with field=form.contacto ayuda="Lo ven los repartidores para coordinar el retiro." %}
         </div>
-    {% endif %}
-
-    {% for field in form.visible_fields %}
-        <div class="mb-3">
-            {{ field.label_tag }}
-            {{ field }}
-            {% for error in field.errors %}
-                <div class="invalid-feedback d-block">{{ error }}</div>
-            {% endfor %}
+    </section>
+    <section class="formulario-seccion" aria-labelledby="sec-estado">
+        <header><h2 id="sec-estado">Estado</h2><p>Solo los comercios activos pueden recibir pedidos nuevos.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.activo %}
         </div>
-    {% endfor %}
-
-    <div class="d-flex flex-wrap gap-2">
-        <button type="submit" class="btn btn-app">Crear comercio</button>
-        <a class="btn btn-app-outline" href="{% url 'operario:comercios' %}">Cancelar</a>
+    </section>
+    <div class="formulario-pie">
+        <a class="btn" data-variant="ghost" href="{% url 'operario:comercios' %}">Cancelar</a>
+        <button type="submit" class="btn" data-variant="primary">{% icon 'check' %}Crear comercio</button>
     </div>
 </form>
 {% endblock %}

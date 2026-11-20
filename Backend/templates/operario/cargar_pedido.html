@@ -1,50 +1,68 @@
-{% extends "base.html" %}
+{% extends "layouts/operario.html" %}
+{% load sgr_ui %}
 
 {% block title %}Cargar pedido{% endblock %}
 
 {% block content %}
-    <div class="page-heading">
-        <h1 class="h2">Cargar pedido nuevo</h1>
-        <p>Registrá un pedido solicitado por un comercio.</p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Cargar pedido nuevo</h1>
+        <p class="bajada">Registrá un pedido solicitado por un comercio. Al guardarlo se genera el código de seguimiento y se intenta asignar un repartidor.</p>
     </div>
+</div>
 
-    {% if not hay_comercios_activos %}
-        <div class="alert alert-warning" role="status">
-            No hay comercios activos disponibles para registrar pedidos.
-        </div>
+{% if not hay_comercios_activos %}
+    <div class="aviso" data-tono="atencion" role="status" style="margin-bottom:1.25rem">
+        {% icon 'triangle-alert' %}
+        <p>No hay comercios activos disponibles para registrar pedidos. <a href="{% url 'operario:comercios' %}">Revisá los comercios</a>.</p>
+    </div>
+{% endif %}
+
+<form method="post" class="panel formulario" novalidate>
+    {% csrf_token %}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+    {% if form.errors %}
+        <div style="padding:1.25rem 1.5rem 0">{% include "components/resumen_errores.html" %}</div>
     {% endif %}
 
-    <form method="post" class="card shadow-sm p-4" novalidate>
-        {% csrf_token %}
-        {% for hidden in form.hidden_fields %}
-            {{ hidden }}
-            {% for error in hidden.errors %}
-                <div class="alert alert-danger" role="alert">{{ error }}</div>
-            {% endfor %}
-        {% endfor %}
-
-        {% if form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-                {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
-            </div>
-        {% endif %}
-
-        {% for field in form.visible_fields %}
-            <div class="mb-3">
-                {{ field.label_tag }}
-                {{ field }}
-                {% for error in field.errors %}
-                    <div class="invalid-feedback d-block">{{ error }}</div>
-                {% endfor %}
-            </div>
-        {% endfor %}
-
-        <div>
-            <button type="submit" class="btn btn-primary" {% if not hay_comercios_activos %}disabled{% endif %}>
-                Registrar Pedido
-            </button>
+    <section class="formulario-seccion" aria-labelledby="sec-origen">
+        <header><h2 id="sec-origen">Origen</h2><p>El comercio que solicita el envío. Solo se listan comercios activos.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.comercio %}
         </div>
-    </form>
+    </section>
+
+    <section class="formulario-seccion" aria-labelledby="sec-destino">
+        <header><h2 id="sec-destino">Destino</h2><p>Dónde y a quién se entrega. El destinatario no se muestra en el seguimiento público.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.direccion_destino %}
+            {% include "components/campo.html" with field=form.datos_destinatario ayuda="Nombre y un teléfono de contacto." %}
+            {% include "components/campo.html" with field=form.fecha_hora_estimada_entrega %}
+        </div>
+    </section>
+
+    <section class="formulario-seccion" aria-labelledby="sec-paquete">
+        <header><h2 id="sec-paquete">Paquete</h2><p>Lo que el repartidor necesita saber para trasladarlo.</p></header>
+        <div class="formulario-campos dos">
+            {% include "components/campo.html" with field=form.tamano_paquete %}
+            {% include "components/campo.html" with field=form.vehiculo_requerido %}
+            {% include "components/campo.html" with field=form.especificaciones_traslado clase="ancho" %}
+        </div>
+    </section>
+
+    <section class="formulario-seccion" aria-labelledby="sec-asignacion">
+        <header><h2 id="sec-asignacion">Asignación</h2><p>Con "Automático", el sistema asigna al repartidor disponible con ese vehículo que espera hace más tiempo.</p></header>
+        <div class="formulario-campos">
+            {% include "components/campo.html" with field=form.repartidor ayuda="Solo se pueden elegir repartidores disponibles con el vehículo requerido." %}
+        </div>
+    </section>
+
+    <div class="formulario-pie">
+        <a class="btn" data-variant="ghost" href="{% url 'operario:inicio' %}">Cancelar</a>
+        <button type="submit" class="btn" data-variant="signal" {% if not hay_comercios_activos %}disabled{% endif %}>{% icon 'check' %}Registrar pedido</button>
+    </div>
+</form>
 {% endblock %}
 
 {% block extrascript %}
@@ -58,6 +76,7 @@
             for (const opcion of repartidor.options) {
                 if (opcion.value === '') continue;
                 opcion.disabled = opcion.dataset.vehiculo !== elegido;
+                opcion.hidden = opcion.disabled;
             }
             const seleccionada = repartidor.selectedOptions[0];
             if (seleccionada && seleccionada.disabled) {
@@ -81,7 +100,7 @@
     };
 
     const inputClave = document.getElementById('id_clave_idempotencia');
-    const form = document.querySelector('form');
+    const form = document.querySelector('form.formulario');
 
     const renovarClaveIdempotencia = () => {
         if (inputClave) {

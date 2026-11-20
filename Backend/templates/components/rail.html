@@ -1,0 +1,31 @@
+{% load sgr_ui %}{% with n=request.resolver_match.url_name %}
+<div class="rail trama">
+    <a class="marca" href="{% url 'operario:inicio' %}">{% include "components/marca.html" %}</a>
+    <nav aria-label="{{ etiqueta_nav|default:'Principal' }}">
+        <div class="rail-grupo">
+            <span>Operación</span>
+            <a class="rail-item" href="{% url 'operario:inicio' %}"{% if n == 'inicio' or n == 'detalle_pedido' or n == 'pedido_registrado' %} aria-current="page"{% endif %}>{% icon 'route' %}Pedidos en curso</a>
+            <a class="rail-item" href="{% url 'operario:entregas_fallidas' %}"{% if n == 'entregas_fallidas' %} aria-current="page"{% endif %}>{% icon 'package-x' %}Entregas fallidas</a>
+            <a class="rail-item" href="{% url 'operario:historial_pedidos' %}"{% if n == 'historial_pedidos' %} aria-current="page"{% endif %}>{% icon 'history' %}Historial de pedidos</a>
+        </div>
+        <div class="rail-grupo">
+            <span>Red de reparto</span>
+            <a class="rail-item" href="{% url 'operario:comercios' %}"{% if n == 'comercios' or n == 'nuevo_comercio' or n == 'editar_comercio' %} aria-current="page"{% endif %}>{% icon 'store' %}Comercios</a>
+            <a class="rail-item" href="{% url 'operario:repartidores' %}"{% if n == 'repartidores' or n == 'nuevo_repartidor' or n == 'regenerar_pin_repartidor' %} aria-current="page"{% endif %}>{% icon 'users' %}Repartidores</a>
+        </div>
+    </nav>
+    <div class="rail-pie">
+        <div class="usuario">
+            <span class="avatar" aria-hidden="true">{{ user|iniciales }}</span>
+            <span class="usuario-texto"><strong>{{ user.get_full_name|default:user.get_username }}</strong><span>Operario</span></span>
+        </div>
+        {% if user.is_staff %}
+            <a class="btn" data-variant="ghost" data-size="sm" href="{% url 'admin:index' %}">{% icon 'settings' %}Administración de datos</a>
+        {% endif %}
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn bloque" data-variant="ghost" data-size="sm">{% icon 'log-out' %}Cerrar sesión</button>
+        </form>
+    </div>
+</div>
+{% endwith %}

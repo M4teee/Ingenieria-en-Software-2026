@@ -1,43 +1,75 @@
-{% extends "base.html" %}
+{% extends "layouts/repartidor.html" %}
+{% load sgr_ui %}
 
 {% block title %}Detalle de entrega{% endblock %}
 
 {% block content %}
-<p><a href="{% url 'repartidor' %}">Volver al panel</a></p>
-<div class="page-heading">
-    <h1 class="h2">Pedido {{ pedido.codigo }}</h1>
-    <p>Estado: <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></p>
-</div>
+<p><a class="enlace-volver" href="{% url 'repartidor' %}">{% icon 'chevron-left' 'sm' %}Volver al panel</a></p>
 
-<section class="card shadow-sm mb-4" aria-labelledby="detalle-heading">
-    <div class="card-body">
-        <h2 id="detalle-heading" class="h5">Datos del viaje</h2>
-        <dl class="row mb-0">
-            <dt class="col-sm-4">Comercio</dt><dd class="col-sm-8">{{ pedido.comercio.nombre|default:"Sin comercio" }}</dd>
-            {% if pedido.comercio %}<dt class="col-sm-4">Dirección del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.direccion }}</dd><dt class="col-sm-4">Contacto</dt><dd class="col-sm-8">{{ pedido.comercio.contacto }}</dd>{% endif %}
-            <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido.direccion_destino|default:"Sin destino" }}</dd>
-            <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
-            <dt class="col-sm-4">Entrega estimada</dt><dd class="col-sm-8">{% if pedido.fecha_hora_estimada_entrega %}{{ pedido.fecha_hora_estimada_entrega|date:"d/m/Y H:i" }}{% else %}Sin estimación{% endif %}</dd>
+<article class="panel ficha">
+    <div class="ficha-cabecera">
+        {% include "components/estado.html" with clave=pedido.estado etiqueta=pedido.get_estado_display %}
+    </div>
+    {% include "components/recorrido.html" with clave=pedido.estado %}
+    <div class="ficha-cuerpo">
+        <h1 class="titulo" style="font-size:var(--t-lg)">Pedido <span class="codigo">{{ pedido.codigo }}</span></h1>
+        <section aria-labelledby="detalle-heading">
+            <h2 id="detalle-heading" class="sr-only">Datos del viaje</h2>
+            <ol class="ruta">
+                <li data-tipo="retiro">
+                    <span class="pin-ruta" aria-hidden="true">A</span>
+                    <div>
+                        <div class="ruta-rotulo">Comercio</div>
+                        <div class="ruta-lugar">{{ pedido.comercio.nombre|default:"Sin comercio" }}</div>
+                        {% if pedido.comercio %}
+                            <div class="ruta-extra">Dirección del comercio: {{ pedido.comercio.direccion }}</div>
+                            <a href="tel:{{ pedido.comercio.contacto|cut:' '|cut:'-' }}">{% icon 'phone' 'sm' %}<span>Contacto: {{ pedido.comercio.contacto }}</span></a>
+                        {% endif %}
+                    </div>
+                </li>
+                <li data-tipo="entrega">
+                    <span class="pin-ruta" aria-hidden="true">B</span>
+                    <div>
+                        <div class="ruta-rotulo">Destino</div>
+                        <div class="ruta-lugar">{{ pedido.direccion_destino|default:"Sin destino" }}</div>
+                    </div>
+                </li>
+            </ol>
+        </section>
+        <dl class="datos">
+            <dt>Especificaciones</dt><dd>{{ pedido.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
+            <dt>Entrega estimada</dt><dd class="num">{% if pedido.fecha_hora_estimada_entrega %}{{ pedido.fecha_hora_estimada_entrega|date:"d/m/Y H:i" }}{% else %}Sin estimación{% endif %}</dd>
         </dl>
     </div>
-</section>
+</article>
 
-<section class="card shadow-sm" aria-labelledby="historial-heading">
-    <div class="card-body">
-        <h2 id="historial-heading" class="h5">Historial de estados</h2>
+<section class="panel" aria-labelledby="historial-heading">
+    <div class="panel-cabecera"><h2 id="historial-heading" class="subtitulo">Historial de estados</h2></div>
+    <div class="panel-cuerpo">
         {% if historial %}
-            <ol class="list-group list-group-numbered">
+            <ol class="cronologia">
                 {% for evento in historial %}
-                    <li class="list-group-item">
-                        <strong>{{ evento.get_estado_nuevo_display }}</strong>
-                        <span class="text-secondary">{{ evento.fecha|date:"d/m/Y H:i:s" }}</span>
-                        {% if evento.incidencia %}<p class="mb-1">{{ evento.incidencia }}</p>{% endif %}
-                        {% if evento.fotografia %}<a href="{% url 'repartidor_fotografia' evento.pk %}" target="_blank" rel="noopener"><img src="{% url 'repartidor_fotografia' evento.pk %}" alt="Evidencia del estado {{ evento.get_estado_nuevo_display }}" class="img-thumbnail mt-2" style="max-width: 14rem; max-height: 14rem;"></a>{% endif %}
+                    <li>
+                        <span class="marcador" data-estado="{{ evento.estado_nuevo }}">{% icon evento.estado_nuevo|icono_estado %}</span>
+                        <div>
+                            <div class="evento-cabecera">
+                                <strong>{{ evento.get_estado_nuevo_display }}</strong>
+                                <time datetime="{{ evento.fecha|date:'c' }}">{{ evento.fecha|date:"d/m/Y H:i:s" }}</time>
+                            </div>
+                            {% if evento.incidencia %}<p class="evento-detalle">{{ evento.incidencia }}</p>{% endif %}
+                            {% if evento.fotografia %}
+                                <div class="evidencia">
+                                    <a href="{% url 'repartidor_fotografia' evento.pk %}" target="_blank" rel="noopener" class="btn-ampliar-evidencia" aria-label="Abrir la evidencia del estado {{ evento.get_estado_nuevo_display }} en otra pestaña">
+                                        <img src="{% url 'repartidor_fotografia' evento.pk %}" alt="Evidencia del estado {{ evento.get_estado_nuevo_display }}" class="img-thumbnail" width="120" height="88" loading="lazy">
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
                     </li>
                 {% endfor %}
             </ol>
         {% else %}
-            <p class="text-secondary mb-0">No hay eventos de historial.</p>
+            <p class="tenue">No hay eventos de historial.</p>
         {% endif %}
     </div>
 </section>

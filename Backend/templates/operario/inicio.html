@@ -1,129 +1,109 @@
-{% extends "base.html" %}
+{% extends "layouts/operario.html" %}
+{% load sgr_ui %}
 
-{% block title %}Panel del operario{% endblock %}
+{% block title %}Pedidos en curso{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div class="page-heading mb-0">
-        <h1 class="h2">Pedidos en curso</h1>
-        <p>Consultá los pedidos activos y abrí su detalle e historial.</p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Pedidos en curso</h1>
+        <p class="bajada">Del más antiguo al más reciente. Tocá un estado para filtrar la lista.</p>
     </div>
-    
-    <div class="d-flex flex-wrap gap-2">
-      <a class="btn btn-app-outline"
-       href="{% url 'operario:historial_pedidos' %}">
-        Historial de pedidos
-    </a>
-    <a class="btn btn-app-outline"
-       href="{% url 'operario:entregas_fallidas' %}">
-        Entregas fallidas
-    </a>
-    <a class="btn btn-app"
-       href="{% url 'operario:cargar_pedido' %}">
-        Cargar pedido
-    </a>
-   </div>
-
+    <p class="vivo" id="estado-actualizacion" aria-live="off"><span class="punto"></span><span data-texto>Actualización automática cada 5 segundos</span></p>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
-    {% endfor %}
-{% endif %}
+<div class="flujo" role="group" aria-label="Filtrar por estado">
+    <button type="button" data-estado="registrado" data-filtro="registrado" aria-pressed="false">
+        <span class="flujo-rotulo">{% icon 'circle-dot' 'sm' %}Registrados</span>
+        <span class="flujo-cifra" data-cifra="registrado">0</span>
+    </button>
+    <button type="button" data-estado="asignado" data-filtro="asignado" aria-pressed="false">
+        <span class="flujo-rotulo">{% icon 'user' 'sm' %}Asignados</span>
+        <span class="flujo-cifra" data-cifra="asignado">0</span>
+    </button>
+    <button type="button" data-estado="retirado" data-filtro="retirado" aria-pressed="false">
+        <span class="flujo-rotulo">{% icon 'package' 'sm' %}Retirados</span>
+        <span class="flujo-cifra" data-cifra="retirado">0</span>
+    </button>
+    <button type="button" data-estado="en_viaje" data-filtro="en_viaje" aria-pressed="false">
+        <span class="flujo-rotulo">{% icon 'truck' 'sm' %}En viaje</span>
+        <span class="flujo-cifra" data-cifra="en_viaje">0</span>
+    </button>
+</div>
 
-<section class="app-section mb-4" aria-labelledby="buscar-pedido-heading">
-    <div class="app-section-body">
-        <h2 id="buscar-pedido-heading" class="h5">Buscar pedido</h2>
-        <p class="text-secondary">
-            Buscá un pedido por su código de seguimiento o identificador para consultar su historial.
-        </p>
-
-        <form method="get" action="{% url 'operario:buscar_pedido' %}">
-            <div class="input-group">
-                <input
-                    type="text"
-                    name="q"
-                    class="form-control"
-                    placeholder="Código o identificador del pedido"
-                    aria-label="Código o identificador del pedido"
-                    required
-                >
-                <button class="btn btn-app" type="submit">
-                    Buscar
-                </button>
-            </div>
-        </form>
-    </div>
-</section>
-
-<section class="app-section mb-4" aria-labelledby="pedidos-heading">
-    <div class="app-section-body">
-        <h2 id="pedidos-heading" class="h5">Pedidos registrados y en reparto</h2>
-        {% if pedidos %}
-            <div class="table-responsive">
-                <table class="table app-table align-middle" id="pedidos-en-curso" data-status-url="{% url 'operario:estado_pedidos' %}">
-                    <thead>
-                        <tr>
-                            <th scope="col">Código</th>
-                            <th scope="col">Comercio</th>
-                            <th scope="col">Destino</th>
-                            <th scope="col">Estado</th>
-                            <th scope="col">Repartidor</th>
-                            <th scope="col">Creado</th>
-                            <th scope="col"><span class="visually-hidden">Acción</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="pedidos-en-curso-body">
-                        {% for pedido in pedidos %}
-                            <tr data-codigo="{{ pedido.codigo }}">
-                                <td>{{ pedido.codigo }}</td>
-                                <td>{{ pedido.comercio.nombre|default:"Sin comercio" }}</td>
-                                <td>{{ pedido.direccion_destino|default:"Sin destino" }}</td>
-                                <td>
-                                    <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
-                                    {% if pedido.estado == 'registrado' and not pedido.repartidor %}
-                                        <div class="small text-danger fw-semibold">Pedido sin repartidor disponible</div>
-                                    {% endif %}
-                                </td>
-                                <td>{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}Sin asignar{% endif %}</td>
-                                <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
-                                <td>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <a class="btn btn-sm btn-app-outline" href="{% url 'operario:detalle_pedido' pedido.pk %}">Ver detalle</a>
-                                        {% if pedido.estado == 'registrado' and not pedido.repartidor %}
-                                            <form method="post" action="{% url 'operario:reintentar_asignacion' pedido.pk %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-warning">Reintentar asignación</button>
-                                            </form>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="text-secondary mb-0">No hay pedidos en curso.</p>
-        {% endif %}
-    </div>
-</section>
-
-<div id="alerta-sin-repartidor" class="position-fixed top-0 end-0 m-3 card border-warning shadow" style="z-index: 1050; max-width: 22rem;" role="alert" {% if not pedidos_sin_repartidor %}hidden{% endif %}>
-    <div class="card-body py-3">
-        <div class="fw-semibold">
-            <i class="bi bi-exclamation-triangle text-warning" aria-hidden="true"></i>
-            Pedido sin repartidor disponible
-        </div>
-        <ul id="alerta-sin-repartidor-lista" class="small mb-0 mt-1">
+<section class="requiere" id="requiere-accion" aria-labelledby="requiere-titulo"{% if not pedidos_sin_repartidor %} hidden{% endif %}>
+    {% icon 'triangle-alert' %}
+    <div>
+        <h2 id="requiere-titulo">Pedido sin repartidor disponible</h2>
+        <p>No hay repartidores libres con el vehículo requerido. Reintentá cuando alguno se marque disponible, o asigná uno desde el detalle.</p>
+        <ul id="requiere-lista">
             {% for pedido in pedidos_sin_repartidor %}
-                <li><a href="{% url 'operario:detalle_pedido' pedido.pk %}">{{ pedido.codigo }}</a></li>
+                <li>
+                    <a class="codigo" href="{% url 'operario:detalle_pedido' pedido.pk %}">{{ pedido.codigo }}</a>
+                    <form method="post" action="{% url 'operario:reintentar_asignacion' pedido.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" data-variant="atencion" data-size="sm">{% icon 'rotate-cw' 'sm' %}Reintentar asignación</button>
+                    </form>
+                </li>
             {% endfor %}
         </ul>
     </div>
-</div>
+</section>
 
+<section class="panel" aria-labelledby="pedidos-heading">
+    <div class="panel-cabecera">
+        <h2 id="pedidos-heading" class="subtitulo">Pedidos registrados y en reparto</h2>
+        <div style="display:flex;align-items:center;gap:.75rem">
+            <span class="conteo" id="conteo-pedidos" aria-live="polite"></span>
+            <button type="button" class="btn" data-variant="ghost" data-size="sm" id="quitar-filtro" hidden>{% icon 'x' 'sm' %}Quitar filtro</button>
+        </div>
+    </div>
+    <div class="tabla-wrap">
+        <table class="tabla apilable" id="pedidos-en-curso" data-status-url="{% url 'operario:estado_pedidos' %}"{% if not pedidos %} hidden{% endif %}>
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Comercio y destino</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Repartidor</th>
+                    <th scope="col">Creado</th>
+                </tr>
+            </thead>
+            <tbody id="pedidos-en-curso-body">
+                {% for pedido in pedidos %}
+                    <tr data-codigo="{{ pedido.codigo }}" data-estado="{{ pedido.estado }}"{% if pedido.estado == 'registrado' and not pedido.repartidor %} data-atencion{% endif %}>
+                        <td data-primaria><a class="fila-enlace codigo" href="{% url 'operario:detalle_pedido' pedido.pk %}">{{ pedido.codigo }}</a></td>
+                        <td><span class="celda-doble"><span>{{ pedido.comercio.nombre|default:"Sin comercio" }}</span><small>{% icon 'map-pin' 'sm' %} {{ pedido.direccion_destino|default:"Sin destino" }}</small></span></td>
+                        <td data-lado>{% include "components/estado.html" with clave=pedido.estado etiqueta=pedido.get_estado_display %}</td>
+                        <td data-label="Repartidor">{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}<span class="tenue">Sin asignar</span>{% endif %}</td>
+                        <td data-label="Creado" class="num">{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="vacio" id="pedidos-vacio"{% if pedidos %} hidden{% endif %}>
+        <span class="vacio-icono">{% icon 'inbox' 'lg' %}</span>
+        <h3>No hay pedidos en curso.</h3>
+        <p>Cuando registres un pedido va a aparecer acá con su estado en tiempo real.</p>
+    </div>
+    <div class="vacio" id="filtro-vacio" hidden>
+        <span class="vacio-icono">{% icon 'search' 'lg' %}</span>
+        <h3>Ningún pedido en este estado</h3>
+        <p>El filtro sigue activo mientras la lista se actualiza.</p>
+    </div>
+</section>
+
+<div id="alerta-sin-repartidor" class="alerta-flotante position-fixed top-0 end-0" role="status" {% if not pedidos_sin_repartidor %}hidden{% endif %}>
+    <button type="button" class="cerrar" aria-label="Ocultar aviso">{% icon 'x' 'sm' %}</button>
+    <div class="alerta-flotante-titulo">{% icon 'triangle-alert' %}Pedido sin repartidor disponible</div>
+    <p>Necesitan reasignación manual o un reintento.</p>
+    <ul id="alerta-sin-repartidor-lista">
+        {% for pedido in pedidos_sin_repartidor %}
+            <li><a href="{% url 'operario:detalle_pedido' pedido.pk %}"><span class="codigo">{{ pedido.codigo }}</span>{% icon 'chevron-right' 'sm' %}</a></li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
 
 {% block extrascript %}
@@ -133,115 +113,172 @@
     const cuerpo = document.getElementById('pedidos-en-curso-body');
     if (!tabla || !cuerpo) return;
 
-    const celda = (fila, texto) => {
-        const elemento = document.createElement('td');
-        elemento.textContent = texto;
-        fila.appendChild(elemento);
-        return elemento;
+    const sprite = "{% load static %}{% static 'sgr/icons.svg' %}";
+    const ICONOS = {registrado: 'circle-dot', asignado: 'user', retirado: 'package', en_viaje: 'truck', entregado: 'circle-check', fallido: 'circle-x', cancelado: 'ban'};
+    const icono = (nombre, clase = '') => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', `icon ${clase}`);
+        svg.setAttribute('aria-hidden', 'true');
+        const uso = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        uso.setAttribute('href', `${sprite}#i-${nombre}`);
+        svg.appendChild(uso);
+        return svg;
     };
-
+    const el = (etiqueta, atributos = {}, ...hijos) => {
+        const nodo = document.createElement(etiqueta);
+        for (const [clave, valor] of Object.entries(atributos)) {
+            if (clave === 'class') nodo.className = valor;
+            else if (clave === 'text') nodo.textContent = valor;
+            else nodo.setAttribute(clave, valor);
+        }
+        hijos.forEach((h) => h && nodo.append(h));
+        return nodo;
+    };
     const tokenCsrf = () => {
-        const coincidencia = document.cookie
-            .split('; ')
-            .find((fragmento) => fragmento.startsWith('csrftoken='));
+        const coincidencia = document.cookie.split('; ').find((f) => f.startsWith('csrftoken='));
         return coincidencia ? coincidencia.split('=')[1] : '';
+    };
+    const formReintentar = (url) => {
+        const formulario = el('form', {method: 'post', action: url});
+        formulario.append(el('input', {type: 'hidden', name: 'csrfmiddlewaretoken', value: tokenCsrf()}));
+        const boton = el('button', {type: 'submit', class: 'btn', 'data-variant': 'atencion', 'data-size': 'sm'}, icono('rotate-cw', 'sm'));
+        boton.append('Reintentar asignación');
+        formulario.append(boton);
+        return formulario;
     };
 
     const alerta = document.getElementById('alerta-sin-repartidor');
     const listaAlerta = document.getElementById('alerta-sin-repartidor-lista');
+    const requiere = document.getElementById('requiere-accion');
+    const listaRequiere = document.getElementById('requiere-lista');
+    const vacio = document.getElementById('pedidos-vacio');
+    const filtroVacio = document.getElementById('filtro-vacio');
+    const conteo = document.getElementById('conteo-pedidos');
+    const quitar = document.getElementById('quitar-filtro');
+    const botonesFiltro = Array.from(document.querySelectorAll('[data-filtro]'));
+    const vivo = document.getElementById('estado-actualizacion');
+    let filtro = null;
+    let ultima = Date.now();
 
-    const actualizarAlerta = (pedidos) => {
-        const afectados = pedidos.filter((pedido) => pedido.sin_repartidor);
-        if (!alerta || !listaAlerta) return;
-        if (afectados.length === 0) {
-            alerta.hidden = true;
-            return;
+    const aplicarFiltro = () => {
+        let visibles = 0;
+        const filas = Array.from(cuerpo.rows);
+        filas.forEach((fila) => {
+            const ver = !filtro || fila.dataset.estado === filtro;
+            fila.hidden = !ver;
+            if (ver) visibles += 1;
+        });
+        botonesFiltro.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filtro === filtro)));
+        quitar.hidden = !filtro;
+        filtroVacio.hidden = !(filtro && filas.length && visibles === 0);
+        const total = filas.length;
+        conteo.textContent = total ? (filtro ? `${visibles} de ${total} pedidos` : `${total} ${total === 1 ? 'pedido' : 'pedidos'}`) : '';
+    };
+    const contar = (estados) => {
+        const cifras = {registrado: 0, asignado: 0, retirado: 0, en_viaje: 0};
+        estados.forEach((e) => { if (e in cifras) cifras[e] += 1; });
+        for (const [clave, valor] of Object.entries(cifras)) {
+            const nodo = document.querySelector(`[data-cifra="${clave}"]`);
+            if (nodo) nodo.textContent = valor;
         }
-        listaAlerta.replaceChildren();
-        for (const pedido of afectados) {
-            const item = document.createElement('li');
-            const enlace = document.createElement('a');
-            enlace.href = pedido.url;
-            enlace.textContent = pedido.codigo;
-            item.appendChild(enlace);
-            listaAlerta.appendChild(item);
-        }
-        alerta.hidden = false;
+    };
+    botonesFiltro.forEach((b) => b.addEventListener('click', () => {
+        filtro = filtro === b.dataset.filtro ? null : b.dataset.filtro;
+        aplicarFiltro();
+    }));
+    quitar.addEventListener('click', () => { filtro = null; aplicarFiltro(); });
+
+    let firmaAfectados = null;
+    const actualizarAvisos = (pedidos) => {
+        const afectados = pedidos.filter((p) => p.sin_repartidor);
+        const firma = afectados.map((p) => p.codigo).join(',');
+        // Solo se reconstruyen las listas si cambió el conjunto de pedidos,
+        // así el foco del teclado no se pierde en cada sondeo.
+        if (firma === firmaAfectados) return;
+        firmaAfectados = firma;
+        listaAlerta.replaceChildren(...afectados.map((p) => {
+            const enlace = el('a', {href: p.url}, el('span', {class: 'codigo', text: p.codigo}), icono('chevron-right', 'sm'));
+            return el('li', {}, enlace);
+        }));
+        listaRequiere.replaceChildren(...afectados.map((p) => el('li', {},
+            el('a', {class: 'codigo', href: p.url, text: p.codigo}), formReintentar(p.url_reintentar))));
+        requiere.hidden = afectados.length === 0;
+        hayAfectados = afectados.length > 0;
+        pintarAlerta();
+    };
+    // El aviso flotante solo aparece cuando la franja "Pedido sin repartidor"
+    // no está a la vista, para no duplicar la advertencia.
+    let hayAfectados = !requiere.hidden;
+    let franjaVisible = true;
+    const pintarAlerta = () => {
+        const firma = listaAlerta.textContent.trim();
+        alerta.hidden = !hayAfectados || franjaVisible || alerta.dataset.descartado === firma;
+    };
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entradas) => {
+            franjaVisible = entradas[0].isIntersecting;
+            pintarAlerta();
+        }).observe(requiere);
+    }
+
+    const fila = (p) => {
+        const tr = el('tr', {'data-codigo': p.codigo, 'data-estado': p.estado_id});
+        if (p.sin_repartidor) tr.setAttribute('data-atencion', '');
+        tr.append(el('td', {'data-primaria': ''}, el('a', {class: 'fila-enlace codigo', href: p.url, text: p.codigo})));
+        const ruta = el('span', {class: 'celda-doble'}, el('span', {text: p.comercio}), el('small', {}, icono('map-pin', 'sm'), ` ${p.destino}`));
+        tr.append(el('td', {}, ruta));
+        const pill = el('span', {class: 'estado', 'data-estado': p.estado_id}, icono(ICONOS[p.estado_id] || 'circle-dot'), el('span', {text: p.estado}));
+        tr.append(el('td', {'data-lado': ''}, pill));
+        const rep = el('td', {'data-label': 'Repartidor'});
+        if (p.repartidor_id) rep.textContent = p.repartidor; else rep.append(el('span', {class: 'tenue', text: p.repartidor}));
+        tr.append(rep);
+        tr.append(el('td', {'data-label': 'Creado', class: 'num', text: p.creado}));
+        return tr;
     };
 
     let enCurso = false;
     const actualizar = async () => {
-        // Evita solapar llamadas: si la anterior sigue esperando respuesta de
-        // Neon, o si la pestaña está oculta, no se dispara otra.
+        // No se solapan llamadas ni se consulta con la pestaña oculta.
         if (enCurso || document.hidden) return;
+        // No se reemplazan filas mientras el foco está dentro de la tabla.
+        if (tabla.contains(document.activeElement)) return;
+        if (requiere.contains(document.activeElement) || alerta.contains(document.activeElement)) return;
         enCurso = true;
         try {
-            const respuesta = await fetch(tabla.dataset.statusUrl, {
-                headers: {'Accept': 'application/json'},
-                credentials: 'same-origin',
-            });
-            if (!respuesta.ok) return;
+            const respuesta = await fetch(tabla.dataset.statusUrl, {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
+            if (!respuesta.ok) throw new Error(String(respuesta.status));
             const datos = await respuesta.json();
-            actualizarAlerta(datos.pedidos);
-            cuerpo.replaceChildren();
-            if (datos.pedidos.length === 0) {
-                const fila = document.createElement('tr');
-                const mensaje = celda(fila, 'No hay pedidos en curso.');
-                mensaje.colSpan = 7;
-                cuerpo.appendChild(fila);
-                return;
-            }
-            for (const pedido of datos.pedidos) {
-                const fila = document.createElement('tr');
-                celda(fila, pedido.codigo);
-                celda(fila, pedido.comercio);
-                celda(fila, pedido.destino);
-                const estado = celda(fila, '');
-                const etiquetaEstado = document.createElement('span');
-                etiquetaEstado.className = `status-badge status-${pedido.estado_id}`;
-                etiquetaEstado.textContent = pedido.estado;
-                estado.appendChild(etiquetaEstado);
-                if (pedido.sin_repartidor) {
-                    const aviso = document.createElement('div');
-                    aviso.className = 'small text-danger fw-semibold';
-                    aviso.textContent = 'Pedido sin repartidor disponible';
-                    estado.appendChild(aviso);
-                }
-                celda(fila, pedido.repartidor);
-                celda(fila, pedido.creado);
-                const accion = celda(fila, '');
-                const enlace = document.createElement('a');
-                enlace.className = 'btn btn-sm btn-app-outline';
-                enlace.href = pedido.url;
-                enlace.textContent = 'Ver detalle';
-                accion.appendChild(enlace);
-                if (pedido.sin_repartidor) {
-                    const formulario = document.createElement('form');
-                    formulario.method = 'post';
-                    formulario.action = pedido.url_reintentar;
-                    const campoCsrf = document.createElement('input');
-                    campoCsrf.type = 'hidden';
-                    campoCsrf.name = 'csrfmiddlewaretoken';
-                    campoCsrf.value = tokenCsrf();
-                    formulario.appendChild(campoCsrf);
-                    const boton = document.createElement('button');
-                    boton.type = 'submit';
-                    boton.className = 'btn btn-sm btn-warning';
-                    boton.textContent = 'Reintentar asignación';
-                    formulario.appendChild(boton);
-                    accion.appendChild(formulario);
-                }
-                cuerpo.appendChild(fila);
-            }
+            actualizarAvisos(datos.pedidos);
+            cuerpo.replaceChildren(...datos.pedidos.map(fila));
+            tabla.hidden = datos.pedidos.length === 0;
+            vacio.hidden = datos.pedidos.length > 0;
+            contar(datos.pedidos.map((p) => p.estado_id));
+            aplicarFiltro();
+            ultima = Date.now();
+            delete vivo.dataset.sinConexion;
+            vivo.removeAttribute('data-latido');
+            void vivo.offsetWidth;
+            vivo.setAttribute('data-latido', '');
         } catch (_) {
             // Si la conexión falla, se conserva el último estado mostrado.
+            vivo.dataset.sinConexion = 'true';
         } finally {
             enCurso = false;
         }
     };
+    const reloj = () => {
+        const segundos = Math.round((Date.now() - ultima) / 1000);
+        vivo.querySelector('[data-texto]').textContent = vivo.dataset.sinConexion
+            ? 'Sin conexión; se muestra el último estado'
+            : (segundos < 2 ? 'Actualizado recién' : `Actualizado hace ${segundos} s`);
+    };
 
+    firmaAfectados = Array.from(listaRequiere.querySelectorAll('a.codigo')).map((a) => a.textContent.trim()).join(',');
+    contar(Array.from(cuerpo.rows).map((f) => f.dataset.estado));
+    aplicarFiltro();
     actualizar();
     window.setInterval(actualizar, 5000);
+    window.setInterval(reloj, 1000);
 })();
 </script>
 {% endblock %}

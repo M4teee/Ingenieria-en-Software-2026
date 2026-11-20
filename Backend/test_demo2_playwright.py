@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 # Setup paths
-APP_DIR = Path(r"C:\Users\simor\Documents\Ing\Tercero\Segundo cuatri\Software\Ingenieria-en-Software-2026\Backend")
+APP_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(APP_DIR))
 os.chdir(str(APP_DIR))
 

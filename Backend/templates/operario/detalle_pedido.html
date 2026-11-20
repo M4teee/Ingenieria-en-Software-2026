@@ -1,216 +1,170 @@
-{% extends "base.html" %}
+{% extends "layouts/operario.html" %}
+{% load sgr_ui %}
 
-{% block title %}Detalle del pedido{% endblock %}
+{% block title %}Pedido {{ pedido.codigo }}{% endblock %}
 
 {% block content %}
-<p><a href="{% url 'operario:inicio' %}">Volver a pedidos en curso</a></p>
-<div class="page-heading">
-    <h1 class="h2">Pedido {{ pedido.codigo }}</h1>
-    <p>Estado actual: <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></p>
-</div>
+<p style="margin-bottom:1rem"><a class="enlace-volver" href="{% url 'operario:inicio' %}">{% icon 'chevron-left' 'sm' %}Volver a pedidos en curso</a></p>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-
-<div id="alerta-sin-repartidor" class="position-fixed top-0 end-0 m-3 card border-warning shadow" style="z-index: 1050; max-width: 22rem;" role="alert" {% if not pedidos_sin_repartidor %}hidden{% endif %}>
-    <div class="card-body py-3">
-        <div class="fw-semibold">
-            <i class="bi bi-exclamation-triangle text-warning" aria-hidden="true"></i>
-            Pedido sin repartidor disponible
-        </div>
-        <ul id="alerta-sin-repartidor-lista" class="small mb-0 mt-1">
-            {% for pedido_sin_repartidor in pedidos_sin_repartidor %}
-                <li><a href="{% url 'operario:detalle_pedido' pedido_sin_repartidor.pk %}">{{ pedido_sin_repartidor.codigo }}</a></li>
-            {% endfor %}
-        </ul>
+<section class="panel detalle-cabecera" aria-labelledby="pedido-titulo">
+    <div class="detalle-titulo">
+        <h1 id="pedido-titulo" class="titulo">Pedido <span class="codigo" translate="no">{{ pedido.codigo }}</span></h1>
+        <span class="sr-only">Estado actual:</span>{% include "components/estado.html" with clave=pedido.estado etiqueta=pedido.get_estado_display grande=True %}
     </div>
+    <p class="tenue num">Creado el {{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</p>
+    {% include "components/recorrido.html" with clave=pedido.estado adaptable=True %}
+</section>
+
+<div id="alerta-sin-repartidor" class="alerta-flotante position-fixed top-0 end-0" role="alert" {% if not pedidos_sin_repartidor %}hidden{% elif pedidos_sin_repartidor|length == 1 and pedidos_sin_repartidor.0.pk == pedido.pk %}hidden{% endif %}>
+    <button type="button" class="cerrar" aria-label="Ocultar aviso">{% icon 'x' 'sm' %}</button>
+    <div class="alerta-flotante-titulo">{% icon 'triangle-alert' %}Pedido sin repartidor disponible</div>
+    <p>Otros pedidos necesitan reasignación manual o un reintento.</p>
+    <ul id="alerta-sin-repartidor-lista">
+        {% for pedido_sin_repartidor in pedidos_sin_repartidor %}{% if pedido_sin_repartidor.pk != pedido.pk %}
+            <li><a href="{% url 'operario:detalle_pedido' pedido_sin_repartidor.pk %}"><span class="codigo">{{ pedido_sin_repartidor.codigo }}</span>{% icon 'chevron-right' 'sm' %}</a></li>
+        {% endif %}{% endfor %}
+    </ul>
 </div>
 
-<div class="row g-4">
-    <div class="col-12 col-lg-7">
-        <section class="card shadow-sm h-100" aria-labelledby="datos-heading">
-            <div class="card-body">
-                <h2 id="datos-heading" class="h5">Datos del pedido</h2>
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">Comercio</dt><dd class="col-sm-8">{{ pedido.comercio.nombre|default:"Sin comercio" }}</dd>
+<div class="detalle-rejilla">
+    <div style="display:grid;gap:1.25rem;min-width:0">
+        <section class="panel" aria-labelledby="datos-heading">
+            <div class="panel-cabecera"><h2 id="datos-heading" class="subtitulo">Datos del pedido</h2></div>
+            <div class="panel-cuerpo">
+                <dl class="datos">
+                    <dt>Comercio</dt><dd class="col-sm-8">{{ pedido.comercio.nombre|default:"Sin comercio" }}</dd>
                     {% if pedido.comercio %}
-                        <dt class="col-sm-4">Dirección del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.direccion|default:"Sin dirección" }}</dd>
-                        <dt class="col-sm-4">Contacto del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.contacto }}</dd>
+                        <dt>Dirección del comercio</dt><dd class="col-sm-8">{{ pedido.comercio.direccion|default:"Sin dirección" }}</dd>
+                        <dt>Contacto del comercio</dt><dd class="col-sm-8 num">{{ pedido.comercio.contacto }}</dd>
                     {% endif %}
-                    <dt class="col-sm-4">Destinatario</dt><dd class="col-sm-8">{{ pedido.datos_destinatario|default:"No informado"|linebreaksbr }}</dd>
-                    <dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ pedido.direccion_destino|default:"Sin destino" }}</dd>
-                    <dt class="col-sm-4">Tamaño del paquete</dt><dd class="col-sm-8">{{ pedido.tamano_paquete|default:"No informado"|linebreaksbr }}</dd>
-                    <dt class="col-sm-4">Vehículo requerido</dt><dd class="col-sm-8">{{ pedido.get_vehiculo_requerido_display|default:"No informado" }}</dd>
-                    <dt class="col-sm-4">Especificaciones</dt><dd class="col-sm-8">{{ pedido.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
-                    <dt class="col-sm-4">Entrega estimada</dt><dd class="col-sm-8">{% if pedido.fecha_hora_estimada_entrega %}{{ pedido.fecha_hora_estimada_entrega|date:"d/m/Y H:i" }}{% else %}Sin estimación{% endif %}</dd>
-                    <dt class="col-sm-4">Repartidor</dt><dd class="col-sm-8">{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}Sin asignar{% endif %}</dd>
-                    <dt class="col-sm-4">Código público</dt><dd class="col-sm-8">{{ pedido.codigo }}</dd>
+                    <dt>Destinatario</dt><dd class="col-sm-8">{{ pedido.datos_destinatario|default:"No informado"|linebreaksbr }}</dd>
+                    <dt>Destino</dt><dd class="col-sm-8">{{ pedido.direccion_destino|default:"Sin destino" }}</dd>
+                    <dt>Tamaño del paquete</dt><dd class="col-sm-8">{{ pedido.tamano_paquete|default:"No informado"|linebreaksbr }}</dd>
+                    <dt>Vehículo requerido</dt><dd class="col-sm-8">{{ pedido.get_vehiculo_requerido_display|default:"No informado" }}</dd>
+                    <dt>Especificaciones</dt><dd class="col-sm-8">{{ pedido.especificaciones_traslado|default:"Sin especificaciones"|linebreaksbr }}</dd>
+                    <dt>Entrega estimada</dt><dd class="col-sm-8 num">{% if pedido.fecha_hora_estimada_entrega %}{{ pedido.fecha_hora_estimada_entrega|date:"d/m/Y H:i" }}{% else %}Sin estimación{% endif %}</dd>
+                    <dt>Repartidor</dt><dd class="col-sm-8">{% if pedido.repartidor %}{{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }}{% else %}Sin asignar{% endif %}</dd>
                 </dl>
             </div>
         </section>
+
+        <section class="panel" aria-labelledby="historial-heading">
+            <div class="panel-cabecera">
+                <h2 id="historial-heading" class="subtitulo">Historial del pedido</h2>
+                <span class="conteo">Del más antiguo al más reciente</span>
+            </div>
+            <div class="panel-cuerpo">
+                {% if historial %}
+                    <ol class="cronologia">
+                        {% for evento in historial %}
+                            <li>
+                                <span class="marcador" data-estado="{{ evento.estado_nuevo }}">{% icon evento.estado_nuevo|icono_estado %}</span>
+                                <div>
+                                    <div class="evento-cabecera">
+                                        <strong>{% if evento.estado_anterior and evento.estado_anterior != evento.estado_nuevo %}{{ evento.get_estado_anterior_display|default:evento.estado_anterior }} → {% endif %}{{ evento.get_estado_nuevo_display|default:evento.estado_nuevo }}</strong>
+                                        <time datetime="{{ evento.fecha|date:'c' }}">{{ evento.fecha|date:"d/m/Y H:i:s" }}</time>
+                                    </div>
+                                    <p class="evento-meta">Responsable: {{ evento.usuario.get_full_name|default:evento.usuario.username }}</p>
+                                    {% if evento.incidencia %}<p class="evento-detalle">{{ evento.incidencia }}</p>{% endif %}
+                                    {% if evento.fotografia %}
+                                        <div class="evidencia">
+                                            <a
+                                                href="{% url 'repartidor_fotografia' evento.pk %}"
+                                                class="btn-ampliar-evidencia"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEvidencia"
+                                                data-img-url="{% url 'repartidor_fotografia' evento.pk %}"
+                                                aria-label="Ampliar fotografía del historial"
+                                            >
+                                                <img
+                                                    src="{% url 'repartidor_fotografia' evento.pk %}"
+                                                    alt="Fotografía de evidencia del pedido"
+                                                    class="img-thumbnail"
+                                                    width="120" height="88"
+                                                    loading="lazy"
+                                                >
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <p class="tenue">No hay eventos registrados.</p>
+                {% endif %}
+            </div>
+        </section>
     </div>
-    <div class="col-12 col-lg-5">
+
+    <aside aria-label="Acciones del pedido">
         {% if pedido.estado == 'registrado' and not pedido.repartidor %}
-            <section class="card shadow-sm border-warning" aria-labelledby="asignacion-heading">
-                <div class="card-body">
-                    <h2 id="asignacion-heading" class="h5">Asignar repartidor</h2>
-                    <div class="alert alert-warning" role="alert">
-                        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
-                        Pedido sin repartidor disponible
-                    </div>
-                    <p class="text-secondary">El repartidor verá la solicitud al abrir o actualizar su panel y tendrá cinco minutos para responder. No se envía una notificación externa.</p>
-                    <form method="post" action="{% url 'operario:reintentar_asignacion' pedido.pk %}" class="mb-3">
+            <section class="panel accion-panel" data-tono="atencion" aria-labelledby="asignacion-heading">
+                <div class="panel-cabecera"><h2 id="asignacion-heading" class="subtitulo">Asignar repartidor</h2></div>
+                <div class="panel-cuerpo">
+                    <div class="aviso" data-tono="atencion" role="status">{% icon 'triangle-alert' %}<div><p><strong>Pedido sin repartidor disponible</strong></p><p>{% if formulario_asignacion.fields.repartidor.queryset.exists %}Reintentá la asignación automática o elegí un repartidor.{% else %}No hay repartidores activos y disponibles sin otro pedido en curso para el vehículo requerido.{% endif %}</p></div></div>
+                    <p class="tenue">El repartidor verá la solicitud al abrir o actualizar su panel y tendrá cinco minutos para responder. No se envía una notificación externa.</p>
+                    <form method="post" action="{% url 'operario:reintentar_asignacion' pedido.pk %}">
                         {% csrf_token %}
-                        <button class="btn btn-warning" type="submit">Reintentar asignación</button>
+                        <button class="btn bloque" data-variant="atencion" type="submit">{% icon 'rotate-cw' %}Reintentar asignación</button>
                     </form>
                     {% if formulario_asignacion.fields.repartidor.queryset.exists %}
-                        <form method="post" action="{% url 'operario:asignar_repartidor' pedido.pk %}">
+                        <p class="separador-o">o elegí manualmente</p>
+                        <form method="post" action="{% url 'operario:asignar_repartidor' pedido.pk %}" style="display:grid;gap:1rem">
                             {% csrf_token %}
-                            <div class="mb-3">
-                                {{ formulario_asignacion.repartidor.label_tag }}
-                                {{ formulario_asignacion.repartidor }}
-                                <small class="text-secondary d-block mt-1">
-                                    Dejá "Automático" para que el sistema elija al repartidor con el mismo vehículo.
-                                </small>
-                            </div>
-                            <button class="btn btn-app" type="submit">Asignar pedido</button>
+                            {% include "components/campo.html" with field=formulario_asignacion.repartidor ayuda='Dejá "Automático" para que el sistema elija al repartidor con el mismo vehículo.' %}
+                            <button class="btn bloque" data-variant="primary" type="submit">Asignar pedido</button>
                         </form>
-                    {% else %}
-                        <p class="alert alert-warning mb-0">No hay repartidores activos y disponibles sin otro pedido en curso para el vehículo requerido.</p>
                     {% endif %}
                 </div>
             </section>
         {% endif %}
+
         {% if pedido.estado == 'registrado' or pedido.estado == 'asignado' %}
-            <section class="card shadow-sm mt-4" aria-labelledby="cancelacion-heading">
-                <div class="card-body">
-                    <h2 id="cancelacion-heading" class="h5">Cancelar pedido</h2>
-                    <form method="post" action="{% url 'operario:cancelar_pedido' pedido.pk %}" onsubmit="return confirm('¿Confirmás cancelar este pedido?');">
+            <section class="panel" aria-labelledby="cancelacion-heading">
+                <div class="panel-cuerpo" style="display:grid;gap:.75rem">
+                    <h2 id="cancelacion-heading" class="subtitulo">Cancelar pedido</h2>
+                    <p class="tenue">El pedido queda cerrado como Cancelado{% if pedido.repartidor %} y {{ pedido.repartidor.get_full_name|default:pedido.repartidor.username }} vuelve a quedar disponible{% endif %}. No se puede deshacer.</p>
+                    <form method="post" action="{% url 'operario:cancelar_pedido' pedido.pk %}" onsubmit="return confirm('¿Confirmás cancelar este pedido? No se puede deshacer.');">
                         {% csrf_token %}
-                        <button class="btn btn-outline-danger" type="submit">
-                            Cancelar pedido
-                        </button>
+                        <button class="btn bloque" data-variant="peligro" type="submit">{% icon 'ban' %}Cancelar pedido</button>
                     </form>
                 </div>
             </section>
-        {% endif %}
-    </div>
-</div>
-
-<section class="card shadow-sm mt-4" aria-labelledby="historial-heading">
-    <div class="card-body">
-        <h2 id="historial-heading" class="h5">Historial del pedido</h2>
-
-        {% if historial %}
-            <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th scope="col">Fecha y hora</th>
-                            <th scope="col">Cambio</th>
-                            <th scope="col">Responsable</th>
-                            <th scope="col">Incidencia</th>
-                            <th scope="col">Evidencia</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for evento in historial %}
-                            <tr>
-                                <td>
-                                    {{ evento.fecha|date:"d/m/Y H:i:s" }}
-                                </td>
-
-                                <td>
-                                    {% if evento.estado_anterior %}
-                                        {{ evento.get_estado_anterior_display|default:evento.estado_anterior }} →
-                                    {% endif %}
-                                    {{ evento.get_estado_nuevo_display|default:evento.estado_nuevo }}
-                                </td>
-
-                                <td>
-                                    {{ evento.usuario.get_full_name|default:evento.usuario.username }}
-                                </td>
-
-                                <td>
-                                    {{ evento.incidencia|default:"—" }}
-                                </td>
-
-                                <td>
-                                    {% if evento.fotografia %}
-                                        <a
-                                            href="{% url 'repartidor_fotografia' evento.pk %}"
-                                            class="btn-ampliar-evidencia d-inline-block"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEvidencia"
-                                            data-img-url="{% url 'repartidor_fotografia' evento.pk %}"
-                                            aria-label="Ampliar fotografía del historial"
-                                        >
-                                            <img
-                                                src="{% url 'repartidor_fotografia' evento.pk %}"
-                                                alt="Fotografía de evidencia del pedido"
-                                                class="img-thumbnail"
-                                                style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
-                                                loading="lazy"
-                                            >
-                                        </a>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        {% elif pedido.estado == 'fallido' %}
+            <section class="panel"><div class="panel-cuerpo" style="display:grid;gap:.75rem">
+                <h2 class="subtitulo">Entrega fallida</h2>
+                <p class="tenue">La devolución al comercio se confirma desde la lista de entregas fallidas.</p>
+                <a class="btn" data-variant="outline" href="{% url 'operario:entregas_fallidas' %}">{% icon 'package-x' %}Ir a entregas fallidas</a>
+            </div></section>
         {% else %}
-            <p class="text-secondary mb-0">
-                No hay eventos registrados.
-            </p>
+            <section class="panel"><div class="panel-cuerpo" style="display:grid;gap:.5rem">
+                <h2 class="subtitulo">Sin acciones pendientes</h2>
+                <p class="tenue">{% if pedido.estado == 'entregado' or pedido.estado == 'cancelado' %}El pedido está cerrado.{% else %}El repartidor actualiza el estado desde su panel; esta página se actualiza cuando cambia.{% endif %}</p>
+            </div></section>
         {% endif %}
-    </div>
-</section>
-
-<!-- Modal para ampliar fotografía (HU #14) -->
-<div class="modal fade" id="modalEvidencia" tabindex="-1" aria-labelledby="modalEvidenciaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalEvidenciaLabel">Evidencia fotográfica</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center p-2">
-                <img id="imgEvidenciaModal" src="" alt="Fotografía de evidencia ampliada" class="img-fluid rounded" style="max-height: 75vh;">
-            </div>
-            <div class="modal-footer">
-                <a id="linkEvidenciaNuevaPestana" href="" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">Abrir en pestaña nueva</a>
-                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
+    </aside>
 </div>
 
+<dialog class="dialog evidencia" id="modalEvidencia" aria-labelledby="modalEvidenciaLabel">
+    <div>
+        <header>
+            <h2 id="modalEvidenciaLabel">Evidencia fotográfica</h2>
+        </header>
+        <section>
+            <img id="imgEvidenciaModal" data-evidencia alt="Fotografía de evidencia ampliada">
+        </section>
+        <footer>
+            <a id="linkEvidenciaNuevaPestana" data-evidencia href="#" target="_blank" rel="noopener" class="btn" data-variant="outline">{% icon 'external-link' %}Abrir en pestaña nueva</a>
+            <button type="button" class="btn" data-variant="primary" data-bs-dismiss="modal">Cerrar</button>
+        </footer>
+        <button type="button" aria-label="Cerrar" data-bs-dismiss="modal">{% icon 'x' %}</button>
+    </div>
+</dialog>
 {% endblock %}
 
 {% block extrascript %}
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.btn-ampliar-evidencia').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const url = btn.dataset.imgUrl;
-            const modalImg = document.getElementById('imgEvidenciaModal');
-            const modalLink = document.getElementById('linkEvidenciaNuevaPestana');
-            if (modalImg) modalImg.src = url;
-            if (modalLink) modalLink.href = url;
-        });
-    });
-});
-</script>
-{% if pedido.estado == 'asignado' %}
+{% if pedido.estado == 'asignado' or pedido.estado == 'retirado' or pedido.estado == 'en_viaje' %}
 <script>
 (() => {
     const codigo = "{{ pedido.codigo|escapejs }}";
@@ -221,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let enCurso = false;
     const verificar = async () => {
         if (enCurso || document.hidden) return;
+        if (document.querySelector('dialog[open]')) return;
         enCurso = true;
         try {
             const respuesta = await fetch(urlEstado, {

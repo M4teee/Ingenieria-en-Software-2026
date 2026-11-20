@@ -1,37 +1,46 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "layouts/acceso.html" %}
+{% load sgr_ui %}
 
 {% block title %}Ingreso repartidor{% endblock %}
-
-{% block extrastyle %}
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-{% endblock extrastyle %}
+{% block lado_titulo %}Mi jornada{% endblock %}
+{% block lado_texto %}Aceptá asignaciones, marcá cada etapa del recorrido y registrá la evidencia de entrega.{% endblock %}
 
 {% block content %}
-    <div class="auth-card">
-        <h1 class="h3 mb-1">Ingreso de repartidor</h1>
-        <p class="text-secondary mb-4">Ingresá tu PIN de acceso.</p>
+<div>
+    <h1 class="titulo" style="font-size:var(--t-xl)">Ingreso de repartidor</h1>
+    <p class="tenue" style="margin-top:.35rem">Ingresá tu PIN de acceso de 4 dígitos.</p>
+</div>
 
-        {% if error %}
-            <div class="alert alert-danger" role="alert">{{ error }}</div>
-        {% endif %}
+{% if error %}
+    <div class="aviso" data-tono="error" role="alert">{% icon 'circle-alert' %}<p>{{ error }}</p></div>
+{% endif %}
 
-        <form method="post">
-            {% csrf_token %}
-            <label for="pin" class="form-label fw-semibold">PIN</label>
-            <input
-                type="password"
-                id="pin"
-                name="pin"
-                class="form-control"
-                inputmode="numeric"
-                autocomplete="off"
-                minlength="4"
-                maxlength="4"
-                pattern="[0-9]{4}"
-                required
-            >
-            <button type="submit" class="btn btn-app w-100 mt-3">Ingresar</button>
-        </form>
+<form method="post">
+    {% csrf_token %}
+    <label for="pin" class="etiqueta">PIN</label>
+    <div class="pin-entrada">
+        <div class="pin-visor" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <input
+            type="password"
+            id="pin"
+            name="pin"
+            inputmode="numeric"
+            autocomplete="off"
+            minlength="4"
+            maxlength="4"
+            pattern="[0-9]{4}"
+            required
+            {% if error %}aria-invalid="true"{% endif %}
+        >
     </div>
+    <div class="teclado" aria-label="Teclado numérico">
+        <button type="button">1</button><button type="button">2</button><button type="button">3</button>
+        <button type="button">4</button><button type="button">5</button><button type="button">6</button>
+        <button type="button">7</button><button type="button">8</button><button type="button">9</button>
+        <button type="button" data-accion="limpiar">Limpiar</button><button type="button">0</button><button type="button" data-accion="borrar" aria-label="Borrar último dígito">Borrar</button>
+    </div>
+    <button type="submit" class="btn bloque" data-variant="signal" data-size="xl">Ingresar</button>
+</form>
+
+<p class="alternativa">¿Sos operario? <a href="{% url 'login' %}?next={% url 'operario:inicio' %}">Ingresá con usuario y contraseña</a>.</p>
 {% endblock %}

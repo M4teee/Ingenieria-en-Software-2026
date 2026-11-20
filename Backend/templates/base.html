@@ -1,138 +1,26 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
+{% load static %}<!DOCTYPE html>
+<html lang="es-AR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#172033">
     <title>{% block title %}{% endblock %} | SGR</title>
-    <link rel="shortcut icon" href="{% static 'Logo 512x512.webp' %}" type="image/webp">
-
+    <link rel="icon" href="{% static 'sgr/favicon.svg' %}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <style>
-        #page-progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            width: 0%;
-            background: linear-gradient(90deg, #10b981, #059669);
-            z-index: 99999;
-            transition: width 0.2s ease, opacity 0.3s ease;
-            pointer-events: none;
-            opacity: 0;
-        }
-        #page-progress-bar.loading {
-            opacity: 1;
-            width: 75%;
-            transition: width 0.8s cubic-bezier(0.1, 0.5, 0.1, 1);
-        }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@500&display=swap">
+    <link rel="stylesheet" href="{% static 'vendor/basecoat/1.1.0/basecoat.cdn.min.css' %}">
+    <link rel="stylesheet" href="{% static 'sgr/sgr.css' %}">
     {% block extrastyle %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <div id="page-progress-bar" aria-hidden="true"></div>
-    <nav class="navbar navbar-expand-lg navbar-app" aria-label="Navegación principal">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'root' %}">
-                <img src="{% static 'Logo Full Resolution.webp' %}" alt="" width="40" height="40">
-                <span>SGR</span>
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation-content" aria-controls="navigation-content" aria-expanded="false" aria-label="Abrir navegación">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navigation-content">
-                <div class="navbar-nav ms-auto me-auto align-items-lg-center gap-lg-3 py-3 py-lg-0">
-                    {% if user.is_authenticated and user.is_operario %}
-                        <a class="nav-link" href="{% url 'operario:inicio' %}">Pedidos</a>
-                        <a class="nav-link" href="{% url 'operario:comercios' %}">Comercios</a>
-                        <a class="nav-link" href="{% url 'operario:repartidores' %}">Repartidores</a>
-                    {% elif user.is_authenticated and user.repartidor %}
-                        <a class="nav-link" href="{% url 'repartidor' %}">Panel repartidor</a>
-                    {% elif not user.is_authenticated %}
-                        <a class="btn btn-sm btn-app-outline" href="{% url 'login' %}?next={% url 'operario:inicio' %}">Iniciar sesión como operario</a>
-                        <a class="btn btn-sm btn-app" href="{% url 'repartidor_login_pin' %}">Iniciar sesión como repartidor</a>
-                    {% endif %}
-                </div>
-                {% if user.is_authenticated %}
-                    <div class="navbar-nav align-items-lg-center gap-lg-2 py-3 py-lg-0">
-                        <span class="navbar-user d-none d-lg-inline">
-                            <i class="bi bi-person-circle" aria-hidden="true"></i> {{ user.get_username }}
-                        </span>
-                        <form method="post" action="{% url 'logout' %}" class="m-0">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-app-outline">
-                                <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Cerrar sesión
-                            </button>
-                        </form>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
-
-    <main id="content" class="container flex-grow-1 py-5">
-        {% block content %}
-        {% endblock %}
-    </main>
-
-    <footer class="footer-app text-center py-3">
-        <small>SGR · Sistema de Gestión de Repartos</small>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-    <script>
-      (function () {
-        var prefetched = new Set();
-        function prefetch(url) {
-          if (!url || prefetched.has(url)) return;
-          try {
-            var u = new URL(url, window.location.href);
-            if (u.origin !== window.location.origin) return;
-            if (u.pathname === window.location.pathname) return;
-            if (u.pathname.includes('logout') || u.pathname.includes('estado')) return;
-            prefetched.add(url);
-            var link = document.createElement('link');
-            link.rel = 'prefetch';
-            link.href = url;
-            link.as = 'document';
-            document.head.appendChild(link);
-          } catch (e) {}
-        }
-        var hoverTimer = null;
-        document.addEventListener('mouseover', function (e) {
-          var a = e.target.closest('a');
-          if (!a || !a.href) return;
-          hoverTimer = setTimeout(function () { prefetch(a.href); }, 65);
-        }, { passive: true });
-        document.addEventListener('mouseout', function () {
-          if (hoverTimer) clearTimeout(hoverTimer);
-        }, { passive: true });
-        document.addEventListener('touchstart', function (e) {
-          var a = e.target.closest('a');
-          if (a && a.href) prefetch(a.href);
-        }, { passive: true });
-        document.addEventListener('click', function (e) {
-          var a = e.target.closest('a');
-          if (!a || !a.href || a.target === '_blank' || a.hasAttribute('download')) return;
-          try {
-            var u = new URL(a.href, window.location.href);
-            if (u.origin === window.location.origin && u.pathname !== window.location.pathname) {
-              var bar = document.getElementById('page-progress-bar');
-              if (bar) bar.classList.add('loading');
-            }
-          } catch (e) {}
-        }, { passive: true });
-      })();
-    </script>
+<body class="{% block body_class %}{% endblock %}">
+    <a class="skip-link" href="#content">Saltar al contenido</a>
+    {% block body %}
+        <main id="content">{% block content %}{% endblock %}</main>
+    {% endblock %}
+    {% include "components/mensajes.html" %}
+    <script src="{% static 'vendor/basecoat/1.1.0/js/basecoat.min.js' %}" defer></script>
+    <script src="{% static 'sgr/sgr.js' %}" defer></script>
     {% block extrascript %}{% endblock %}
 </body>
 </html>

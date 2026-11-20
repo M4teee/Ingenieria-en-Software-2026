@@ -1,85 +1,67 @@
-{% extends "base.html" %}
+{% extends "layouts/operario.html" %}
+{% load sgr_ui %}
 
 {% block title %}Entregas fallidas{% endblock %}
 
 {% block content %}
-<p><a href="{% url 'operario:inicio' %}">Volver a pedidos en curso</a></p>
-<div class="page-heading mb-4">
-    <h1 class="h2">Entregas fallidas</h1>
-    <p>Pedidos en estado Fallido, ordenados desde la falla más antigua.</p>
+<div class="encabezado">
+    <div>
+        <h1 class="titulo">Entregas fallidas</h1>
+        <p class="bajada">Pedidos en estado Fallido, ordenados desde la falla más antigua. Confirmá la devolución cuando el paquete vuelva al comercio.</p>
+    </div>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %}" role="status">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-
 {% if entregas %}
-    <div class="table-responsive app-section">
-        <table class="table app-table align-middle mb-0">
-            <thead>
-                <tr>
-                    <th scope="col">Pedido</th>
-                    <th scope="col">Comercio</th>
-                    <th scope="col">Fecha de falla</th>
-                    <th scope="col">Motivo</th>
-                    <th scope="col">Repartidor que intentó entregar</th>
-                    <th scope="col">Fotografía</th>
-                    <th scope="col">Cronología</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entrega in entregas %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'operario:detalle_pedido' entrega.pedido.pk %}">{{ entrega.pedido.codigo }}</a>
-                        </td>
-                        <td>{{ entrega.pedido.comercio.nombre|default:"Sin comercio" }}</td>
-                        <td>
-                            {% if entrega.evento %}{{ entrega.evento.fecha|date:"d/m/Y H:i:s" }}{% else %}Sin evento de falla{% endif %}
-                        </td>
-                        <td>{{ entrega.evento.incidencia|default:"Sin motivo registrado"|linebreaksbr }}</td>
-                        <td>
-                            {% if entrega.evento %}{{ entrega.evento.usuario.get_full_name|default:entrega.evento.usuario.username }}{% else %}Sin responsable registrado{% endif %}
-                        </td>
-                        <td>
-                            {% if entrega.evento.fotografia %}
-                                <a href="{% url 'repartidor_fotografia' entrega.evento.pk %}">Ver fotografía</a>
-                            {% else %}
-                                No adjunta
-                            {% endif %}
-                        </td>
-                        <td>
-                            <ol class="mb-0 ps-3">
-                                {% if entrega.evento %}
-                                    <li>
-                                        {{ entrega.evento.fecha|date:"d/m/Y H:i:s" }} — Fallido, por {{ entrega.evento.usuario.get_full_name|default:entrega.evento.usuario.username }}
-                                    </li>
-                                {% else %}
-                                    <li>Sin evento de falla registrado</li>
-                                {% endif %}
-                                {% if entrega.devolucion %}
-                                    <li>
-                                        {{ entrega.devolucion.fecha|date:"d/m/Y H:i:s" }} — Devolución registrada por {{ entrega.devolucion.usuario.get_full_name|default:entrega.devolucion.usuario.username }}
-                                    </li>
-                                {% else %}
-                                    <li>
-                                        Devolución pendiente
-                                        <form method="post" action="{% url 'operario:confirmar_devolucion' entrega.pedido.pk %}" class="mt-2">
-                                            {% csrf_token %}
-                                            <button class="btn btn-sm btn-app" type="submit">Confirmar devolución</button>
-                                        </form>
-                                    </li>
-                                {% endif %}
-                            </ol>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <ol class="casos">
+        {% for entrega in entregas %}
+            <li class="panel caso" data-devuelto="{% if entrega.devolucion %}true{% else %}false{% endif %}">
+                <div class="caso-id">
+                    <a class="codigo" href="{% url 'operario:detalle_pedido' entrega.pedido.pk %}">{{ entrega.pedido.codigo }}</a>
+                    <span>{{ entrega.pedido.comercio.nombre|default:"Sin comercio" }}</span>
+                </div>
+                <div class="caso-motivo">
+                    <span class="etiqueta">Motivo</span>
+                    <blockquote>{{ entrega.evento.incidencia|default:"Sin motivo registrado"|linebreaksbr }}</blockquote>
+                    <p class="evento-meta">Informado por el repartidor {% if entrega.evento %}{{ entrega.evento.usuario.get_full_name|default:entrega.evento.usuario.username }}{% else %}Sin responsable registrado{% endif %}</p>
+                </div>
+                <div class="caso-foto">
+                    {% if entrega.evento.fotografia %}
+                        <a href="{% url 'repartidor_fotografia' entrega.evento.pk %}" class="btn-ampliar-evidencia" target="_blank" rel="noopener" aria-label="Ver fotografía de la incidencia (se abre en otra pestaña)">
+                            <img src="{% url 'repartidor_fotografia' entrega.evento.pk %}" alt="Fotografía de la incidencia" class="img-thumbnail" width="120" height="88" loading="lazy">
+                        </a>
+                    {% else %}
+                        <span class="sin-foto">Fotografía<br>No adjunta</span>
+                    {% endif %}
+                </div>
+                <div class="caso-devolucion">
+                    <span class="etiqueta">Cronología</span>
+                    <ol>
+                        {% if entrega.evento %}
+                            <li data-hecho>{% icon 'circle-x' 'sm' %}<span>{{ entrega.evento.fecha|date:"d/m/Y H:i:s" }}: entrega fallida</span></li>
+                        {% else %}
+                            <li data-hecho>{% icon 'circle-x' 'sm' %}<span>Sin evento de falla registrado</span></li>
+                        {% endif %}
+                        {% if entrega.devolucion %}
+                            <li data-hecho>{% icon 'undo-2' 'sm' %}<span>{{ entrega.devolucion.fecha|date:"d/m/Y H:i:s" }}: Devolución registrada por {{ entrega.devolucion.usuario.get_full_name|default:entrega.devolucion.usuario.username }}</span></li>
+                        {% else %}
+                            <li data-pendiente>{% icon 'hourglass' 'sm' %}<span>Devolución pendiente</span></li>
+                        {% endif %}
+                    </ol>
+                    {% if not entrega.devolucion %}
+                        <form method="post" action="{% url 'operario:confirmar_devolucion' entrega.pedido.pk %}">
+                            {% csrf_token %}
+                            <button class="btn bloque" data-variant="primary" type="submit">{% icon 'undo-2' %}Confirmar devolución</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ol>
 {% else %}
-    <div class="alert alert-info" role="status">No hay pedidos con entrega fallida.</div>
+    <div class="panel vacio" role="status">
+        <span class="vacio-icono">{% icon 'package-check' 'lg' %}</span>
+        <h3>No hay pedidos con entrega fallida.</h3>
+        <p>Cuando un repartidor informe una falla, el pedido aparece acá para gestionar la devolución.</p>
+    </div>
 {% endif %}
 {% endblock content %}

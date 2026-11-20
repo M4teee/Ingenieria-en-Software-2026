@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load sgr_ui %}
+{% block body %}
+<div class="acceso">
+    <aside class="acceso-lado trama">
+        <a class="marca" href="{% url 'root' %}">{% include "components/marca.html" %}</a>
+        <div class="acceso-texto">
+            <p class="display lado-titulo">{% block lado_titulo %}{% endblock %}</p>
+            <p>{% block lado_texto %}{% endblock %}</p>
+        </div>
+        <small>¿Querés seguir un envío? <a href="{% url 'root' %}" style="color:#fff">Consultá con tu código</a>.</small>
+    </aside>
+    <main id="content" class="acceso-form" tabindex="-1">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

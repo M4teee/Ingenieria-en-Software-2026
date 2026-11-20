@@ -1,0 +1,319 @@
+id,ref,subject,description,sprint_id,sprint,sprint_estimated_start,sprint_estimated_finish,status,is_closed,swimlane,back-points,design-points,front-points,ux-points,total-points,backlog_order,sprint_order,kanban_order,created_date,modified_date,finish_date,client_requirement,team_requirement,attachments,generated_from_issue,generated_from_task,from_task_ref,external_reference,tasks,tags,due_date,due_date_reason,epics
+9597896,9,Iniciar sesion operario,"Como Operario, quiero iniciar sesión en la plataforma web de escritorio para acceder al panel de control y gestionar los pedidos del sistema.
+
+*   Reglas:
+    1.  El usuario debe estar previamente registrado en el sistema con credenciales de operario.
+*   Criterios de Aceptación:
+    *   Escenario 1: Inicio de sesión exitoso     
+        En el formulario de acceso de escritorio, el operario ingresa su nombre de usuario y contraseña válidos. Al presionar ""Iniciar sesión"", el sistema valida las credenciales contra la base de datos segura y redirige al panel principal de gestión de pedidos.
+    *   Escenario 2: Inicio de sesión fallido   
+        En el formulario de acceso, se ingresa un nombre de usuario inexistente en el sistema o una contraseña incorrecta. Al presionar ""Iniciar sesión"", el sistema permanece en la pantalla de login y muestra el mensaje: _""Por favor introduzca un nombre de usuario y una contraseña correctos. Tenga en cuenta que ambos campos son sensibles a mayúsculas/minúsculas.""_.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,2.0,0.0,0.0,0.0,2.0,1791035510483640,12,1793413492230544,2026-10-03 13:47:40.621731+00:00,2026-11-18T21:21:13+0000,,False,False,0,,,,,,,2026-10-30,,3
+9597897,10,Registar comercios,"Como Operario, quiero registrar un nuevo comercio en el sistema para poder asociar sus futuros pedidos a la base de datos.
+
+*   Reglas:
+    1.  El nombre o identificador del comercio debe ser único en el sistema.
+*   Criterios de Aceptación:
+    *   Escenario 1: Registro exitoso de comercio         
+        El operario ingresa los datos de un comercio no existente (nombre, dirección, teléfono de contacto y selecciona el estado) y presiona ""Crear comercio"". El sistema almacena el registro y muestra el mensaje: _""Comercio dado de alta exitosamente.""_, quedando habilitado para la emisión de pedidos.
+    *   Escenario 2: Registro fallido por comercio ya existente         
+        El operario ingresa un nombre de comercio que ya se encuentra activo en la base de datos. Al presionar ""Crear comercio"", el sistema cancela el alta y emite la alerta: _""Ya existe un comercio registrado con ese nombre""_.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,2.0,0.0,0.0,0.0,2.0,1791035510483644,9,1793413477814048,2026-10-03 13:51:50.497403+00:00,2026-11-19T16:58:43+0000,,False,False,0,,,,,,,2026-10-30,,2
+9597898,11,Dar de alta a repartidor,"Como Operario, quiero dar de alta a un nuevo repartidor para habilitarlo a operar en la plataforma móvil.
+
+*   Reglas:
+    1.  El DNI del repartidor debe ser único.
+    2.  El operario debe asignar un PIN de acceso numérico de exactamente 4 dígitos (el cual no debe estar asignado a otro repartidor).
+    3.  El repartidor inicia con estado de disponibilidad ""No disponible"" hasta que inicie su jornada.
+*   Criterios de Aceptación:
+    *   ESCENARIO 1: Alta exitosa de repartidor.      
+        El operario completa los datos de un repartidor con un DNI y un PIN de 4 dígitos no registrado previamente y presiona ""Crear repartidor"". El sistema guarda el perfil, lo crea con disponibilidad ""No disponible"" y emite el mensaje: _""Repartidor dado de alta exitosamente.""_.
+    *   ESCENARIO 2: Alta fallida por DNI duplicado.      
+        El operario ingresa los datos de un repartidor cuyo DNI ya pertenece a otro repartidor registrado. Al presionar ""Crear repartidor"", el sistema rechaza la operación y muestra el mensaje: _""El DNI ingresado ya se encuentra registrado en el sistema.""_.
+    *   ESCENARIO 3: Alta fallida por PIN duplicado.   
+        El operario ingresa un PIN de 4 dígitos que ya está siendo utilizado por otro repartidor en el sistema. Al presionar ""Crear repartidor"", el sistema rechaza la operación y muestra el mensaje: _""Ese PIN ya está asignado a otro repartidor.""_.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,2.0,0.0,0.0,0.0,2.0,1791035510483643,10,1793413482387705,2026-10-03 13:54:11.183985+00:00,2026-11-18T21:23:50+0000,,False,False,0,,,,,,,2026-10-30,,4
+9597899,12,Cargar pedido nuevo,"Como Operario, quiero cargar un nuevo pedido solicitado por un comercio para incorporarlo al sistema y comenzar su gestión.
+
+*   Reglas:
+    1.  El pedido debe asociarse a un comercio previamente registrado y activo en el sistema.
+    2.  El estado inicial de todo pedido nuevo es ""Registrado"".
+    3.  El sistema debe generar automáticamente un código de seguimiento alfanumérico no secuencial y pseudoaleatorio.
+*   Criterios de Aceptación:
+    *   ESCENARIO 1: Carga y registro exitoso de pedido.     
+        El operario selecciona un comercio activo, ingresa la dirección de destino, especificaciones de traslado y tiempo estimado de entrega, y presiona ""Registrar Pedido"". El sistema crea el envío con estado ""Registrado"", genera un código de seguimiento único no predecible, lo muestra en pantalla con opción de copiado rápido y muestra el mensaje: _""Pedido registrado con éxito""_.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,2.0,0.0,0.0,0.0,2.0,1791035510483647,4,1793413453411773,2026-10-03 13:55:38.418596+00:00,2026-11-19T16:59:56+0000,,False,False,0,,,,,,,,,3
+9597900,13,Cancelar pedido,"Como Operario, quiero cancelar un pedido si el comercio o cliente lo solicita para anular la orden antes de que sea despachada a la calle.
+
+*   Reglas:
+    1.  Solo se admiten cancelaciones si el pedido se encuentra en estado ""Registrado"" o ""Asignado"".
+    2.  Está estrictamente prohibido cancelar un pedido que ya se encuentre en estado ""Retirado"" o ""En viaje"".
+*   Criterios de Aceptación:
+    *   ESCENARIO 1: Cancelación exitosa de un pedido no retirado   
+        El operario visualiza un pedido en estado ""Asignado"", presiona el botón ""Cancelar Pedido"" y confirma la acción. El sistema cambia el estado a ""Cancelado"", notifica la baja del viaje al repartidor asignado, lo libera y registra el evento en el historial.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483659,10,1794529611895704,2026-10-03 13:56:16.214439+00:00,2026-11-13T00:26:51+0000,,False,False,0,,,,,,,,,3
+9597902,14,Ver historial de cambios de un pedido,"Como operario, quiero visualizar el historial de cambios de estado de un pedido, para verificar las acciones realizadas por cada usuario ante un reclamo por pedido perdido o demorado
+
+*   Reglas:
+    1.  El historial es inmutable: no se pueden editar ni borrar registros de auditoría.
+    2.  Debe exponer cronológicamente cada cambio de estado, hora exacta, usuario responsable y foto adjunta si existiera.
+*   Criterios de Aceptación:
+    *   ESCENARIO 1: Visualización íntegra del timeline de un pedido   
+        El operario busca un pedido por su identificador o código y presiona ""Ver Historial/Timeline"". El sistema lista en orden temporal todos los estados por los que transitó, especificando fecha y hora exacta, qué usuario ejecutó el cambio (Operario o nombre del Repartidor) y miniaturas ampliables de las fotos de retiro y entrega.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483656,5,1795050233556296,2026-10-03 13:57:29.754244+00:00,2026-11-19T01:03:53+0000,,False,False,0,,,,,,,,,8
+9597903,15,Visualizar repartidores activos,"Como Operario, quiero visualizar los repartidores activos y disponibles para conocer la capacidad operativa actual del servicio.
+
+*   Reglas:
+    1.  El listado debe diferenciar claramente el estado de cada repartidor (ej. ""Disponible"", ""No disponible"").
+    2.  Se debe visualizar el tipo de vehículo que posee el repartidor, ya que es el parámetro que usa el operario para asignar los viajes.
+*   Criterios de Aceptación:
+    *   ESCENARIO 1: Visualización del listado de repartidores   
+        El operario accede a la sección de repartidores. El sistema muestra una lista con todos los repartidores registrados, indicando su nombre, tipo de vehículo y resaltando su estado actual (""Disponible"" o ""No disponible"").
+    *   ESCENARIO 2: Actualización de disponibilidad   
+        Un repartidor cambia su estado desde su aplicación móvil de ""No disponible"" a ""Disponible"". El sistema actualiza automáticamente el listado en la pantalla del operario reflejando la nueva capacidad operativa.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483649,4,1794965162075089,2026-10-03 13:58:18.827180+00:00,2026-11-18T01:26:02+0000,,False,False,0,,,,,,,,,4
+9597905,16,Deshabilitar comercio,"Como Operario, quiero deshabilitar un comercio para impedir que continúe siendo utilizado, conservando el historial de sus pedidos anteriores.
+
+*   Reglas:
+    *   Se debe aplicar un borrado lógico; la información del comercio no se elimina de la base de datos.
+    *   Un comercio deshabilitado no debe aparecer como opción disponible al momento de registrar un nuevo pedido.
+    *   Los pedidos anteriores asociados al comercio deshabilitado deben permanecer intactos en el historial y en la línea de tiempo (timeline).
+*   Criterios:
+    *   ESCENARIO 1: Deshabilitación exitosa de un comercio   
+        El operario accede a la gestión de comercios, ubica un comercio activo y desactiva su interruptor de estado. El sistema solicita confirmación mediante un diálogo en pantalla. Tras confirmar, el sistema actualiza el estado del comercio a ""Inactivo"" y muestra el mensaje: ""Comercio deshabilitado exitosamente"". Al intentar crear un nuevo pedido, este comercio ya no figura en la lista de opciones.
+    *   ESCENARIO 2: Cancelación de la confirmación  
+        El operario presiona el interruptor de estado de un comercio activo y rechaza el diálogo de confirmación. El sistema cancela la operación y mantiene el comercio en estado activo sin mostrar mensajes de modificación.
+    *   ESCENARIO 3: Conservación del historial tras la deshabilitación   
+        Luego de deshabilitar un comercio exitosamente (como en el Escenario 1), el operario consulta la lista de pedidos históricos. El sistema sigue mostrando los pedidos previos asociados a dicho comercio y el acceso a su correspondiente timeline, sin errores ni omisiones.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483670,7,1795107150874860,2026-10-03 13:59:22.406001+00:00,2026-11-19T16:52:30+0000,,False,False,0,,,,,,,,,2
+9597906,17,Acceso con PIN de 4 dígitos,"Como Repartidor, quiero iniciar sesión mediante un PIN de 4 dígitos para acceder rápidamente a mis pedidos desde el celular.
+
+*   Reglas:
+    *   El PIN ingresado debe ser de 4 dígitos numéricos.
+    *   El repartidor debe estar registrado y activo en el sistema.
+*   Criterios:
+    *   ESCENARIO 1: Autenticación exitosa con PIN   
+        El repartidor ingresa su PIN de 4 dígitos en el teclado numérico en pantalla. El sistema valida el token y abre directamente la pantalla operativa de repartos.
+    *   ESCENARIO 2: Autenticación fallida por PIN incorrecto   
+        El repartidor introduce una combinación de 4 dígitos que no coincide con ningún repartidor registrado. El sistema limpia los campos y muestra: _""PIN incorrecto. Verifique los dígitos""_.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483651,15,1793413505319342,2026-10-03 14:01:46.203074+00:00,2026-10-31T02:25:05+0000,,False,False,0,,,,,,,,,6
+9597908,18,Aceptar asignacion de pedidos,"Como Repartidor, quiero aceptar o rechazar una asignación de pedido para informar al sistema si puedo realizar el viaje.
+
+*   Reglas:
+    *   Si el repartidor presiona ""Aceptar pedido"", el pedido pasa a estar confirmado para su retiro.
+    *   Si el repartidor presiona ""Rechazar"" o no responde en 5 minutos, el evento se guarda en el historial de auditoría y su estado cambia automáticamente a ""No disponible"".
+*   Criterios:
+    *   ESCENARIO 1: Aceptación del pedido dentro del tiempo límite      
+        El repartidor recibe la solicitud de viaje con cuenta regresiva menor a 5 minutos y presiona ""Aceptar pedido"". El sistema confirma la asignación, detiene el temporizador, muestra el mensaje “Asignación confirmada. Ya podés retirar el pedido.” y habilita las acciones de retiro del paquete.
+    *   ESCENARIO 2: Rechazo explícito del pedido      
+        El repartidor recibe la solicitud y presiona ""Rechazar"". El sistema desvincula el pedido, guarda en el timeline el evento _""Rechazado por repartidor \[Nombre\]""_, cambia automáticamente la disponibilidad del repartidor a ""No disponible"", muestra el mensaje “El pedido se liberó para reasignación."" y notifica al operario para reasignación.
+    *   ESCENARIO 3: Expiración por tiempo de espera agotado      
+        Transcurren 5 minutos desde la asignación sin respuesta. El sistema cambia automáticamente el estado del repartidor a ""No disponible"", libera el pedido a estado ""Registrado"" y registra la desasignación en el historial.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,8.0,0.0,0.0,0.0,8.0,1791035510483654,7,1793413467878169,2026-10-03 14:03:26.570191+00:00,2026-11-03T18:49:51+0000,,False,False,0,,,,,,,,,5
+9597910,19,Actualizar estado de entrega,"Como Repartidor, quiero actualizar los estados de mi entrega adjuntando fotos opcionales para dejar constancia del progreso del envío.
+
+*   Reglas:
+    *   Las transiciones permitidas son secuenciales: de _Asignado_ a _Retirado_, de _Retirado_ a _En viaje_, y de _En viaje_ a _Entregado_.
+    *   La captura de foto es opcional pero permitida en los estados _Retirado_ y _Entregado_.
+*   Criterios:
+    *   ESCENARIO 1: Avance de estado intermedio en el viaje    
+        El repartidor con un pedido en curso presiona el botón para avanzar de estado (""Marcar como Retirado"" con o sin foto; “Iniciar viaje” sin foto). El sistema actualiza el estado del pedido, registra el evento en el timeline y mantiene al repartidor asignado a dicho viaje.
+    *   ESCENARIO 2: Finalización exitosa de la entrega    
+        El repartidor con el pedido en estado ""En viaje"" llega a destino, opcionalmente adjunta la fotografía del paquete y presiona ""Marcar como entregado"". El sistema actualiza el estado a ""Entregado"", guarda la evidencia y el registro en el timeline, da por concluido el viaje y actualiza la disponibilidad del repartidor a ""Disponible"".",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483658,3,1793413447492057,2026-10-03 14:07:27.236288+00:00,2026-10-31T02:24:07+0000,,False,False,0,,,,,,,,,6
+9597911,20,Repartidor cambia de estado,"Como Repartidor, quiero cambiar mi estado de disponibilidad para indicar al sistema si puedo recibir nuevas asignaciones de pedidos.
+
+*   Reglas
+    *   El repartidor debe haber ingresado previamente al sistema mediante su PIN de acceso.
+    *   El estado por defecto al arrancar el día es ‘No disponible’. Hasta que el propio repartidor lo cambie
+*   Criterios
+    *   ESCENARIO 1: Cambio a estado Disponible     
+        El repartidor accede a su interfaz estando “No disponible” y presiona la opción para marcarse como ""Disponible"". El sistema actualiza su estado, muestra el mensaje “Ahora estás Disponible.” y lo habilita para ingresar en la lista de asignación de nuevos viajes.
+    *   ESCENARIO 2: Cambio a estado No Disponible     
+        El repartidor estando “Disponible” presiona la opción para marcarse como ""No disponible"". El sistema actualiza su estado, muestra el mensaje “Ahora estás No disponible.” y deja de considerarlo para las próximas asignaciones de pedidos.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483657,14,1793413500285488,2026-10-03 14:08:24.902104+00:00,2026-11-03T18:43:38+0000,,False,False,0,,,,,,,,,4
+9597912,21,Ingresar codigo de seguimiento,"Como Cliente Final, quiero ingresar mi código de seguimiento en la plataforma pública para acceder a la información de mi paquete de forma segura y sin registrarme.
+
+*   Reglas
+    *   La pantalla de consulta debe ser web y accesible sin requerir creación de cuenta ni inicio de sesión.
+    *   El código de seguimiento ingresado debe ser validado contra los códigos pseudoaleatorios generados por el sistema.
+*   Criterios
+    *   ESCENARIO 1: Acceso exitoso con código válido.     
+        El cliente ingresa a la página pública de seguimiento, ingresa el código provisto por el comercio y envía la petición. El sistema valida que el código existe en la base de datos y redirige al cliente a la pantalla de detalles de su envío.
+    *   ESCENARIO 2: _Acceso denegado por código inválido._    
+        El cliente final ingresa un código con un formato erróneo o que no existe en el sistema. Al enviar la petición, el sistema permanece en la pantalla de búsqueda y muestra el mensaje “No encontramos un pedido con ese código. Revisá que esté bien escrito.”.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483648,5,1793413458543252,2026-10-03 14:09:02.832168+00:00,2026-11-03T18:39:33+0000,,False,False,0,,,,,,,,,7
+9597933,22,Visualizar datos del viaje,"Como Repartidor, quiero visualizar los datos básicos del viaje al recibir una asignación automática, para decidir si acepto o rechazo el pedido dentro de mi límite de tiempo.
+
+*   Reglas
+    *   La información solo debe estar visible en pantalla durante el periodo de tolerancia de 5 minutos.
+    *   Se deben mostrar los datos requeridos por el sistema: quién lo envía (comercio) y a dónde (dirección de destino).
+*   Criterios
+    *   _ESCENARIO 1: Visualización correcta durante la asignación_     
+        El sistema asigna un viaje automáticamente a un repartidor disponible. En la pantalla del móvil del repartidor se despliega un cartel con la información del comercio, del destino y un cronómetro visible de 5 minutos en cuenta regresiva.
+    *   ESCENARIO 2: Desaparición de los detalles por tiempo agotado     
+        El cronómetro de la pantalla de asignación llega a 0 segundos. El sistema cierra inmediatamente el cartel de asignación y devuelve al repartidor a la pantalla principal, impidiendo que interactúe con el viaje.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483660,16,1793413510134194,2026-10-03 14:33:10.236840+00:00,2026-11-19T17:01:05+0000,,False,False,0,,,,,,,,,5
+9597935,23,Filtrar historial de pedidos,"Como Operario, quiero filtrar el historial de pedidos por nombre de comercio o estado, para encontrar rápidamente un envío específico cuando se presenta un reclamo o paquete perdido.
+
+*   Reglas:
+    *   El buscador debe permitir buscar envíos pertenecientes a todos los comercios, incluidos los que hayan sido ""deshabilitados lógicamente"".
+    *   Los filtros deben aplicarse sobre la base de datos completa de pedidos registrados.
+*   Criterios:
+    *   ESCENARIO 1: Búsqueda exitosa con filtros    
+        El operario ingresa a la vista del historial general, selecciona filtros y escribe el nombre de un comercio particular. Al presionar ""Buscar"", el sistema actualiza la lista mostrando únicamente los pedidos de ese comercio que coincidan con el comercio y/o el estado seleccionado, permitiendo acceder a su línea de tiempo.
+    *   ESCENARIO 2: Búsqueda sin resultados    
+        El operario ingresa parámetros de búsqueda para un comercio que nunca realizó envíos o aplica un filtro de estado inexistente para ese comercio. El sistema limpia la lista y muestra el mensaje: ""No se encontraron pedidos que coincidan con los filtros ingresados"".",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,2.0,0.0,0.0,0.0,2.0,1791035510483661,1,1795050218264365,2026-10-03 14:38:15.515865+00:00,2026-11-19T01:03:38+0000,,False,False,0,,,,,,,,,8
+9597944,24,Visualizar estado del pedido,"Como Cliente Final, quiero visualizar el estado actualizado de mi pedido para saber cuándo llegará mi paquete.
+
+*   Reglas
+    *   El cliente solo tiene permisos de lectura sobre esta pantalla, no puede interactuar.
+    *   Los datos a mostrar provienen de la información: estado, comercio remitente y tiempo estimado (si está en viaje).
+    *   Si el pedido pasa a estado ""Entregado"", ""Fallido"" o ""Cancelado"", el tiempo estimado de llegada debe dejar de mostrarse.
+*   Criterios
+    *   _ESCENARIO 1: Visualización de envío confirmado._   
+        El cliente accede a la pantalla de detalles de su envío. El sistema carga la información y muestra claramente el estado actual, el nombre del comercio remitente y un texto con el tiempo estimado de llegada.
+    *   _ESCENARIO 2: Visualización de envío finalizado o interrumpido._   
+        El cliente accede a la pantalla de un envío que ya finalizó (ya sea fallido o entregado). El sistema muestra el estado actual resaltado, el comercio de origen, y oculta/elimina el campo de tiempo estimado de llegada para evitar confusiones.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,2.0,0.0,0.0,0.0,2.0,1791035510483662,8,1793413472926271,2026-10-03 14:51:52.477939+00:00,2026-10-31T02:24:32+0000,,False,False,0,,,,,,,,,7
+9602866,25,Editar comercio,"Como Operario, quiero editar los datos de un comercio registrado para mantener actualizada su dirección y teléfono de contacto.
+
+*   Reglas
+    *   El nombre del comercio sigue siendo único: no puede coincidir con el de otro comercio existente.
+*   Criterios
+    *   ESCENARIO 1: Edición exitosa.     
+        El operario selecciona la opción de editar un comercio, modifica sus datos (nombre, dirección, teléfono o estado) y presiona ""Guardar cambios"". El sistema actualiza el registro y muestra: _""Datos del comercio actualizados""_.
+    *   ESCENARIO 2: Edición fallida por nombre duplicado.     
+        El operario cambia el nombre del comercio a uno que ya pertenece a otro comercio registrado y presiona ""Guardar cambios"". El sistema rechaza el cambio y muestra: _""Ya existe un comercio registrado con ese nombre""_.
+
+Como Operario, quiero editar los datos de un comercio registrado para mantener actualizada su información.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483645,2,1794423285948117,2026-10-05 21:50:53.561839+00:00,2026-11-19T00:46:57+0000,,False,False,0,,,,,,,,,2
+9602891,26,Listado pedidos en curso,"Como Operario, quiero visualizar el listado de pedidos en curso con su estado actual para controlar la operación diaria desde un solo lugar.
+
+*   Reglas
+    *   Se muestran los pedidos no finalizados (Registrado, Asignado, Retirado, En viaje).
+    *   Cada pedido muestra comercio, destino, estado y repartidor asignado (si corresponde).
+*   Criterios
+    *   ESCENARIO 1: Visualización del panel.   
+        El operario ingresa al panel principal y ve la lista de pedidos en curso, ordenada por antigüedad.
+    *   ESCENARIO 2: Actualización automática.   
+        Cuando un repartidor cambia el estado de un pedido, el panel lo refleja sin recargar la página.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483663,6,1793413462945797,2026-10-05 21:59:22.871136+00:00,2026-10-31T02:24:22+0000,,False,False,0,,,,,,,,,5
+9602895,27,Reactivar comercio,"Como Operario, quiero reactivar un comercio deshabilitado para que pueda volver a solicitar pedidos sin tener que registrarlo de nuevo.
+
+*   Reglas:
+    *   La reactivación revierte el borrado lógico y conserva todo el historial previo.
+    *   Un comercio reactivado vuelve a aparecer en la lista de opciones al registrar pedidos.
+*   Criterios:
+    *   ESCENARIO 1: Reactivación exitosa.  
+        El operario accede a la gestión de comercios, presiona el interruptor de estado de un comercio inactivo y confirma la acción en el diálogo emergente. El sistema activa el interruptor del comercio y muestra el mensaje: ""Comercio reactivado exitosamente"". Al intentar registrar un nuevo pedido, el comercio vuelve a aparecer disponible en la lista de selección.
+    *   ESCENARIO 2: Cancelación de la confirmación.  
+        El operario presiona el interruptor de estado de un comercio inactivo y rechaza el diálogo de confirmación. El sistema cancela la operación y mantiene el comercio en estado inactivo sin mostrar mensajes de modificación.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483671,8,1795107159486590,2026-10-05 22:00:58.528347+00:00,2026-11-19T16:52:39+0000,,False,False,0,,,,,,,,,2
+9602904,28,Consultar lista de comercios,"Como Operario, quiero consultar el listado de comercios con su estado (Activo / Inactivo) para tener una visión general de los comercios asociados.
+
+*   Reglas
+    *   El listado incluye comercios activos e inactivos, diferenciados visualmente.
+    *   Debe permitir buscar por nombre.
+*   Criterios
+    *   ESCENARIO 1: Listado completo.    
+        El operario accede a ""Comercios"" y el sistema muestra nombre, dirección, teléfono y estado de cada uno.
+    *   ESCENARIO 2: Búsqueda sin coincidencias.    
+        El operario busca un nombre inexistente y el sistema muestra: _""No se encontraron comercios con ese nombre.""_.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483653,3,1793736490107610,2026-10-05 22:02:49.593786+00:00,2026-11-19T17:02:36+0000,,False,False,0,,,,,,,,,2
+9602913,29,Deshabilitar repartidor,"Como Operario, quiero deshabilitar a un repartidor para impedir que opere sin perder su historial de entregas.
+
+*   Reglas:
+    *   Se aplica un borrado lógico; el repartidor y su historial de entregas permanecen registrados.
+    *   No se puede deshabilitar a un repartidor con un pedido en estado ""Asignado"", ""Retirado"" o ""En viaje"".
+    *   Un repartidor deshabilitado no puede iniciar sesión con su PIN ni ser seleccionado para nuevos pedidos.
+*   Criterios:
+    *   ESCENARIO 1: Deshabilitación exitosa.  
+        El operario accede a la gestión de repartidores y presiona el interruptor de la columna ""Activo"" de un repartidor sin viajes en curso. El sistema desactiva el interruptor del repartidor, impide que aparezca disponible para asignar nuevos pedidos y conserva sus entregas previas en el historial.
+    *   ESCENARIO 2: Deshabilitación bloqueada por pedido en curso.  
+        El operario intenta desactivar el interruptor de la columna ""Activo"" de un repartidor que tiene un pedido en estado ""Asignado"", ""Retirado"" o ""En viaje"". El sistema rechaza la operación, mantiene el interruptor activado y muestra el mensaje: ""El repartidor tiene pedidos en curso"".",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483666,9,1794965178957008,2026-10-05 22:04:02.323049+00:00,2026-11-19T00:57:07+0000,,False,False,0,,,,,,,,,4
+9602923,30,Alerta de pedido sin repartidor,"Como Operario, quiero ser alertado cuando un pedido no consigue repartidor disponible para estar al tanto de la demora.
+
+*   Reglas
+    *   La alerta se genera automáticamente cuando un pedido queda sin repartidor asignado porque no hay candidatos disponibles compatibles con el vehículo requerido.
+*   Criterios
+    *   ESCENARIO 1: Visualización de la alerta por falta de candidatos disponibles  
+        El sistema no encuentra ningún repartidor disponible compatible con el vehículo requerido. El pedido queda en estado ""Registrado"" y en el panel del operario aparece destacada la notificación y el aviso ""Pedido sin repartidor disponible"" con una redirección al pedido, hasta que el operario interactúa con la notificación.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483666,11,1794949885674293,2026-10-05 22:05:49.189615+00:00,2026-11-17T21:11:25+0000,,False,False,0,,,,,,,,,5
+9602936,32,Recuperar PIN de repartidor,"Como Operario, quiero regenerar el PIN de un repartidor para recuperar su acceso si lo olvidó o si fue comprometido.
+
+*   Reglas:
+    *   El nuevo PIN debe ser numérico y de exactamente 4 dígitos.
+    *   El PIN debe ser único entre todos los repartidores, ya que es el único dato de ingreso.
+    *   El nuevo PIN debe ser distinto al que el repartidor tiene asignado actualmente.
+    *   El PIN anterior queda invalidado inmediatamente al guardar el cambio.
+*   Criterios:
+    *   ESCENARIO 1: Actualización exitosa de PIN.  
+        El operario presiona ""Regenerar PIN"" en un repartidor, ingresa un nuevo PIN válido de 4 dígitos que no esté en uso ni coincida con el actual, y presiona ""Confirmar"". El sistema actualiza el PIN, invalida inmediatamente el anterior y muestra en pantalla el nuevo PIN junto con el mensaje: ""Transmití este PIN al repartidor. El PIN anterior ya no permite ingresar."".
+    *   ESCENARIO 2: Rechazo por formato inválido.  
+        El operario presiona ""Regenerar PIN"", ingresa un valor que no cumple con ser numérico de 4 dígitos y presiona ""Confirmar"". El sistema rechaza el cambio, mantiene el PIN anterior sin modificar y muestra el mensaje: ""El PIN debe ser numérico y de exactamente 4 dígitos."".
+    *   ESCENARIO 3: Rechazo por PIN ya asignado a otro repartidor.  
+        El operario presiona ""Regenerar PIN"", ingresa un PIN de 4 dígitos que ya pertenece a otro repartidor y presiona ""Confirmar"". El sistema rechaza el cambio, mantiene el PIN anterior sin modificar y muestra el mensaje: ""Ese PIN ya está asignado a otro repartidor."".
+    *   ESCENARIO 4: Rechazo por ingresar el mismo PIN actual.  
+        El operario presiona ""Regenerar PIN"", ingresa el mismo PIN que el repartidor ya posee y presiona ""Confirmar"". El sistema rechaza el cambio, mantiene el PIN actual sin modificar y muestra el mensaje: ""El nuevo PIN debe ser diferente al actual."".",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,5.0,0.0,0.0,0.0,5.0,1791035510483650,15,1795050201222985,2026-10-05 22:07:41.976461+00:00,2026-11-19T01:03:21+0000,,False,False,0,,,,,,,,,4
+9602943,33,Ver detalle de pedidos,"Como Operario, quiero ver el detalle completo de un pedido para conocer todos sus datos ante una consulta del comercio o del cliente.
+
+*   Reglas
+    *   El detalle muestra: comercio emisor, datos del destinatario, dirección de destino, tamaño del paquete, vehículo requerido, estado actual, código de seguimiento y repartidor asignado (si corresponde).
+    *   Desde el detalle se accede al timeline del pedido.
+    *   Es de solo lectura, excepto las acciones permitidas según el estado (por ejemplo, cancelar).
+*   Criterios
+    *   ESCENARIO 1: Visualización del detalle.    
+        El operario selecciona un pedido del listado. El sistema muestra todos sus datos y los botones de acción habilitados para su estado actual.
+    *   ESCENARIO 2: Pedido sin repartidor.    
+        El operario abre un pedido en estado ""Registrado"". El sistema muestra el campo de repartidor vacío con la leyenda ""Sin asignar"".",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483665,14,1795050207371073,2026-10-05 22:08:38.079040+00:00,2026-11-19T01:03:27+0000,,False,False,0,,,,,,,,,3
+9602951,34,Visualizar pedidos fallidos,"Como Operario, quiero visualizar los pedidos con entrega fallida y confirmar su devolución para dar cierre a los envíos que no pudieron entregarse.
+
+*   Reglas
+    *   Se listan los pedidos en estado ""Fallido"" con el motivo, la foto (si existe) y el repartidor que intentó la entrega.
+    *   La confirmación de devolución queda registrada en el timeline con fecha, hora y usuario.
+*   Criterios
+    *   ESCENARIO 1: Listado de entregas fallidas.   
+        El operario accede a la sección ""Entregas fallidas"". El sistema muestra los pedidos en estado ""Fallido"" ordenados por fecha.
+    *   ESCENARIO 2: Confirmación de devolución.   
+        El operario selecciona un pedido fallido y presiona ""Confirmar devolución"". El sistema registra el evento en el timeline y muestra: _""Devolución registrada""_.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483666,6,1795107142692591,2026-10-05 22:10:12.774792+00:00,2026-11-19T16:52:22+0000,,False,False,0,,,,,,,,,3
+9602959,35,Ver informacion del pedido activo,"Como Repartidor, quiero ver mi pedido activo y sus datos completos tras aceptarlo para poder retirarlo y entregarlo correctamente.
+
+*   Reglas
+    *   Tras aceptar, se muestran comercio (dirección y contacto), dirección de destino y especificaciones de traslado.
+    *   La pantalla debe habilitar las acciones de estado correspondientes al progreso del pedido.
+*   Criterios
+    *   ESCENARIO 1: Visualización del pedido activo.   
+        El repartidor abre su pantalla operativa y ve todos los datos del viaje con las acciones de estado disponibles.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483667,11,1793413487826186,2026-10-05 22:12:09.537515+00:00,2026-10-31T02:24:47+0000,,False,False,0,,,,,,,,,6
+9602970,36,Registrar entrega fallida,"Como Repartidor, quiero registrar una entrega fallida adjuntando opcionalmente una foto como evidencia para dejar constancia de que se intentó entregar el paquete.
+
+*   Reglas
+    *   Solo se puede marcar ""Fallido"" desde el estado ""En viaje"".
+    *   La foto es opcional, pero recomendable como respaldo ante un reclamo.
+*   Criterios
+    *   ESCENARIO 1: Entrega fallida con fotografía.        
+        El repartidor escribe el motivo del fallo, opcionalmente adjunta una foto y presiona ""Marcar entrega fallida"". El sistema cambia el estado a “Fallido”, registra fecha, hora, usuario y foto en el timeline, da por concluido el viaje y actualiza la disponibilidad del repartidor a ""Disponible""
+    *   ESCENARIO 2: Entrega fallida sin fotografía.        
+        El repartidor presiona ""Marcar Entrega Fallida"" sin adjuntar archivo y confirma. El sistema registra el cambio de estado y la incidencia en el timeline, termina el viaje y libera al repartidor a “Disponible”.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,3.0,0.0,0.0,0.0,3.0,1791035510483668,2,1793413442617710,2026-10-05 22:13:39.378329+00:00,2026-11-18T20:56:17+0000,,False,False,0,,,,,,,,,6
+9602980,38,Ver el historial de estados del pedido,"Como Cliente Final, quiero ver el historial de estados de mi pedido para entender por qué etapas pasó mi paquete.
+
+*   Reglas
+    *   Solo lectura.
+    *   Se muestran estados y horarios, pero no datos internos (nombre o teléfono del repartidor, fotos).
+*   Criterios
+    *   Escenario 1: Historial.  
+        El cliente ve la lista cronológica de estados con fecha y hora.",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,2.0,0.0,0.0,0.0,2.0,1791035510483669,13,1793413496471453,2026-10-05 22:15:17.714441+00:00,2026-10-31T02:24:56+0000,,False,False,0,,,,,,,,,8
+9635664,40,Listar pedidos del repartidor,"Como repartidor quiero ver una lista con mi historial de entregas para tener seguimiento de los viajes realizados.
+
+*   Reglas:
+    *   El repartidor debe haber iniciado sesión previamente mediante su PIN de 4 dígitos.
+    *   Solo se deben listar los pedidos finalizados que hayan estado asignados al repartidor autenticado, sin exponer viajes de otros repartidores.
+    *   La información del listado es estrictamente de solo lectura y debe ordenarse cronológicamente por fecha de finalización.
+    *   Para cada entrega se debe mostrar: identificador/código de seguimiento, nombre del comercio de origen, dirección de destino, estado final y fecha/hora de cierre.
+*   Criterios:
+    *   ESCENARIO 1: Consulta exitosa del historial de entregas  
+         El repartidor autenticado accede a la sección ""Historial de entregas"" habiendo realizado viajes previos. El sistema lista cronológicamente todos sus pedidos finalizados en estado ""Entregado"", ""Fallido"" o ""Cancelado"", exponiendo para cada uno el comercio de origen, dirección de destino, estado de cierre y fecha/hora. 
+    *   ESCENARIO 2: Historial vacío sin viajes finalizados  
+         El repartidor accede a la sección ""Historial de entregas"" sin haber completado ni registrado viajes finalizados en su cuenta. El sistema muestra la pantalla limpia con el mensaje: ""Aún no tienes entregas registradas en tu historial"".",532933,Sprint 1,2026-10-09,2026-10-30,Done,False,,2.0,0.0,0.0,0.0,2.0,1792149579198656,17,1793413514389255,2026-10-16 11:19:39.218869+00:00,2026-10-31T02:25:14+0000,,False,False,0,,,,,,,,,6
+9717088,41,Asignación automática de repartidor,"Como Operario quiero asignar automáticamente un pedido a un repartidor al registrar un nuevo pedido para agilizar el despacho de viajes sin tener que seleccionarlo manualmente.
+
+*   Reglas
+    *   Al cargar un pedido, el selector de repartidor ofrece la opción predeterminada ""Automático"".
+    *   La asignación automática selecciona únicamente repartidores activos, en estado ""Disponible""  y cuyo vehículo sea el requerido del pedido.
+    *   Entre los candidatos que cumplen las condiciones, se prioriza por orden FIFO a quien lleve más tiempo esperando disponible sin viaje.
+    *   Si un repartidor asignado rechaza el viaje o deja vencer el tiempo de respuesta, el sistema reintenta la asignación automáticamente en cascada con el siguiente candidato disponible en la cola.
+*   Criterios
+    *   ESCENARIO 1: Asignación automática exitosa al registrar un pedido  
+        El operario registra un pedido dejando la opción predeterminada ""Automático"". El sistema asigna el pedido al repartidor que lleva más tiempo esperando disponible, cambia el estado a ""Asignado"" y registra el evento en el historial.
+    *   ESCENARIO 2: Reasignación automática en cascada ante rechazo o expiración  
+        Un repartidor asignado rechaza el pedido o deja expirar los 5 minutos de tolerancia, habiendo otro repartidor disponible con el mismo vehículo en espera. El sistema libera la asignación anterior, asigna automáticamente el pedido al siguiente repartidor de la cola y registra ambos movimientos en el historial.",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,8.0,0.0,0.0,0.0,8.0,1794867955690336,12,1795016984827973,2026-11-16 22:25:55.772580+00:00,2026-11-18T15:49:44+0000,,False,False,0,,,,,,,,,
+9717120,42,Reintentar asignación de pedido,"Como Operario quiero relanzar manualmente la búsqueda automática de repartidor sobre un pedido pendiente para asignarlo a un repartidor disponible.
+
+*   Reglas
+    *   La opción de reintentar asignación solo está habilitada para pedidos que se encuentren en estado ""Registrado"" sin repartidor asignado. 
+    *   El reintento aplica los mismos criterios de compatibilidad de vehículo y prioridad por tiempo de espera (FIFO) que la asignación automática.
+*   Criterios
+    *   ESCENARIO 1: Reintento de asignación exitoso  
+        El operario presiona ""Reintentar asignación"" sobre un pedido en estado ""Registrado"" sin repartidor (desde el panel principal o desde el detalle del pedido) cuando ya hay un repartidor disponible compatible. El sistema le asigna el pedido, cambia su estado a ""Asignado"" y registra la asignación en el historial.
+    *   ESCENARIO 2: Reintento sin repartidores disponibles  
+        El operario presiona ""Reintentar asignación"" sobre un pedido afectado, pero continúa sin haber repartidores disponibles que coincidan con el vehículo requerido. El sistema mantiene el pedido en estado ""Registrado"" y conserva el aviso ""Pedido sin repartidor disponible"".",532934,Sprint 2,2026-10-30,2026-11-20,Done,False,,3.0,0.0,0.0,0.0,3.0,1794869040100194,13,1795016989179626,2026-11-16 22:44:00.000000+00:00,2026-11-18T15:49:49+0000,,False,False,0,,,,,,,,,
