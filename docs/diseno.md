@@ -1,6 +1,6 @@
-# Dirección de diseño: "Cuadrícula"
+# Sistema de diseño
 
-Estado: implementada en las plantillas de `Backend/templates/` y en `Backend/static/sgr/`.
+Identidad visual de la interfaz ("Cuadrícula"). Los tokens viven en `Backend/static/sgr/sgr.css`.
 
 ## Idea central
 

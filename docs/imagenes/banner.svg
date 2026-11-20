@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="SGR, Sistema de Gestión de Repartos">
+  <defs>
+    <pattern id="calles" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#FFFFFF" stroke-opacity=".06" stroke-width="1"/>
+    </pattern>
+    <pattern id="diagonales" width="320" height="320" patternUnits="userSpaceOnUse">
+      <path d="M0 0L320 320M320 0L0 320" fill="none" stroke="#FFFFFF" stroke-opacity=".08" stroke-width="1"/>
+    </pattern>
+    <clipPath id="borde"><rect width="1280" height="320" rx="20"/></clipPath>
+  </defs>
+  <g clip-path="url(#borde)">
+    <rect width="1280" height="320" fill="#172033"/>
+    <rect width="1280" height="320" fill="url(#calles)"/>
+    <rect width="1280" height="320" fill="url(#diagonales)"/>
+    <rect y="314" width="1280" height="6" fill="#F2B705"/>
+  </g>
+  <g transform="translate(72 104) scale(3.5)">
+    <rect width="32" height="32" rx="8" fill="#F2B705"/>
+    <path d="M11.5 4v24M20.5 4v24M4 11.5h24M4 20.5h24" stroke="#172033" stroke-opacity=".3" stroke-width="2"/>
+    <path d="M8 24 23.5 8.5" stroke="#172033" stroke-width="3.4" stroke-linecap="round"/>
+    <circle cx="23.5" cy="8.5" r="3.4" fill="#172033"/>
+  </g>
+  <g font-family="Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#FFFFFF">
+    <text x="218" y="166" font-size="76" font-weight="800" letter-spacing="2">SGR</text>
+    <text x="222" y="208" font-size="26" font-weight="500" fill="#C9D2E3">Sistema de Gestión de Repartos</text>
+  </g>
+  <g font-family="Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="end">
+    <text x="1208" y="138" fill="#FFFFFF">Operación · Reparto · Seguimiento</text>
+    <text x="1208" y="172" fill="#9AA6BE" font-weight="500">Del comercio a la puerta, en cada etapa.</text>
+  </g>
+</svg>

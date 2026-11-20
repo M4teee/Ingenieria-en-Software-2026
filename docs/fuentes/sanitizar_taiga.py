@@ -47,7 +47,7 @@ def sanitize(value: Any, removed: Counter[str]) -> Any:
 
 def main() -> int:
     if len(sys.argv) != 3:
-        print("Uso: python sanitize_taiga_export.py EXPORTACION.json SALIDA.json", file=sys.stderr)
+        print("Uso: python sanitizar_taiga.py EXPORTACION.json SALIDA.json", file=sys.stderr)
         return 2
     source, destination = (Path(arg).expanduser().resolve() for arg in sys.argv[1:])
     if source == destination or not source.is_file():

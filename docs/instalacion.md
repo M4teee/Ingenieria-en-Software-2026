@@ -1,6 +1,6 @@
-# Guía de instalación, ejecución y pruebas
+# Instalación y pruebas
 
-Esta guía prepara el backend Django para desarrollo local y reúne los comandos automatizados. Para los procedimientos desde la interfaz, consultá el [manual de uso](MANUAL-DE-USO.md).
+Cómo preparar el proyecto para desarrollo local, elegir la base de datos y ejecutar las comprobaciones.
 
 ## Requisitos
 
@@ -141,28 +141,7 @@ python3 scripts/check_docs.py .
 git diff --check
 ```
 
-Los resultados de la última auditoría registrada están en [proyecto/INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md](proyecto/INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md).
-
-### Escenarios de navegación y permisos
-
-- Persona anónima: `/` muestra la búsqueda pública y los accesos diferenciados a `/login/?next=/operario/` y `/repartidor/login-pin/`.
-- Cuenta activa `is_operario`: el login redirige al panel `/operario/`; abrir `/` desde una sesión activa también lleva al panel. Tener `is_staff` sin `is_operario` no concede acceso al módulo.
-- Cuenta con perfil activo de repartidor: el PIN inicia sesión y `/` lleva a `/repartidor/`.
-- `is_operario` y `is_staff` son independientes: `is_operario` permite el módulo de operario y `is_staff` permite entrar a Django Admin (sujeto a permisos de modelo). Ninguno exige ser superusuario.
-- La navegación pública no muestra herramientas operativas; la del repartidor no ofrece seguimiento ni acciones de operario; el panel de operario mantiene una sola acción principal para cargar pedidos.
-
-## Limitaciones conocidas
-
-- No hay configuración de CI, lint ni comprobaciones estáticas adicionales declaradas.
-- Las tipografías se cargan desde Google Fonts; sin red se usan las fuentes del sistema.
-- No se ensayó la migración sobre una base poblada con datos heredados reales.
-- La ruta PostgreSQL/Neon está documentada a partir del código; no forma parte de la suite automatizada.
-- No se validó el despliegue en producción, el almacenamiento remoto de fotografías ni el comportamiento en Windows.
-- Si un evento referencia una fotografía cuyo archivo no existe, el endpoint de evidencia responde con error 500 en lugar de 404.
-- La HU 18 no envía una notificación activa al operario ante un rechazo; la expiración se procesa al consultar o responder, no mediante una tarea en segundo plano.
-- El login por PIN no tiene limitación de intentos. La app no se debe exponer a Internet en su configuración actual.
-- La HU 34 tiene una sola confirmación de devolución por pedido; falta validar con el equipo si el proceso permite varias recepciones. La dirección del orden por fecha también queda abierta en la fuente.
-- Las HUs 22, 30 y 41 tienen responsabilidades diferentes según el export del 19/11/2026: visualización de asignación, alerta y despacho automático FIFO. No se calcula cercanía geográfica porque las HUs 41/42 del snapshot no la exigen y el modelo no registra ubicación suficiente.
+Los resultados de la última verificación están en [estado.md](estado.md). Las limitaciones conocidas, también.
 
 ## Errores frecuentes
 

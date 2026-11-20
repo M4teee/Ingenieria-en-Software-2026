@@ -8,7 +8,7 @@
 - Si no se define `DJANGO_SECRET_KEY`, se usa una clave de desarrollo pública.
 - El ingreso por PIN de 4 dígitos no limita la cantidad de intentos.
 - No hay configuración de HTTPS, cookies seguras ni encabezados HSTS.
-- Los PIN se guardan como texto para que el operario pueda comunicarlos (decisión registrada en [docs/proyecto/DECISIONS.md](docs/proyecto/DECISIONS.md)).
+- Los PIN se guardan como texto para que el operario pueda comunicarlos (decisión registrada en [docs/estado.md](docs/estado.md#decisiones-vigentes)).
 
 ## Antes de desplegar
 

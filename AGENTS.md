@@ -1,21 +1,21 @@
 # Instrucciones para asistentes de código
 
-Antes de trabajar, leé `docs/INDEX.md` y los documentos pertinentes. Comprobá el estado actual del repositorio; las síntesis pueden quedar desactualizadas.
+Vale para cualquier asistente (Claude, Codex, Copilot u otros). `CLAUDE.md` solo importa este archivo.
 
-## Fuentes y requisitos
+## Contexto
 
-- Las consignas, entrevistas y documentos listados en `docs/proyecto/SOURCE_INDEX.md` son referencias para los requisitos. Las copias versionadas están en `docs/proyecto/context/`; verificá su alcance y autorización antes de compartirlas fuera del equipo.
-- Separá requisitos explícitos, acuerdos registrados, interpretación y preguntas abiertas. No conviertas una propuesta del PGP, una historia o una alternativa técnica en una funcionalidad ya implementada o una decisión aprobada.
-- Ante contradicciones entre fuentes, código y documentación, describí la discrepancia y conservá el comportamiento existente hasta que el equipo decida.
+- Leé [README.md](README.md), [docs/arquitectura.md](docs/arquitectura.md) y [docs/estado.md](docs/estado.md) antes de cambiar algo. El código prevalece sobre la documentación; si no coinciden, describí la discrepancia.
+- Los requisitos originales están en [docs/fuentes/](docs/fuentes/README.md). Son planificación, no evidencia de que algo esté implementado.
 
-## Cambios y verificación
+## Al cambiar código
 
-- Preservá el código existente. Modificá únicamente lo que pida la tarea y no hagas refactors, renombres o reformatos ajenos a su alcance.
-- Antes de editar, inspeccioná los archivos relevantes y los cambios locales. No descartes trabajo ni alteres el historial de Git.
-- Antes de preparar cambios para `git push`, seguí la sección "Documentación" de `CONTRIBUTING.md`: actualizá `docs/proyecto/CURRENT_STATE.md` y solo los otros documentos afectados; no atribuyas cambios recibidos a quien hizo el pull.
-- Leé `docs/INDEX.md` para ubicar contexto y consultá en `docs/proyecto/SOURCE_INDEX.md` las fuentes originales pertinentes. Los Markdown son síntesis derivadas, no fuentes primarias.
-- Usá `python3 scripts/check_docs.py .` para revisar enlaces locales y rutas específicas de una máquina; esta verificación no reemplaza la revisión semántica ni de privacidad.
-- Ejecutá verificaciones pertinentes y reportá los comandos y resultados reales. No afirmes que una prueba o funcionalidad funciona si no la ejecutaste.
-- No publiques, hagas push ni despliegues sin una instrucción explícita.
+- Modificá solo lo que pide la tarea, sin refactors ni renombres ajenos. Preservá los cambios locales y el historial de Git.
+- La interfaz usa los layouts y componentes de `Backend/templates/`. Conservá el marcado que exigen los tests (lista en [docs/arquitectura.md](docs/arquitectura.md#marcado-del-que-dependen-los-tests)).
+- Ejecutá `python manage.py test --settings=config.settings_test` desde `Backend/` y reportá los resultados reales. No afirmes que algo funciona si no lo verificaste.
+- Actualizá `docs/estado.md` y los documentos afectados; verificá enlaces con `python3 scripts/check_docs.py .`.
 
-No registres secretos, datos personales innecesarios ni contenido confidencial. La configuración Django actual es de desarrollo; no la trates como apta para producción.
+## Límites
+
+- No hagas commit, push ni despliegues sin una instrucción explícita.
+- No registres secretos ni datos personales; las variables sensibles van en `.env`.
+- La configuración Django es de desarrollo; no la trates como apta para producción.

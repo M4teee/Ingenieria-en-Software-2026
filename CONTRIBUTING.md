@@ -13,7 +13,7 @@
 
 ## Convenciones
 
-- **Código:** seguí las convenciones del proyecto Django existente (aplicaciones en `Backend/main/`, plantillas en `Backend/templates/`, estilos en `Backend/static/sgr/`). Las pantallas nuevas deben usar los layouts y componentes descritos en [docs/ARQUITECTURA-FRONTEND.md](docs/ARQUITECTURA-FRONTEND.md).
+- **Código:** seguí las convenciones del proyecto Django existente (aplicaciones en `Backend/main/`, plantillas en `Backend/templates/`, estilos en `Backend/static/sgr/`). Las pantallas nuevas deben usar los layouts y componentes descritos en [docs/arquitectura.md](docs/arquitectura.md#interfaz).
 - **Tests:** todo cambio funcional incluye o actualiza pruebas en el `tests.py` de la aplicación correspondiente. Varios tests verifican fragmentos de HTML; si cambiás una plantilla, revisá esa dependencia.
 - **Commits:** mensajes descriptivos en castellano.
 - **Idioma de la interfaz:** castellano rioplatense, voseo y mayúscula inicial.
@@ -22,8 +22,8 @@
 
 Al cambiar código, configuración o dependencias:
 
-1. Contrastá el cambio con [docs/proyecto/CURRENT_STATE.md](docs/proyecto/CURRENT_STATE.md) y actualizalo si cambió lo implementado.
-2. Actualizá solo los documentos afectados (README, guía, manual o arquitectura). Registrá en [docs/proyecto/DECISIONS.md](docs/proyecto/DECISIONS.md) únicamente acuerdos confirmados por el equipo.
+1. Actualizá [docs/estado.md](docs/estado.md) si cambió lo implementado, una decisión vigente o una limitación.
+2. Actualizá solo los demás documentos afectados (README, instalación, arquitectura o diseño).
 3. Verificá los enlaces locales:
 
    ```bash
