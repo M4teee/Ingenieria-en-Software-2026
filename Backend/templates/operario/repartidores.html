@@ -76,7 +76,7 @@
                                     <div class="modal fade" id="modalPin{{ perfil.pk }}" tabindex="-1" aria-labelledby="modalPinLabel{{ perfil.pk }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
-                                                <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}">
+                                                <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}" novalidate>
                                                     {% csrf_token %}
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="modalPinLabel{{ perfil.pk }}">Regenerar PIN - {{ perfil.user.username }}</h5>
@@ -92,11 +92,7 @@
                                                                    class="form-control font-monospace text-center fs-4"
                                                                    id="pinInput{{ perfil.pk }}"
                                                                    name="pin"
-                                                                   maxlength="4"
-                                                                   minlength="4"
-                                                                   pattern="\d{4}"
                                                                    inputmode="numeric"
-                                                                   required
                                                                    placeholder="0000"
                                                                    autocomplete="off">
                                                         </div>
