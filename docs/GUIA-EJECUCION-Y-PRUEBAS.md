@@ -8,9 +8,9 @@ Esta guía prepara el backend Django para desarrollo local y reúne los comandos
 - Git y una terminal.
 - SQLite, incluida con Python. No se requiere un servicio de base de datos ni variables de entorno.
 - Dependencias fijadas en `requirements.txt`: Django 6.1.2, asgiref, sqlparse, django-crispy-forms, crispy-bootstrap5, Pillow, `dj-database-url`, `python-dotenv` y Psycopg 3 con su binario.
-- Conexión a Internet para descargar dependencias y para cargar Bootstrap, iconos y tipografías desde CDN durante la navegación.
+- Conexión a Internet para descargar dependencias. Durante la navegación, solo las tipografías (Archivo e IBM Plex Mono) se cargan desde Google Fonts; los estilos, scripts e íconos se sirven desde `Backend/static/`.
 
-`Backend/config/settings.py` usa `DEBUG=True` y una clave de desarrollo. Sin una variable `DATABASE_URL` no vacía, usa `Backend/db.sqlite3`; con una URL `postgres://` o `postgresql://`, usa PostgreSQL (incluido Neon). Esta configuración es de desarrollo y no debe utilizarse en producción.
+`Backend/config/settings.py` usa `DEBUG=True` y, si no se define `DJANGO_SECRET_KEY`, una clave de desarrollo. Sin una variable `DATABASE_URL` no vacía, usa `Backend/db.sqlite3`; con una URL `postgres://` o `postgresql://`, usa PostgreSQL (incluido Neon). Esta configuración es de desarrollo y no debe utilizarse en producción.
 
 La suite automatizada usa `Backend/config/settings_test.py`, que fuerza SQLite en memoria aunque exista un `DATABASE_URL` local. No hace falta configurar Neon ni copiar credenciales para ejecutar pruebas.
 
@@ -49,13 +49,11 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-`createsuperuser` solicita los datos de acceso en forma interactiva; el repositorio no contiene cuentas de prueba. `migrate` prepara `Backend/db.sqlite3`. No borres esa base para resolver errores: podría contener datos locales que deban conservarse. El comando `runserver` imprime la dirección local, normalmente `http://127.0.0.1:8000/`. Detenelo con `Ctrl+C`.
-
-Los pasos de instalación se basan en la configuración real. En esta revisión, la instalación de los paquetes fijados se completó en el entorno virtual local. Una instalación limpia en otra computadora depende del acceso a PyPI.
+`createsuperuser` solicita los datos de acceso en forma interactiva. Para trabajar con datos ya cargados (operario, repartidores, comercios y pedidos ficticios), usá los [datos de demostración](../demo/README.md) en una base descartable. `migrate` prepara `Backend/db.sqlite3`. No borres esa base para resolver errores: podría contener datos locales que deban conservarse. El comando `runserver` imprime la dirección local, normalmente `http://127.0.0.1:8000/`. Detenelo con `Ctrl+C`.
 
 ## Elegir y ejecutar la base de datos
 
-La aplicación carga `.env` desde la raíz del repositorio (`Backend/config/settings.py`). Una variable `DATABASE_URL` ya exportada en la terminal tiene precedencia sobre `.env`. El valor vacío selecciona SQLite. Un valor no vacío debe comenzar con `postgres://` o `postgresql://`; un esquema incorrecto produce un error de configuración, no cambia silenciosamente a SQLite.
+La aplicación carga `.env` desde la raíz del repositorio (`Backend/config/settings.py`); tomá [`.env.example`](../.env.example) como base. Una variable `DATABASE_URL` ya exportada en la terminal tiene precedencia sobre `.env`. El valor vacío selecciona SQLite. Un valor no vacío debe comenzar con `postgres://` o `postgresql://`; un esquema incorrecto produce un error de configuración, no cambia silenciosamente a SQLite.
 
 ### A. SQLite local
 
@@ -118,8 +116,6 @@ Errores frecuentes con Neon:
 - `relation ... does not exist`: aplicá `python manage.py migrate` en esa base de desarrollo.
 - Las pruebas automáticas usan `settings_test` y SQLite en memoria; no prueban Neon ni leen `.env` para seleccionar la base.
 
-En la auditoría del 2026-11-19 no había `.env` ni credenciales de Neon en el entorno. Por eso la ruta de Neon quedó documentada a partir del código, pero su conexión y sus migraciones no se ejecutaron.
-
 ## Pruebas y comprobaciones
 
 Con el entorno virtual activo y desde `Backend/`:
@@ -145,11 +141,7 @@ python3 scripts/check_docs.py .
 git diff --check
 ```
 
-### Resultados de la auditoría pre-demo del 2026-11-19
-
-Con Django 6.1.2 y las dependencias fijadas instaladas en un entorno temporal con Python 3.13.16, se ejecutó desde `Backend/` `/tmp/sgr-audit-venv/bin/python manage.py test --settings=config.settings_test`: 182 pruebas aprobadas, 0 fallos y 0 errores. La configuración declarada del proyecto requiere Python 3.14; la ejecución con 3.13 sirve como comprobación en este host, no como verificación del intérprete objetivo. También pasaron `check`, `makemigrations --check --dry-run` y `pip check`; la revisión final de `scripts/check_docs.py .` verificó 48 enlaces. La suite usa SQLite en memoria y no conecta a Neon ni modifica la SQLite existente.
-
-Prueba manual en navegador local, con base SQLite descartable separada de `Backend/db.sqlite3` y viewport 663×711: portada pública; login, panel y detalle de operario; lista/filtro de comercios; lista y diálogo de regeneración de PIN; login del repartidor, aceptación y ciclo de estados hasta Entregado; seguimiento público. El seguimiento mostró únicamente el estado, el comercio y la cronología, sin datos internos. No se inspeccionó escritorio ancho ni todas las pantallas; Windows no se probó.
+Los resultados de la última auditoría registrada están en [proyecto/INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md](proyecto/INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md).
 
 ### Escenarios de navegación y permisos
 
@@ -162,14 +154,15 @@ Prueba manual en navegador local, con base SQLite descartable separada de `Backe
 ## Limitaciones conocidas
 
 - No hay configuración de CI, lint ni comprobaciones estáticas adicionales declaradas.
-- Los estilos e iconos se cargan desde CDN; sin red, el contenido sigue disponible pero puede presentarse sin esos recursos.
+- Las tipografías se cargan desde Google Fonts; sin red se usan las fuentes del sistema.
 - No se ensayó la migración sobre una base poblada con datos heredados reales.
+- La ruta PostgreSQL/Neon está documentada a partir del código; no forma parte de la suite automatizada.
 - No se validó el despliegue en producción, el almacenamiento remoto de fotografías ni el comportamiento en Windows.
+- Si un evento referencia una fotografía cuyo archivo no existe, el endpoint de evidencia responde con error 500 en lugar de 404.
 - La HU 18 no envía una notificación activa al operario ante un rechazo; la expiración se procesa al consultar o responder, no mediante una tarea en segundo plano.
 - El login por PIN no tiene limitación de intentos. La app no se debe exponer a Internet en su configuración actual.
 - La HU 34 tiene una sola confirmación de devolución por pedido; falta validar con el equipo si el proceso permite varias recepciones. La dirección del orden por fecha también queda abierta en la fuente.
 - Las HUs 22, 30 y 41 tienen responsabilidades diferentes según el export del 19/11/2026: visualización de asignación, alerta y despacho automático FIFO. No se calcula cercanía geográfica porque las HUs 41/42 del snapshot no la exigen y el modelo no registra ubicación suficiente.
-- La revisión visual fue parcial: faltan formularios de alta, historial completo, pantalla de entregas fallidas y viewport de escritorio amplio.
 
 ## Errores frecuentes
 

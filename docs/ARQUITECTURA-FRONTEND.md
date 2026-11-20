@@ -1,4 +1,4 @@
-# Arquitectura del frontend rediseñado
+# Arquitectura del frontend
 
 ## Decisión
 
@@ -50,22 +50,20 @@ Backend/static/vendor/basecoat/1.1.0/   CSS/JS precompilados + LICENSE.md (MIT)
 Backend/main/homePage/templatetags/sgr_ui.py   {% icon %}, pasos_estado, iconos por estado/vehículo, iniciales
 ```
 
-Se eliminaron `static/css/base.css`, `home.css`, `login.css`, `tracking_card.css`, `comercios.css` y `repartidores.css`. Se conservan `variables.css` y `admin.css`, que solo usa Django Admin.
+`static/css/variables.css` y `static/css/admin.css` solo los usa Django Admin, que conserva su estilo propio.
 
-## Cambios fuera de las plantillas (mínimos y justificados)
+## Piezas de presentación fuera de las plantillas
 
 | Archivo | Cambio | Motivo |
 |---|---|---|
-| `main/homePage/templatetags/sgr_ui.py` (nuevo) | Filtros/etiquetas de presentación | Íconos y stepper sin lógica en plantillas; no consulta la base |
-| `main/operario/forms.py` | `empty_label` del campo comercio en castellano | Django 6.1 lo mostraba como "- Select an option -" |
-| `static/js/comercios.js`, `repartidores.js` | Reescritos con selectores nuevos | Mismo endpoint, mismos parámetros y mismas confirmaciones; los errores se muestran en la página en vez de `alert()` |
-
-No se modificaron modelos, vistas, URLs, permisos, migraciones ni la lógica de despacho.
+| `main/homePage/templatetags/sgr_ui.py` | Filtros y etiquetas de presentación | Íconos y stepper sin lógica en plantillas; no consulta la base |
+| `main/operario/forms.py` | `empty_label` del campo comercio en castellano | Django 6.1 muestra por defecto "- Select an option -" |
+| `static/js/comercios.js`, `repartidores.js` | Interruptores de activo/inactivo con `fetch` | Piden confirmación antes de desactivar y muestran los errores del servidor en la página |
 
 ## Compatibilidad con los tests
 
-Varios tests verifican fragmentos HTML. Se preservaron deliberadamente: `<dd class="col-sm-8">Sin asignar</dd>`, `class="img-thumbnail"`, `data-bs-target="#modalEvidencia"`/`id="modalEvidencia"` (ahora un `<dialog>` nativo que `sgr.js` abre leyendo `data-bs-*`), `id="alerta-sin-repartidor"` con `position-fixed top-0 end-0` (clases redefinidas en `sgr.css`), el orden de atributos `type="checkbox" role="switch" data-…`, `onsubmit="return confirm(` en cancelar, `<output` del PIN, `data-filtro-estado`, `id="mensaje-estado-comercio"`, y que "Cargar pedido" aparezca una sola vez en el tablero.
+Varios tests verifican fragmentos HTML; al editar plantillas hay que conservar: `<dd class="col-sm-8">Sin asignar</dd>`, `class="img-thumbnail"`, `data-bs-target="#modalEvidencia"`/`id="modalEvidencia"` (ahora un `<dialog>` nativo que `sgr.js` abre leyendo `data-bs-*`), `id="alerta-sin-repartidor"` con `position-fixed top-0 end-0` (clases redefinidas en `sgr.css`), el orden de atributos `type="checkbox" role="switch" data-…`, `onsubmit="return confirm(` en cancelar, `<output` del PIN, `data-filtro-estado`, `id="mensaje-estado-comercio"`, y que "Cargar pedido" aparezca una sola vez en el tablero.
 
 ## Dependencias externas en tiempo de ejecución
 
-Google Fonts (Archivo, IBM Plex Mono), igual que la versión anterior usaba Google Fonts. Bootstrap y Bootstrap Icons por CDN ya no se cargan en las pantallas propias.
+Solo Google Fonts (Archivo, IBM Plex Mono). Basecoat, los íconos y los scripts se sirven desde `Backend/static/`. Si las fuentes no cargan, se usan las del sistema.

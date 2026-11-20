@@ -24,4 +24,4 @@ Las entrevistas describen siete estados y reglas de cancelación antes del retir
 
 ## Plan académico
 
-El PGP, revisión 1.0 del 4 de octubre de 2026, propone dos sprints y una entrega final el 20 de noviembre de 2026. Es planificación documental, no comprobación del progreso. El snapshot sanitizado de Taiga registra 31 historias, 7 épicas y 2 hitos; no se consultó el tablero en vivo. Consultá `docs/context/README.md` y `docs/SOURCE_INDEX.md` para conocer su procedencia y límites.
+El PGP, revisión 1.0 del 4 de octubre de 2026, propone dos sprints y una entrega final el 20 de noviembre de 2026. Es planificación documental, no comprobación del progreso. El snapshot sanitizado de Taiga registra 31 historias, 7 épicas y 2 hitos; no se consultó el tablero en vivo. Consultá `docs/proyecto/context/README.md` y `docs/proyecto/SOURCE_INDEX.md` para conocer su procedencia y límites.

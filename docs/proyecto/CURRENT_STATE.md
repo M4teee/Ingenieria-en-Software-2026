@@ -1,8 +1,18 @@
 # Estado actual
 
+> Registro interno y acumulativo del proyecto: cada sección anota lo verificado en una fecha. Para instalar y usar la aplicación, ver el [README](../../README.md) y la [guía](../GUIA-EJECUCION-Y-PRUEBAS.md).
+
 Actualizado: 2026-11-19. Auditoría pre-demo registrada en [`INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md`](INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md). El snapshot local de Taiga contiene 31 HUs (todas `Done` en esa exportación), pero no se consultó Taiga en vivo. La suite local ejecutó 182 pruebas con SQLite en memoria; Neon no se pudo verificar. Se revisó visualmente una selección de pantallas autenticadas en un servidor temporal con datos ficticios, sin cubrir todas las pantallas ni tamaños. La implementación y sus límites se resumen a continuación; los resultados de esta auditoría prevalecen sobre los registros históricos de ejecuciones anteriores.
 
-## Verificación pre-demo (2026-11-19)
+## Reorganización del repositorio (2026-11-20)
+
+- Documentación separada en pública (`docs/`) y registro del proyecto (`docs/proyecto/`, con `context/`). `TOUR-APLICACION.md` pasó a `docs/ARQUITECTURA.md`; los documentos del rediseño, a `docs/ARQUITECTURA-FRONTEND.md` y `docs/SISTEMA-DE-DISENO.md`. Se retiraron `AI_INITIALIZATION_PROMPT.md`, `TASK_TEMPLATE.md` y `DOCUMENTATION_WORKFLOW.md`; las pautas vigentes están en `CONTRIBUTING.md`.
+- `Demo2/` pasó a `demo/` (`datos-demo.json`, `reiniciar_db.py`, `README.md`). Se eliminaron el placeholder `Frontend/front` y dos volcados de base sin referencias que contenían correos reales y sesiones (`base de datos para demo1.utf8.json`, `Demo2/Estado_Previo_2026-11-19.json`); siguen en el historial de Git.
+- `SECRET_KEY` se lee de `DJANGO_SECRET_KEY` con una clave de desarrollo por defecto; la clave anterior estaba versionada.
+- Nuevos `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `.env.example` y capturas en `docs/screenshots/`.
+- La contraseña `operario` documentada para el usuario `admin` del fixture de demostración no coincide con su hash (verificado con `check_password`); `demo/README.md` indica cómo definir una.
+
+
 
 - Suite completa: 182 pruebas aprobadas (0 fallos, 0 errores), Django 6.1.2, Python 3.13.16, SQLite en memoria (`settings_test`). La rama declara Python 3.14; el intérprete objetivo no estaba disponible en este host.
 - `manage.py check --settings=config.settings_test`: aprobado.
@@ -45,7 +55,7 @@ Actualizado: 2026-11-19. Auditoría pre-demo registrada en [`INFORME-AUDITORIA-P
 - `main.repartidor` incluye el historial de entregas del repartidor en `/repartidor/historial/` (`historial_entregas`): lista de solo lectura, filtrada al repartidor de la sesión, con los pedidos en estado `entregado`, `fallido` o `cancelado`, ordenados del más reciente primero según la fecha del evento de cierre del historial (con `fecha_creacion` como respaldo), usando `select_related('comercio')` y una subconsulta anotada para la fecha de cierre. Muestra código, comercio, destino, estado final y fecha/hora de cierre; sin entregas muestra "Aún no tienes entregas registradas en tu historial". El índice del repartidor enlaza a esta sección y la vista exige sesión y perfil activo de repartidor (redirección al login por PIN; 403 sin perfil).
 - `main.clienteFinal` ofrece búsqueda pública de solo lectura por código en `/clienteFinal/` y consulta en `/clienteFinal/seguimiento/<codigo>/`. Lee el pedido y el historial persistidos. La página pública no presenta datos de contacto, especificaciones, usuarios internos ni fotografías.
 - Django Admin incluye todos los modelos propios del proyecto: usuario, vehículo, comercio, pedido, historial de estado y perfil de repartidor. Pedido e historial se consultan en modo de solo lectura; el resto conserva las operaciones de administración estándar.
-- Rediseño del frontend (2026-11-19): las plantillas usan layouts por rol (`templates/layouts/`), el sistema de diseño "Cuadrícula" (`static/sgr/`) y Basecoat UI 1.1.0 vendorizado; Bootstrap ya no se carga en las pantallas propias (Django Admin conserva su estilo con `variables.css` y `admin.css`). Ver [`redesign/architecture.md`](redesign/architecture.md) y [`redesign/design-direction.md`](redesign/design-direction.md). No cambió modelos, vistas, URLs ni permisos.
+- Rediseño del frontend (2026-11-19): las plantillas usan layouts por rol (`templates/layouts/`), el sistema de diseño "Cuadrícula" (`static/sgr/`) y Basecoat UI 1.1.0 vendorizado; Bootstrap ya no se carga en las pantallas propias (Django Admin conserva su estilo con `variables.css` y `admin.css`). Ver [`redesign/architecture.md`](../ARQUITECTURA-FRONTEND.md) y [`redesign/design-direction.md`](../SISTEMA-DE-DISENO.md). No cambió modelos, vistas, URLs ni permisos.
 - Django Admin conserva la autorización estándar de Django: requiere usuario activo con `is_staff`, y cada operación requiere permisos de modelo. `is_operario` no concede acceso al Admin. El campo de rol puede administrarse desde el formulario de usuarios.
 
 ## Requisitos, acuerdos y discrepancias
@@ -80,8 +90,8 @@ Actualizado: 2026-11-19. Auditoría pre-demo registrada en [`INFORME-AUDITORIA-P
 
 En la tarea de 2026-11-19 (sincronización de contexto con exportación Taiga del 2026-11-19 y auditoría integral de preparación para demo según apunte de cátedra), con Python 3.14.8 y el entorno `.venv` de Windows, desde `Backend/`:
 
-- `.venv\Scripts\python.exe docs/context/sanitize_taiga_export.py "..\sai21-sistema-de-gestion-de-repartos-grupo-03-b635898f-2cb7-40ba-8c7a-0ab7a2081fd8.json" "docs/context/Historias de Usuario.sanitized.json"`: exportación derivada creada exitosamente (7 épicas, 31 historias, 2 hitos, 273 campos omitidos por política de privacidad).
-- Sincronización de `docs/context/userstories.csv`: sincronizado con 12 cambios de estado y descripciones (HU 14, 23, 32 y 33 pasaron a `Done`; descripciones refinadas en HU 9, 10, 11, 16, 25, 27, 29 y 32; timestamps normalizados al formato ISO).
+- `.venv\Scripts\python.exe docs/context/sanitize_taiga_export.py "..\sai21-sistema-de-gestion-de-repartos-grupo-03-b635898f-2cb7-40ba-8c7a-0ab7a2081fd8.json" "docs/proyecto/context/Historias de Usuario.sanitized.json"`: exportación derivada creada exitosamente (7 épicas, 31 historias, 2 hitos, 273 campos omitidos por política de privacidad).
+- Sincronización de `docs/proyecto/context/userstories.csv`: sincronizado con 12 cambios de estado y descripciones (HU 14, 23, 32 y 33 pasaron a `Done`; descripciones refinadas en HU 9, 10, 11, 16, 25, 27, 29 y 32; timestamps normalizados al formato ISO).
 - `DATABASE_URL=" " ..\.venv\Scripts\python.exe manage.py test`: 182 pruebas ejecutadas y aprobadas en 70.6 s, 0 fallos, 0 errores, sin problemas detectados por el chequeo del sistema.
 - `..\.venv\Scripts\python.exe manage.py check`: aprobado, 0 issues (`System check identified no issues (0 silenced)`).
 - `..\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run`: "No changes detected". No se requirieron migraciones.
@@ -90,8 +100,8 @@ En la tarea de 2026-11-19 (sincronización de contexto con exportación Taiga de
 
 En la tarea de 2026-11-18 (sincronización de contexto con exportación Taiga del 2026-11-18 e implementación integral de nuevas reglas y criterios de aceptación de HU #32), con Python 3.14.8 y el entorno `.venv` de Windows, desde `Backend/`:
 
-- `.venv\Scripts\python.exe docs/context/sanitize_taiga_export.py "..\sai21-sistema-de-gestion-de-repartos-grupo-03-735e8e2f-c231-431f-813f-973caac31783.json" "docs/context/Historias de Usuario.sanitized.json"`: exportación derivada creada exitosamente (7 épicas, 31 historias, 2 hitos, 273 campos omitidos por política de privacidad).
-- Sincronización de `docs/context/userstories.csv`: actualizado en descripciones, fechas de modificación y estados vigentes (HU 15, 29, 41 y 42 en `Done`; HU 32 en `In progress` con sus nuevos criterios de aceptación).
+- `.venv\Scripts\python.exe docs/context/sanitize_taiga_export.py "..\sai21-sistema-de-gestion-de-repartos-grupo-03-735e8e2f-c231-431f-813f-973caac31783.json" "docs/proyecto/context/Historias de Usuario.sanitized.json"`: exportación derivada creada exitosamente (7 épicas, 31 historias, 2 hitos, 273 campos omitidos por política de privacidad).
+- Sincronización de `docs/proyecto/context/userstories.csv`: actualizado en descripciones, fechas de modificación y estados vigentes (HU 15, 29, 41 y 42 en `Done`; HU 32 en `In progress` con sus nuevos criterios de aceptación).
 - Implementación de HU #32: creación del formulario `RegenerarPinForm` en `main.operario.forms` con validación de 4 dígitos numéricos, unicidad excluyendo el propio perfil y descarte de PIN idéntico; actualización de la vista `regenerar_pin_repartidor` en `main.operario.views` con bloqueo pesimista `select_for_update`, savepoints ante carreras y mensajes claros de error y éxito con `@never_cache`; diálogo modal Bootstrap interactivo en `operario/repartidores.html` con input numérico y confirmación; y actualización y expansión de pruebas automatizadas en `main.operario.tests` (105 pruebas específicas en `main.operario`).
 - `DATABASE_URL=" " ..\.venv\Scripts\python.exe manage.py test`: 182 pruebas ejecutadas y aprobadas en 67.3 s (179 preexistentes + 3 nuevas cubriendo Escenario 1 de actualización exitosa e invalidación inmediata, Escenario 2 de rechazo de duplicados de otro repartidor, rechazo de PINs inválidos, rechazo de PIN idéntico, y colisión concurrente de integridad), 0 fallos, 0 errores, sin problemas detectados por el chequeo del sistema.
 - `..\.venv\Scripts\python.exe manage.py check`: aprobado, 0 issues (`System check identified no issues (0 silenced)`).
@@ -124,8 +134,8 @@ Para el cierre de HU 33 después del pull del 2026-11-17:
 
 En la tarea de 2026-11-17 (auditoría, actualización de contexto de historias de usuario desde exportación reciente de Taiga y validación de criterios de aceptación de HU #30, #41 y #42), con Python 3.14.8 y el entorno `.venv` de Windows:
 
-- `.venv\Scripts\python.exe docs/context/sanitize_taiga_export.py "..\sai21-sistema-de-gestion-de-repartos-grupo-03-90836b77-63b6-4c86-bcde-e9313297c686.json" "docs/context/Historias de Usuario.sanitized.json"`: ejecutado con éxito; 7 épicas, 31 historias (incorporación de HU 41 y HU 42), 2 hitos, 273 campos omitidos por política de privacidad (cuentas, propietarios, asignaciones, watchers, adjuntos, notas de bloqueo, historial y reemplazo de emails).
-- Sincronización de `docs/context/userstories.csv`: actualizado a 31 filas (historias 9 a 42), sincronizado en estados (HU 23 en `In progress`, HU 30 en `Done`, HU 41 y 42 en `Ready for test` de Sprint 2) y descripciones exactas con el JSON sanitizado.
+- `.venv\Scripts\python.exe docs/context/sanitize_taiga_export.py "..\sai21-sistema-de-gestion-de-repartos-grupo-03-90836b77-63b6-4c86-bcde-e9313297c686.json" "docs/proyecto/context/Historias de Usuario.sanitized.json"`: ejecutado con éxito; 7 épicas, 31 historias (incorporación de HU 41 y HU 42), 2 hitos, 273 campos omitidos por política de privacidad (cuentas, propietarios, asignaciones, watchers, adjuntos, notas de bloqueo, historial y reemplazo de emails).
+- Sincronización de `docs/proyecto/context/userstories.csv`: actualizado a 31 filas (historias 9 a 42), sincronizado en estados (HU 23 en `In progress`, HU 30 en `Done`, HU 41 y 42 en `Ready for test` de Sprint 2) y descripciones exactas con el JSON sanitizado.
 - Auditoría funcional de HU #30, #41 y #42: se verificaron al 100% las reglas y criterios de aceptación independientes de cada historia. Se incorporó prueba específica cubriendo la Regla 1 de HU #42 (reintento rechazado con mensaje y redirección ante pedidos que no están pendientes de repartidor) y docstrings en las suites correspondientes.
 - `DATABASE_URL=" " ..\.venv\Scripts\python.exe manage.py test` desde `Backend/`: 176 pruebas ejecutadas y aprobadas en 62.1 s, 0 fallos, 0 errores, sin problemas en el chequeo del sistema.
 - `..\.venv\Scripts\python.exe manage.py check` desde `Backend/`: aprobado, 0 issues.
@@ -236,4 +246,4 @@ En la revisión anterior (2026-11-03), con Python 3.14.8 y las dependencias de `
 - Definir un canal de notificaciones para los criterios de HU 18 que requieren avisar al operario.
 - No se validó producción, Windows, migración desde una base poblada, ni almacenamiento remoto de archivos.
 - La auditoría actual corrió en Python 3.13.16; el proyecto declara Python 3.14. Confirmar el resultado de la suite en el intérprete objetivo antes de la demo si está disponible.
-- Consultar el [manual de uso](MANUAL-DE-USO.md), la [guía de ejecución y pruebas](GUIA-EJECUCION-Y-PRUEBAS.md) y el [tour técnico](TOUR-APLICACION.md) para los recorridos.
+- Consultar el [manual de uso](../MANUAL-DE-USO.md), la [guía de ejecución y pruebas](../GUIA-EJECUCION-Y-PRUEBAS.md) y el [tour técnico](../ARQUITECTURA.md) para los recorridos.

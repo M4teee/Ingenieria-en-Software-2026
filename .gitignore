@@ -1,32 +1,43 @@
-.env
-proyecto-node-postgres/node_modules
-
-# Python / Django
+# ── Entornos virtuales ──
 .venv/
 venv/
+.setup-venv/
+
+# ── Python ──
 __pycache__/
 *.py[cod]
-*.sqlite3
-db.sqlite3
+*.pyo
 .pytest_cache/
 .coverage
 htmlcov/
-.setup-venv/
-Backend/media/entregas/
 
-# Editor and operating system files
-.DS_Store
-.vscode/
+# ── Django ──
+*.sqlite3
+db.sqlite3
+Backend/media/
+Backend/logs/
+Backend/staticfiles/
 
-# Local environments and generated files (project-init)
+# ── Variables de entorno ──
+.env
 .env.*
 !.env.example
-node_modules/
-dist/
-build/
-.project-init/context/
 
-# Application logs
+# ── Editor e IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Sistema operativo ──
+.DS_Store
+Thumbs.db
+
+# ── Logs ──
 logs/
-Backend/logs/
 *.log
+
+# ── Herramientas locales ──
+.project-init/context/
+.claude/settings.local.json

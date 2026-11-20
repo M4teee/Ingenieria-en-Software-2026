@@ -1,19 +1,19 @@
-# Tour técnico de la aplicación
+# Arquitectura
 
-Este recorrido explica cómo se conectan las interfaces y los datos de un pedido. Los pasos de uso están detallados en el [manual](MANUAL-DE-USO.md); los comandos para iniciar el proyecto y ejecutar la suite están en la [guía](GUIA-EJECUCION-Y-PRUEBAS.md).
+Cómo se organizan los módulos del backend y cómo se conectan las interfaces con los datos de un pedido. La capa de presentación (layouts, componentes y sistema de diseño) se describe en [ARQUITECTURA-FRONTEND.md](ARQUITECTURA-FRONTEND.md). Los pasos de uso están detallados en el [manual](MANUAL-DE-USO.md); los comandos para iniciar el proyecto y ejecutar la suite están en la [guía](GUIA-EJECUCION-Y-PRUEBAS.md).
 
 ## Mapa de módulos
 
 | Aplicación | Responsabilidad | Archivos principales |
 |---|---|---|
-| `main.homePage` | Enrutamiento de sesiones activas y entrada pública del cliente | `Backend/main/homePage/views.py`, `urls.py`, `Backend/templates/base.html` |
+| `main.homePage` | Enrutamiento de sesiones activas, entrada pública y etiquetas de presentación | `Backend/main/homePage/views.py`, `urls.py`, `templatetags/sgr_ui.py` |
 | `main.operario` | Comercios, alta de pedido, panel, detalle y asignación manual | `models.py`, `forms.py`, `views.py`, `urls.py`, `Backend/templates/operario/` |
 | `main.repartidor` | Pedido, perfil, estados, historial y evidencia fotográfica | `models.py`, `forms.py`, `views.py`, `urls.py`, `Backend/templates/repartidor/` |
 | `main.clienteFinal` | Búsqueda pública e historial de solo lectura | `views.py`, `urls.py`, `Backend/templates/clienteFinal/` |
-| `main.users` | Usuario extendido, rol de operario y vehículo | `Backend/main/users/models.py`, `Backend/main/users/migrations/` |
+| `main.users` | Usuario extendido con el rol de operario y catálogo `Vehiculo` (solo en Django Admin) | `Backend/main/users/models.py`, `backends.py` |
 | `config` | Ajustes, URLs globales y entrypoints ASGI/WSGI | `Backend/config/` |
 
-La UI se sirve con plantillas Django. `Frontend/` no contiene una app separada. Bootstrap, iconos y tipografía se cargan desde CDN.
+La interfaz se sirve con plantillas Django renderizadas en el servidor; no hay una aplicación frontend separada ni paso de build.
 
 ## Recorrido funcional
 
@@ -34,7 +34,7 @@ La asignación manual se conserva junto al despacho automático FIFO de HU 41. E
 - **Alta:** `PedidoForm` y `ComercioActivoField` viven en `main/operario/forms.py`; `cargar_pedido`, `_crear_pedido` y confirmación están en `views.py`; las plantillas `cargar_pedido.html` y `pedido_registrado.html` construyen el formulario y el resultado.
 - **Operación del repartidor:** las URLs de `main/repartidor/urls.py` conectan el PIN, la página, el detalle, la evidencia y los cambios de estado. `ActualizarEstadoForm` en `forms.py` valida fotos. Las vistas limitan las consultas al usuario asociado al perfil y al pedido asignado.
 - **Seguimiento:** `main/clienteFinal/views.py` consulta Pedido e HistorialEstado por el código y renderiza `templates/clienteFinal/seguimiento.html`.
-- **Navegación global:** `Backend/templates/base.html` presenta enlaces según autenticación y rol. `main.homePage.views.rootHandler` dirige las sesiones activas a su panel y deriva las visitas anónimas a la vista pública de `main.clienteFinal`. `config/urls.py` monta las rutas de las apps y las vistas de autenticación Django.
+- **Navegación global:** cada rol tiene su layout en `Backend/templates/layouts/` (operario, repartidor, público y acceso), que extiende `base.html`. `main.homePage.views.rootHandler` dirige las sesiones activas a su panel y deriva las visitas anónimas a la vista pública de `main.clienteFinal`. `config/urls.py` monta las rutas de las apps y las vistas de autenticación Django.
 
 ## Modelo relacional
 
@@ -42,21 +42,21 @@ La asignación manual se conserva junto al despacho automático FIFO de HU 41. E
 - `Pedido` tiene un código único, una clave de idempotencia nullable/única, una relación opcional con comercio, datos del destino, fechas, estado y una relación opcional con `users.User` para el repartidor asignado.
 - `Repartidor` enlaza una cuenta con PIN y disponibilidad.
 - `HistorialEstado` enlaza pedido y usuario y guarda estado anterior/nuevo, fecha, incidencia y fotografía opcional. La cronología se muestra por fecha y clave primaria.
-- `User` extiende `AbstractUser` y mantiene su asociación opcional con un vehículo.
+- `User` extiende `AbstractUser` con el indicador `is_operario`. El vehículo del repartidor es un campo con opciones fijas de `Repartidor`; el modelo `Vehiculo` de `main.users` no se relaciona con los demás.
 
-Las migraciones de `Backend/main/repartidor/migrations/` incorporan las relaciones/campos de pedido, el perfil de repartidor y las marcas temporales de asignación/aceptación. La auditoría actual no añadió modelos ni migraciones.
+Las migraciones de `Backend/main/repartidor/migrations/` incorporan las relaciones/campos de pedido, el perfil de repartidor y las marcas temporales de asignación/aceptación.
 
 ## Recorrido de pruebas
 
-Desde `Backend/`, ejecutá `python manage.py test` para la suite. `main.operario.tests` verifica alta, permisos, panel y asignación; `main.repartidor.tests` cubre PIN, aislamiento, cambios de estado, disponibilidad y fotos; `main.clienteFinal.tests` cubre búsqueda e historial público; `main.homePage.tests` comprueba la entrada pública, las redirecciones por rol, la navegación y el acceso a Django Admin.
+Desde `Backend/`, ejecutá `python manage.py test --settings=config.settings_test` (SQLite en memoria, ignora `DATABASE_URL`). `main.operario.tests` verifica alta, permisos, panel y asignación; `main.repartidor.tests` cubre PIN, aislamiento, cambios de estado, disponibilidad y fotos; `main.clienteFinal.tests` cubre búsqueda e historial público; `main.homePage.tests` comprueba la entrada pública, las redirecciones por rol, la navegación y el acceso a Django Admin.
 
-## Estado del rediseño de navegación
+## Accesos por rol
 
-La entrada anónima `/` presenta el seguimiento público y las opciones de autenticación para operario y repartidor. Las sesiones `is_operario` y las asociadas a un perfil de repartidor activo se dirigen a sus respectivos paneles, evitando que el inicio de sesión vuelva al selector público. La navegación compartida se filtra por rol y es colapsable en pantallas estrechas.
+La entrada anónima `/` presenta el seguimiento público y las opciones de autenticación para operario y repartidor. Las sesiones `is_operario` y las asociadas a un perfil de repartidor activo se dirigen a sus respectivos paneles, evitando que el inicio de sesión vuelva al selector público. Cada layout muestra solo la navegación de su rol; en pantallas estrechas el menú del operario pasa a un panel lateral.
 
 El módulo `/operario/` y sus páginas hijas requieren `is_operario=True`, incluso si la cuenta también tiene `is_staff=False`. Django Admin mantiene el control estándar de Django basado en cuenta activa, `is_staff` y permisos de modelo. Las fotografías enlazadas desde el detalle del operario permiten `is_operario`; las cuentas `is_staff` y el repartidor dueño también conservan el acceso. El repartidor conserva la disponibilidad, aceptación/rechazo, transiciones, fotografías, historial y aislamiento por propietario.
 
-La entrada pública y el panel del operario se inspeccionaron en un navegador local con viewport estrecho; no se inspeccionaron visualmente sesiones de repartidor autenticadas ni escritorio amplio. Las pruebas y límites vigentes están en [`CURRENT_STATE.md`](CURRENT_STATE.md).
+Las pruebas y los límites vigentes están en [`proyecto/CURRENT_STATE.md`](proyecto/CURRENT_STATE.md).
 
 ## Para seguir aprendiendo
 
@@ -65,4 +65,4 @@ La entrada pública y el panel del operario se inspeccionaron en un navegador lo
 3. Leé `main/repartidor/views.py` para ver permisos por usuario, transacciones y almacenamiento de fotos.
 4. Compará vistas y plantillas de `clienteFinal` para entender el seguimiento público.
 5. Revisá `tests.py` de las apps antes de ampliar cualquier flujo.
-6. Leé `DECISIONS.md` y `SOURCE_INDEX.md` para distinguir acuerdos de las historias originales y fuentes.
+6. Leé [`proyecto/DECISIONS.md`](proyecto/DECISIONS.md) y [`proyecto/SOURCE_INDEX.md`](proyecto/SOURCE_INDEX.md) para distinguir acuerdos de las historias originales y fuentes.

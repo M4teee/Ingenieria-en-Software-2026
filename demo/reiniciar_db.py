@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Reinicia la base de datos de Django y carga los datos de Demo 2."""
+"""Vacía la base de datos local de Django y carga los datos de demostración.
+
+Atención: `flush` borra todos los datos de la base configurada.
+"""
 
 from pathlib import Path
 import subprocess
@@ -10,7 +13,7 @@ def main() -> None:
     raiz = Path(__file__).resolve().parent.parent
     backend = raiz / "Backend"
     manage_py = backend / "manage.py"
-    fixture = Path(__file__).resolve().parent / "db-Demo2.json"
+    fixture = Path(__file__).resolve().parent / "datos-demo.json"
 
     # --noinput evita la confirmación interactiva de flush.
     subprocess.run(

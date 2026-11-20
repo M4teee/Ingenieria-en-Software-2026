@@ -31,7 +31,7 @@ La interfaz de carga y las consultas públicas se implementan con las plantillas
 
 - `Backend/config/settings.py` configura SQLite para desarrollo local.
 - `requirements.txt` fija las versiones actuales de Django y sus dependencias.
-- `Frontend/` sigue siendo un marcador de posición; no hay framework elegido en sus archivos.
+- No hay una aplicación frontend separada: la interfaz usa plantillas Django con Basecoat UI y un sistema de diseño propio (ver [ARQUITECTURA-FRONTEND.md](../ARQUITECTURA-FRONTEND.md)). El directorio `Frontend/`, que solo contenía un marcador de posición, se eliminó.
 
 ## Pendiente de confirmación del equipo
 

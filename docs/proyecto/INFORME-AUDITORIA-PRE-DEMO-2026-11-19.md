@@ -74,7 +74,7 @@ No aparece una HU completamente ausente en el código inspeccionado. Esto no cer
 
 ## E. Documentación actualizada
 
-Se actualizaron `readme.md`, `docs/PROJECT_BRIEF.md`, `docs/KNOWLEDGE_BASE.md`, `docs/GUIA-EJECUCION-Y-PRUEBAS.md`, `docs/MANUAL-DE-USO.md` y `docs/DECISIONS.md`; se añadió este informe y se enlaza desde `docs/INDEX.md`. No se fusionó ni eliminó documentación o material académico. La guía describe SQLite y Neon: instalación, `DATABASE_URL`, selección, conexión, migraciones, inicio, verificación y errores habituales. La ruta Neon está documentada a partir de la implementación, pero no se probó en vivo.
+Se actualizaron `README.md`, `docs/proyecto/PROJECT_BRIEF.md`, `docs/proyecto/KNOWLEDGE_BASE.md`, `docs/GUIA-EJECUCION-Y-PRUEBAS.md`, `docs/MANUAL-DE-USO.md` y `docs/proyecto/DECISIONS.md`; se añadió este informe y se enlaza desde `docs/INDEX.md`. No se fusionó ni eliminó documentación o material académico. La guía describe SQLite y Neon: instalación, `DATABASE_URL`, selección, conexión, migraciones, inicio, verificación y errores habituales. La ruta Neon está documentada a partir de la implementación, pero no se probó en vivo.
 
 ## F. Verificaciones ejecutadas
 

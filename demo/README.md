@@ -1,11 +1,30 @@
-# Datos de ejemplo para la Demo 2
+# Datos de demostración
 
-## Operario
+`datos-demo.json` es un fixture de Django con un operario, 12 repartidores (tres por vehículo), 9 comercios y 13 pedidos con su historial. Sirve para recorrer la aplicación sin cargar datos a mano. Todos los nombres, contraseñas y PIN son ficticios y solo deben usarse en un entorno local.
+
+## Cargar los datos
+
+> **Atención:** el script ejecuta `manage.py flush`, que borra **todos** los datos de la base configurada (por defecto `Backend/db.sqlite3`). No lo uses contra una base con datos reales.
+
+```bash
+python demo/reiniciar_db.py
+```
+
+Equivale a `python manage.py flush --noinput` seguido de `python manage.py loaddata ../demo/datos-demo.json`, ejecutados desde `Backend/`. Algunos eventos del historial referencian fotografías que no forman parte del repositorio; esas imágenes no cargan (el servidor responde con error al pedir un archivo inexistente).
+
+## Credenciales de prueba
+
+### Operario
 
 - Usuario: `admin`
-- Contraseña: `operario`
+- Contraseña: la documentada anteriormente (`operario`) **no coincide** con el hash guardado en el fixture. Después de cargar los datos, definí una propia:
 
-## Repartidores
+```bash
+cd Backend
+python manage.py changepassword admin
+```
+
+### Repartidores
 
 | Usuario | Nombre | Vehículo | PIN | Disponibilidad |
 |---|---|---|---|---|

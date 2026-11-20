@@ -1,30 +1,33 @@
-# Índice de documentación
+# Documentación
 
-Leé primero el estado para conocer qué existe en el código y qué sigue pendiente. Este material orienta el trabajo, pero no reemplaza las fuentes originales ni la inspección del repositorio.
+## Uso y desarrollo
 
-## Documentos
+| Documento | Contenido |
+|---|---|
+| [GUIA-EJECUCION-Y-PRUEBAS.md](GUIA-EJECUCION-Y-PRUEBAS.md) | Instalación, elección de base de datos (SQLite o PostgreSQL/Neon), pruebas automatizadas y errores frecuentes. |
+| [MANUAL-DE-USO.md](MANUAL-DE-USO.md) | Procedimientos para cliente, operario, repartidor y administrador. |
+| [ARQUITECTURA.md](ARQUITECTURA.md) | Módulos Django, recorrido de un pedido, modelo de datos y accesos por rol. |
+| [ARQUITECTURA-FRONTEND.md](ARQUITECTURA-FRONTEND.md) | Plantillas, layouts, componentes, Basecoat UI y dependencias de los tests sobre el HTML. |
+| [SISTEMA-DE-DISENO.md](SISTEMA-DE-DISENO.md) | Identidad visual: paleta, tipografía, composición por rol y movimiento. |
+| [../demo/README.md](../demo/README.md) | Datos de demostración y credenciales de prueba. |
 
-- [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md): propósito, alcance y requisitos extraídos de las fuentes.
-- [`SOURCE_INDEX.md`](SOURCE_INDEX.md): ubicación y utilidad de las fuentes académicas originales.
-- [`context/README.md`](context/README.md): procedencia y tratamiento de las exportaciones de Taiga incluidas en `context/`.
-- [`CURRENT_STATE.md`](CURRENT_STATE.md): implementación observada, verificaciones y pendientes.
-- [`INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md`](INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md): trazabilidad de las 31 HUs del snapshot, resultados de pruebas, hallazgo de configuración y pendientes de demo.
-- [`GUIA-EJECUCION-Y-PRUEBAS.md`](GUIA-EJECUCION-Y-PRUEBAS.md): preparación del entorno, pruebas y recorrido manual reproducible.
-- [`MANUAL-DE-USO.md`](MANUAL-DE-USO.md): procedimientos reales para operario, repartidor, cliente y administrador.
-- [`TOUR-APLICACION.md`](TOUR-APLICACION.md): mapa de módulos y recorrido del flujo de pedidos en código y base de datos.
-- [`DECISIONS.md`](DECISIONS.md): decisiones técnicas registradas y temas sin resolver.
-- [`KNOWLEDGE_BASE.md`](KNOWLEDGE_BASE.md): resumen de contexto y discrepancias entre fuentes.
-- [`TASK_TEMPLATE.md`](TASK_TEMPLATE.md): guía para describir una tarea y sus criterios de aceptación.
-- [`DOCUMENTATION_WORKFLOW.md`](DOCUMENTATION_WORKFLOW.md): revisión posterior a `git pull` y previa a `git push`.
-- [`redesign/architecture.md`](redesign/architecture.md) y [`redesign/design-direction.md`](redesign/design-direction.md): arquitectura e identidad visual del frontend rediseñado.
-- [`../scripts/check_docs.py`](../scripts/check_docs.py): comprobación mecánica local de enlaces y rutas.
+## Registro del proyecto
+
+Material del proceso académico (Ingeniería de Software 2026): requisitos, decisiones y estado verificado. Las fuentes originales prevalecen sobre sus resúmenes.
+
+| Documento | Contenido |
+|---|---|
+| [proyecto/PROJECT_BRIEF.md](proyecto/PROJECT_BRIEF.md) | Propósito, alcance y requisitos extraídos de las fuentes. |
+| [proyecto/SOURCE_INDEX.md](proyecto/SOURCE_INDEX.md) | Fuentes académicas originales (entrevistas, requisitos, PGP, backlog) y sus límites. |
+| [proyecto/context/](proyecto/context/README.md) | Copias de las fuentes y exportación sanitizada del backlog de Taiga. |
+| [proyecto/KNOWLEDGE_BASE.md](proyecto/KNOWLEDGE_BASE.md) | Síntesis de contexto y discrepancias entre fuentes. |
+| [proyecto/DECISIONS.md](proyecto/DECISIONS.md) | Decisiones técnicas registradas y temas sin resolver. |
+| [proyecto/CURRENT_STATE.md](proyecto/CURRENT_STATE.md) | Implementación observada, verificaciones ejecutadas y pendientes, por fecha. |
+| [proyecto/INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md](proyecto/INFORME-AUDITORIA-PRE-DEMO-2026-11-19.md) | Trazabilidad de las 31 historias de usuario y resultados de la auditoría previa a la demo. |
 
 ## Mantenimiento
 
-- Las fuentes originales prevalecen sobre los resúmenes. Indicá si cada dato es requisito, decisión, interpretación o pendiente.
-- Al cambiar código o configuración, contrastá el diff con el estado y actualizá `CURRENT_STATE.md` si la implementación cambió.
-- Registrá en `DECISIONS.md` solo acuerdos confirmados; conservá las alternativas abiertas como pendientes.
-- Las copias portables de las fuentes están en `context/`; consultá su índice y verificá autorización antes de compartirlas fuera del equipo.
-- Al añadir o reemplazar una fuente, actualizá `SOURCE_INDEX.md` y `context/README.md` si cambia la procedencia o el tratamiento de privacidad.
+- Al cambiar código o configuración, actualizá `proyecto/CURRENT_STATE.md` y solo los documentos afectados (ver [CONTRIBUTING.md](../CONTRIBUTING.md)).
+- Registrá en `proyecto/DECISIONS.md` solo acuerdos confirmados; las alternativas abiertas quedan como pendientes.
 - Anotá únicamente verificaciones ejecutadas y el entorno en que se hicieron.
-- Seguí `DOCUMENTATION_WORKFLOW.md`; el script solo comprueba enlaces, no la exactitud académica o funcional.
+- `python3 scripts/check_docs.py .` comprueba enlaces locales y rutas propias de una máquina; no valida la exactitud funcional.
