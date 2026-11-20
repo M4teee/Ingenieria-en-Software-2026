@@ -75,7 +75,7 @@
         {% for perfil in repartidores %}
             <dialog class="dialog" id="modalPin{{ perfil.pk }}" aria-labelledby="modalPinLabel{{ perfil.pk }}"{% if repartidor_error_id == perfil.pk %} data-abrir-al-cargar{% endif %}>
                 <div>
-                    <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}" id="formPin{{ perfil.pk }}" hidden>{% csrf_token %}</form>
+                    <form method="post" action="{% url 'operario:regenerar_pin_repartidor' perfil.pk %}" id="formPin{{ perfil.pk }}" novalidate hidden>{% csrf_token %}</form>
                         <header>
                             <h2 id="modalPinLabel{{ perfil.pk }}">Regenerar PIN de {{ perfil.user.username }}</h2>
                             <p>Ingresá un PIN nuevo de 4 dígitos que no use otro repartidor. Al confirmar, el PIN anterior deja de funcionar de inmediato.</p>
@@ -83,7 +83,7 @@
                         <section>
                             <div role="group" class="field"{% if repartidor_error_id == perfil.pk %} data-invalid="true"{% endif %}>
                                 <label for="pinInput{{ perfil.pk }}">Nuevo PIN</label>
-                                <input type="text" class="pin-campo" id="pinInput{{ perfil.pk }}" name="pin" form="formPin{{ perfil.pk }}" maxlength="4" minlength="4" pattern="\d{4}" inputmode="numeric" required placeholder="0000" autocomplete="off"{% if repartidor_error_id == perfil.pk %} aria-invalid="true" aria-describedby="pinError{{ perfil.pk }}"{% endif %}>
+                                <input type="text" class="pin-campo" id="pinInput{{ perfil.pk }}" name="pin" form="formPin{{ perfil.pk }}" inputmode="numeric" placeholder="0000" autocomplete="off"{% if repartidor_error_id == perfil.pk %} aria-invalid="true" aria-describedby="pinError{{ perfil.pk }}"{% endif %}>
                                 {% if repartidor_error_id == perfil.pk %}<p class="error-campo" id="pinError{{ perfil.pk }}" role="alert">{% icon 'circle-alert' 'sm' %}<span>{{ error_pin }}</span></p>{% endif %}
                             </div>
                         </section>

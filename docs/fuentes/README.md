@@ -10,6 +10,7 @@ Material de partida del trabajo práctico de Ingeniería en Software (Grupo 03, 
 | [iniciativas-y-epicas.doc](iniciativas-y-epicas.doc) | `Iniciativas+Épicas - Grupo03.doc` | Tres iniciativas y siete épicas. |
 | [plan-de-proyecto.docx](plan-de-proyecto.docx) | `PGP_SGR.docx` | Plan de proyecto: entregables, sprints y riesgos (rev. 1.0, 04/10/2026). |
 | [historias-de-usuario.json](historias-de-usuario.json) | Exportación de Taiga | Backlog al 19/11/2026: 7 épicas, 31 historias y 2 hitos, sanitizado. |
+| [userstories.csv](userstories.csv) | Exportación de Taiga | Historias del backlog; se quitaron los campos de cuentas, responsables, asignaciones, watchers y votantes. |
 
 Son planificación y requisitos, no evidencia de implementación. Lo implementado está en [estado.md](../estado.md).
 

@@ -25,7 +25,7 @@ Las 31 historias del backlog (exportación de Taiga del 19/11/2026, ver [fuentes
 - **Disponibilidad:** la fuente única es `Repartidor.disponible` (con `disponible_desde`); se eliminó la propiedad calculada de `User`.
 - **Despacho FIFO:** candidato = usuario activo, disponible, mismo vehículo exacto y sin pedido en curso, ordenado por `disponible_desde`. Sin cálculo de cercanía: el modelo no registra ubicación.
 - **Asignación:** el repartidor tiene 5 minutos para responder. Al vencer, el pedido vuelve a `registrado`, el repartidor queda no disponible y se reintenta el despacho. El vencimiento se evalúa al cargar los paneles (no hay tareas en segundo plano).
-- **PIN:** 4 dígitos, únicos, guardados como texto para que el operario pueda comunicarlos; el operario ingresa el nuevo PIN al regenerarlo.
+- **PIN:** 4 dígitos, únicos, guardados como texto para que el operario pueda comunicarlos; el operario ingresa el nuevo PIN al regenerarlo. La validación del formulario de regeneración se procesa en el backend para mostrar los errores de negocio.
 - **Devolución:** registro inmutable `Devolucion` (uno por pedido fallido), separado de `HistorialEstado`; el pedido sigue en `fallido`.
 - **Seguimiento público:** muestra estado, comercio, historial y la hora estimada solo en `en_viaje`; nunca destinatario, repartidor ni fotos.
 - **Fuera de alcance del MVP:** modo offline (RNF 7) y notificaciones externas.
@@ -36,7 +36,7 @@ Las 31 historias del backlog (exportación de Taiga del 19/11/2026, ver [fuentes
 
 | Comprobación | Resultado |
 |---|---|
-| `python manage.py test --settings=config.settings_test` | 182 pruebas, 181 correctas. Falla `EntregasFallidasTests.test_confirma_por_post_con_actor_fecha_mensaje_y_estado_fallido`: espera el texto "Cronología HU 34", que la plantilla dejó de mostrar antes del rediseño. Hay que ajustar el test o la plantilla. |
+| `python manage.py test --settings=config.settings_test` | Última ejecución registrada antes de integrar los cambios recientes: 182 pruebas, 181 correctas. `origin/main` actualizó la aserción de `EntregasFallidasTests.test_confirma_por_post_con_actor_fecha_mensaje_y_estado_fallido` para usar el encabezado "Cronología" que muestra la plantilla rediseñada. Pendiente volver a ejecutar la suite después de esta integración. |
 | `python manage.py check` | Sin problemas. |
 | `python manage.py makemigrations --check --dry-run` | Sin migraciones pendientes. |
 | Carga de `demo/datos-demo.json` sobre una base en memoria | Correcta (13 pedidos). |
