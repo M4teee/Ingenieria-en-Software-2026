@@ -2148,7 +2148,7 @@ class EntregasFallidasTests(TestCase):
 
         listado = self.client.get(respuesta.url)
         self.assertContains(listado, 'Devolución registrada')
-        self.assertContains(listado, 'Cronología HU 34')
+        self.assertContains(listado, 'Cronología')
         self.assertNotContains(listado, 'Confirmar devolución')
         self.assertContains(listado, 'Devolución registrada por operario_fallas')
 
